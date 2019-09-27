@@ -1,0 +1,108 @@
+body {
+  font-family: 'Helvetica', sans-serif;
+  color: #333;
+  margin: 0;
+  padding: 0;
+  background: #fff;
+}
+img {
+  border: 1px solid #666;
+}
+a {
+  color: #b54;
+  text-decoration: underline;
+}
+h1{
+  font-size: 23px;
+}
+h2{
+  font-size: 20px;
+}
+p {
+  font-size: 17px;
+  margin-top: 15px;
+  margin-bottom: 0;
+}
+
+.header {
+  text-align: center;
+  margin-top: 10px;
+}
+.nav {
+  text-align: center;
+}
+.nav ul {
+  display: inline-block;
+  list-style: none;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+.nav li {
+  display: inline-block;
+  font-size: 18px;
+  line-height: 30px;
+  /*margin-left: -5px;*/
+}
+.nav a {
+  display: block;
+  text-decoration: none;
+  color: #333;
+  padding: 10px;
+}
+.nav a:hover {
+  background-color: #ccc;
+}
+.nav a.active {
+  background-color: #ccc;
+  cursor: default;
+}
+@media (max-width: 500px) {
+  .nav ul{
+    width: 100%;
+  }
+  .nav li{
+    line-height: 10px;
+    display: block;
+  }
+}
+
+.container {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.page {
+  display: inline-block;
+  text-align: left;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+#about {
+  max-width: 800px;
+}
+#about .image {
+  float: left;
+  margin-top: 20px;
+}
+#about .text {
+  padding-left: 20px;
+  overflow: auto;
+}
+@media (max-width: 560px) {
+  #about .image {
+    text-align: center;
+    float: none;
+  }
+}
+
+#publications, #research, #teaching, #news {
+  max-width: 600px;
+}
+
+.footer {
+  margin-top: 50px;
+  margin-bottom: 50px;
+  text-align: center;
+}

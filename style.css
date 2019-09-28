@@ -5,7 +5,7 @@ body {
   padding: 0;
   background: #fff;
 }
-img {
+img,video {
   border: 1px solid #666;
 }
 a {
@@ -90,8 +90,17 @@ p {
   padding-left: 20px;
   overflow: auto;
 }
+#research .image{
+  float: left;
+  padding-right: 20px;
+  padding-bottom: 10px;
+}
 @media (max-width: 560px) {
   #about .image {
+    text-align: center;
+    float: none;
+  }
+  #research .image {
     text-align: center;
     float: none;
   }

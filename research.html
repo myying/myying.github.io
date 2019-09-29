@@ -31,6 +31,52 @@
 
   <div class="container">
     <div class="page" id="research">
+
+      <h2>Advancing data assimilation methodologies for multiscale systems</h2>
+      <div class="content">
+        <div class="image" style="max-width:300px"><img width="100%" alt="Ensemble data assimilation methodologies" src="img/Zoo_DA_methods.png"/> </div>
+        <div>
+          <p>An outstanding issue for multiscale weather prediction is the choice of data assimilation methods. Small scales feature rapid error growth that gives rise to nonlinearity, and multiscale systems typically have large dimensionality as well. Currently, methods based on linearization, such as the Ensemble Kalman Filter (EnKF), work efficiently for large problems but cannot handle high nonlinearity. On the other hand, nonlinear methods, such as the Particle Filter, are still not feasible for large dimensional problems.</p>
+        </div>
+      </div>
+      <p>I have been seeking methods that can both handle nonlinearity and be efficient enough for the multiscale prediction problems. My first attempt was to reduce the dimensionality through localization. In <a href="paper/09_Ying_2018MWR.pdf">Ying et al. 2018</a>, we tested the scale dependency of best localization distances using a quasi-geostrophic model. The following figures show the correlation map between the observation "+" and the model state at each scale, and the circles show the best localization distances.</p>
+      <div style="max-width:500px"><img width="100%" alt="" src="img/Scale_dependent_localization.png"/></div>
+      <p>These results motivate a scale-aware data assimilation framework, where large- and small-scale components of the system can be treated separately.</p>
+      <p>I then noticed that displacement of coherent structures (position errors) is a major source of nonlinearity at small scales. The following figures show ensemble <a href="https://en.wikipedia.org/wiki/Spaghetti_plot">spaghetti plots</a> of Rankine vortices before and after assimilating observations using EnKF. The ensemble members only differ in location of the vortex. Since the displacement is comparable to the vortex size, nonlinear errors follow a skewed distribution and the resulting analysis is not optimal.</p>
+      <div style="max-width:550px"><img width="100%" alt="" src="img/Displacement_error_Rankine_example.png"/></div>
+      <p>I am inspired by the computer vision literature on <a href="https://en.wikipedia.org/wiki/Optical_flow">optical flows</a>, and developed a "multiscale alignment" method that can successively reduce displacement errors from large to small scales of the system. The method is described in detail in <a href="paper/11_Ying2019MWR.pdf">Ying 2019</a>. Now, I am further evaluating this method in more realistic and complex models.</p>
+      <br/><br/>
+
+      <h2>Multiscale predictability of tropical weather</h2>
+      <p>Tropical weather systems are important components of the global circulation that span a wide range of spatial and temporal scales. At large scales, the Madden-Julian Oscillation (MJO) is the dominant mode. At small scales, moist convective systems dominate. Atmospheric wave motion due to Earth's rotation and gravity fills the spectrum, including the equatorial Rossby (ER), Kelvin, mixed-Rossby-gravity (MRG), and inertia-gravity (IG) waves. The coupling between large-scale waves and small-scale moist convection makes the predictability of tropical weather both flow and scale dependent.</p>
+      <p>In <a href="paper/08_YingZhang2017JAS.pdf">Ying and Zhang 2017</a>, we estimated the predictability of tropical weather through ensemble perturbation experiments using the Weather Research and Forecasting (WRF) model. The following figure summarizes our findings. </p>
+      <div style="max-width:450px;"><img width="100%" alt="" src="img/Tropical_weather_predictability.png"/> </div>
+      <p>Thick lines are practical predictability horizon (days) plotted as a function of spatial scales. Thin lines are the intrinsic limits of predictability, found by reducing the initial perturbations to a much smaller amount. Small-scale moist convection features more rapid error growth which places an intrinsic limit on the predictability of these systems. On the other hand, large-scale forcing from wave patterns serves as a source of predictability.</p>
+      <p>Currently, there is still room for improving the prediction skill before hitting the intrinsic limit. In <a href="paper/10_YingZhang2018JAS.pdf">Ying and Zhang 2018</a>, we evaluated the potential impact from assimilating satellite-derived observations on tropical weather predictability. </p>
+      <div class="content">
+        <div class="image" style="max-width:300px"><img width="100%" alt="" src="img/Observing_networks.png"/> </div>
+        <div>
+          <p>This figure shows the observing networks that we evaluated, including temperature and moisture profiles retrieved from the Advanced TIROS Operational Vertical Sounders (ATOVS) and the GPS Radio Occultation (GPSRO) technique. While large-scale component can be well constrained using these observations, the convective scale still lacks spatial resolution to obtain enough information. Better design of observing networks is still necessary to further improve tropical weather predictability.</p>
+        </div>
+      </div>
+      <br/>
+
+      <h2>Tropical cyclone structural changes in response to ambient moisture variations</h2>
+      <div class="content">
+        <div class="image" style="max-width:350px"><img width="100%" alt="" src="img/TC_size_intensity.png"/> </div>
+        <div>
+          <p>No two tropical cyclones are the same. Sometimes they can have vastly different size and intensity, and both become very destructive. This picture shows an example. Bilis 2016 was large and weak, but brought much water damage; Saomai 2006 was small but strong, and induced a lot of wind damage. To understand tropical cyclones, studying their structural change is as important as any single parameter.</p>
+        </div>
+      </div>
+      <p>In <a href="paper/04_YingZhang2012JMSJ.pdf">Ying and Q.Zhang 2012</a>, we conducted a series of sensitivity experiments to test the response of tropical cyclone structure to changing ambient moisture. </p>
+      <div class="content">
+        <div class="image" style="max-width:250px"><img width="100%" alt="" src="img/TC_structure_different_environment.png"/> </div>
+        <div>
+          <p>This schematic plot summarizes our findings. Tropical cyclones in overly moist environment tend to become large and weak, while those in dry environment become compact and intense. Vertical wind shear can induce asymmetry in cyclone structure, and when this happens, spatial distribution of moisture becomes a factor. We found that only those air mass to the right hand side of the shear vector has more chance to enter the inner circulation. Therefore, the humidity of these air mass will influence the structural change of the cyclone. More detailed dynamical processes are discussed in the paper.</p>
+        </div>
+      </div>
+      <br/>
+
     </div>
   </div>
 

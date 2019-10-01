@@ -108,6 +108,15 @@ p {
   overflow: auto;
 }
 
+.page ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.page li {
+  padding-bottom: 5px;
+}
+
 .footer {
   margin-top: 50px;
   margin-bottom: 50px;

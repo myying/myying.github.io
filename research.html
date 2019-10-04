@@ -53,7 +53,7 @@
       <p>These results motivate a scale-aware data assimilation framework, where large- and small-scale components of the system can be treated separately.</p>
       <p>I then noticed that displacement of coherent structures (position errors) is a major source of nonlinearity at small scales. The following figures show ensemble <a href="https://en.wikipedia.org/wiki/Spaghetti_plot">spaghetti plots</a> of Rankine vortices before and after assimilating observations using EnKF. The ensemble members only differ in location of the vortex. Since the displacement is comparable to the vortex size, nonlinear errors follow a skewed distribution and the resulting analysis is not optimal.</p>
       <div style="max-width:550px"><img width="100%" alt="" src="img/Displacement_error_Rankine_example.png"/></div>
-      <p>I am inspired by the computer vision literature on <a href="https://en.wikipedia.org/wiki/Optical_flow">optical flows</a>, and developed a "multiscale alignment" method that can successively reduce displacement errors from large to small scales of the system. The method is described in detail in <a href="paper/11_Ying2019MWR.pdf">Ying 2019</a> and I gave a proof of concept with the quasi-geostrophic model. Now, I am further evaluating this method in more realistic and complex models.</p>
+      <p>I was inspired by the computer vision literature on <a href="https://en.wikipedia.org/wiki/Optical_flow">optical flows</a>, and developed a "multiscale alignment" method that can successively reduce displacement errors from large to small scales of the system. The method is described in detail in <a href="paper/11_Ying2019MWR.pdf">Ying 2019</a> and I gave a proof of concept with the quasi-geostrophic model. Now, I am further evaluating this method in more realistic and complex models.</p>
       <br/><br/>
 
       <h2 id="multiscale_predictability">Multiscale predictability of tropical weather</h2>
@@ -81,7 +81,7 @@
       <div class="content">
         <div class="image" style="max-width:250px"><img width="100%" alt="" src="img/TC_structure_different_environment.png"/> </div>
         <div>
-          <p>This schematic plot summarizes our findings. Tropical cyclones in overly moist environment tend to become large and weak, while those in dry environment become compact and intense. Vertical wind shear can induce asymmetry in cyclone structure, and when this happens, spatial distribution of moisture becomes a factor. We found that only those air mass to the right hand side of the shear vector has more chance to enter the inner circulation. Therefore, the humidity of these air mass will influence the structural change of the cyclone. More detailed dynamical processes are discussed in the paper.</p>
+          <p>This schematic plot summarizes our findings. Tropical cyclones in overly moist environment tend to become large and weak, while those in dry environment become compact and intense. Vertical wind shear can induce asymmetry in cyclone structure, and when this happens, spatial distribution of moisture becomes a factor. We found that only those air masses to the right hand side of the shear vector have more chance to enter the inner circulation. Therefore, the humidity of these air masses will influence the structural change of the cyclone. More detailed dynamical processes are discussed in the paper.</p>
         </div>
       </div>
       <br/>

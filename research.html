@@ -62,7 +62,7 @@
       <p>These results motivate a scale-aware data assimilation framework, where large- and small-scale components of the system can be treated separately.</p>
       <br/>
 
-      <h2 id="multiscale_alignment"><i class="fa fa-caret-right"></i> Reducing nonlinear displacement errors through "multiscale alignment"</h2>
+      <h2 id="multiscale_alignment"><i class="fa fa-caret-right"></i> Reducing displacement errors through "multiscale alignment"</h2>
       <p>I then noticed that displacement of coherent structures (position errors) is a major source of nonlinearity at small scales. The following figures show ensemble <a href="https://en.wikipedia.org/wiki/Spaghetti_plot">spaghetti plots</a> of Rankine vortices before and after assimilating observations using EnKF. The ensemble members only differ in location of the vortex. Since the displacement is comparable to the vortex size, nonlinear errors follow a skewed distribution and the resulting analysis is not optimal.</p>
       <div style="max-width:550px"><img width="100%" alt="" src="img/Displacement_error_Rankine_example.png"/></div>
       <p>I was inspired by the computer vision literature on <a href="https://en.wikipedia.org/wiki/Optical_flow">optical flows</a>, and developed a "multiscale alignment" method that can successively reduce displacement errors from large to small scales of the system. The method is described in detail in <a href="paper/11_Ying2019MWR.pdf">Ying 2019</a> and I gave a proof of concept with the quasi-geostrophic model. Now, I am further evaluating this method in more realistic and complex models.</p>

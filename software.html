@@ -1,0 +1,81 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="Yue (Michael) Ying">
+<meta name="keywords" content="data assimilation, predictability, multiscale, meteorology, research">
+<meta name="author" content="Yue Ying">
+
+<link rel="apple-touch-icon" sizes="180x180" href="ico/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="ico/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="ico/favicon-16x16.png">
+<link rel="manifest" href="ico/site.webmanifest">
+
+<link href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="style.css">
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-148955805-2"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'UA-148955805-2');
+</script>
+
+
+<title>Yue (Michael) Ying</title>
+</head>
+
+<body>
+<div class="header">
+    <h1>Yue (Michael) Ying</h1>
+</div>
+
+<script src="nav_bar.js"></script>
+
+<div class="container">
+<div class="page" id="about">
+<div class="content">
+
+    <h2 id="meps"><i class="fa fa-caret-right"></i> Multiscale Earth Prediction System (MEPS) at NERSC </h2>
+    <p> Under construction... </p>
+    <br/>
+
+    <h2 id="rankine"><i class="fa fa-caret-right"></i>Rankine vortex system</h2>
+    <p>A two-dimensional vortex with simple vorticity dynamics, for testing multiscale data assimilation algorithms with alignment techniques: <a href="https://github.com/myying/rankine">rankine</a>.</p>
+    <br/>
+
+    <h2 id="qg_multiscale_da"><i class="fa fa-caret-right"></i> Quasi-geostrophic system</h2>
+    <p>A multiscale DA algorithms testbed written in Python, the QG model from <a href="https://cims.nyu.edu/~shafer/">Dr. Shafer Smith</a> is used as the dynamical system: <a href="https://github.com/myying/QG_Multiscale_DA">QG_Multiscale_DA</a></p>
+    <br/>
+
+
+    <h2 id="lorenz96_da"><i class="fa fa-caret-right"></i> Lorenz-96 system</h2>
+    <p>A toy system for testing data assimilation algorithms using the Lorenz-96 model: <a href="https://github.com/myying/L96_DA">L96_DA</a></p>
+    <br/>
+
+
+    <h2 id="psu_wrf_enkf"><i class="fa fa-caret-right"></i> The PSU_WRF_EnKF data assimilation system</h2>
+    <p>The Pennsylvania State University Ensemble Kalman Filter system for the Weather Research and Forecasting model (PSU_WRF_EnKF) originated from Fuqing Zhang's project code when he was a postdoc at NCAR. The project was a proof of concept for <a href="http://adapt.psu.edu/ZHANG/papers/SnyderZhang2003MWR.pdf">radar data assimilation for the convective-scale weather</a>. It quickly evolved and became a reseach testbed for ensemble data assimilation methods and their application to various weather systems. It was also developed into a quasi-operational <a href="http://hfip.psu.edu/">hurricane ensemble forecast system</a>. The PennState <a href="http://adapt.psu.edu">ADAPT</a> center currently host the PSU_WRF_EnKF system development team, and aims to further apply data assimilation and predictability techniques to many fields beyond weather prediction.</p>
+
+    <p>The PSU_WRF_EnKF code should be downloaded from the official <a href="http://adapt.psu.edu/index.php?loc=outreach">Code Release Page</a>.</p>
+    <p>I contributed to the development of the PSU_WRF_EnKF system as Fuqing's PhD student. In 2012, I rewrote the Fortran MPI parallel algorithms and increased the efficiency of the system. I also participated in the development of assimilation capability for satellite radiance data and many other types of observing systems. By the time I graduate in 2018, I wrote this <a href="pages/software/PSU_WRF_EnKF_system_technote.pdf"><i class="fa fa-file"></i>Technical Note</a> to comprehensively document the current system and describe its components.</p>
+    <br/>
+
+    <h2 id="shallow_water_models"><i class="fa fa-caret-right"></i> Shallow water models</h2>
+    <p>Matlab code for demonstration of the shallow-water systems: <a href="https://github.com/myying/1d_shallow_water_model_matlab">1D model</a>, <a href="https://github.com/myying/2d_shallow_water_model_matlab">2D model</a></p>
+    <br/>
+
+
+    <h2 id="cluster_user_guide"><i class="fa fa-caret-right"></i> Supercomputer Cluster User Guide</h2>
+    <p>In 2009, as I started my master degree program in Peking University, I learned how to use high performance supercomputers and worked as a part-time system administrator for a small 32-node cluster hosted in the Department of Atmospheric Science. I wrote this
+    <a href="pages/software/Cluster_User_Guide_V2.pdf">Cluster User Guide V2</a> (in Chinese) to help fellow students learn how to use the cluster system for their research. The document received more attention than I expected, it was even circulating among students and researchers outside Peking University.
+
+</div></div></div>
+
+<script src="footer.js"></script>
+</body>
+</html>
+

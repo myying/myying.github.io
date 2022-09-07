@@ -24,6 +24,10 @@
     gtag('config', 'UA-148955805-2');
 </script>
 
+<!-- MathJax -->
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 
 <title>Yue (Michael) Ying</title>
 </head>
@@ -71,7 +75,7 @@
       <h2 id="multiscale_approach"><i class="fa fa-caret-right"></i> Towards an integrated multiscale approach</h2>
       <p>Putting everything together, the workflow of the proposed multiscale approach can be shown as follows.</p>
       <div style="max-width:400px"><img width="100%" alt="" src="pages/research/multiscale_framework.png"/></div>
-      <p><b><i>x</i></b> is the model state, <b><i>y</i></b> = H(<b><i>x</i></b>) is the observation prior, and <b><i>y<sup> o</sup></i></b> is the actual observation. The double-lined arrow is a bandpass filter that extracts a certain scale component indexed by <i>s</i>. &delta;<b><i>x</i></b> is the analysis increment found by a core assimilation algorithm (serial EnSRF in this case). <b><i>&sigma;<sup> o</sup></i></b> is the specified observation error std, and <b><i>&rho;</i></b> is the localization function. The multiscale approach processes large to small scale components sequentially (for <i>s</i> = 1, 2, ...) and update the model state iteratively. </p>
+      <p> \(\mathbf{x}\) is the model state, \(\mathbf{y} = h(\mathbf{x})\) is the observation prior, and \(\mathbf{y}^o\) is the actual observation. The double-lined arrow is a bandpass filter that extracts a certain scale component indexed by \(s\). \(\delta\mathbf{x}\) is the analysis increment found by a core assimilation algorithm (serial EnSRF in this case). \(\sigma^o\) is the specified observation error std, and \(\boldsymbol{\rho}\) is the localization function. The multiscale approach processes large to small scale components sequentially (for \(s=1, 2, \ldots, N_s\)) and update the model state iteratively. </p>
       <p>I am currently working on the implementation of such multiscale approach in the PSU_WRF_EnKF system (partially done) and the DART system (on-going). If you are working on a problem where you think the multiscale data assimilation method might help, please don't hesitate to contact me!</p>
       <br/><br/>
 

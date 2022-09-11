@@ -2,15 +2,15 @@
 
 \usepackage[utf8]{inputenc}
 \usepackage[full]{textcomp}
-\usepackage{ebgaramond}
+\usepackage{tgtermes}
 \usepackage[T1]{fontenc}
 \usepackage{enumitem}
-\usepackage[a4paper,left=.9in, right=.9in, top=1.5in, bottom=1.5in]{geometry}
+\usepackage[a4paper,left=.9in, right=.9in, top=1.2in, bottom=1.2in]{geometry}
+\usepackage{ulem}
 \usepackage{url}
 \usepackage[dvipsnames]{xcolor}
 \usepackage{amsmath}
 
-% package settings
 \usepackage[
     hidelinks,
     pdfnewwindow=true,
@@ -20,38 +20,26 @@
 
 \pagestyle{headings}
 \markright{\textbf{Yue Ying}}
-
 \setlength\parindent{2em}
-
 \thispagestyle{empty}
+\newcommand{\cvsection}[1]{\section*{\bfseries#1}}
+\newcommand{\cvsubsection}[1]{\subsection*{\itshape\uline{#1}}}
 
-% define cv section
-\newcommand{\cvsection}[1]{\section*{\rmfamily#1}}
-\newcommand{\cvsubsection}[1]{\subsection*{\rmfamily\hspace{1.6em}#1}}
-
-% begin
 \begin{document}
 
-% name
+% name & contact info
 \begin{center}
-    \huge{
-    \rmfamily
-    \textbf{Yue (Michael) Ying}}
+\huge{\textbf{Yue (Michael) Ying}} \\
+\vspace{10pt}
+\normalsize{Researcher, Data Assimilation Group \\
+Nansen Environmental and Remote Sensing Center (NERSC) \\
+Jahnebakken 3, 5007 Bergen, Norway \\
+E-mail: \href{mailto:yue.ying@nersc.no}{\texttt{yue.ying@nersc.no}} \\
+Webpage: \url{https://myying.github.io} \\
+ORCID: \href{https://orcid.org/0000-0001-9988-3488}{\texttt{0000-0001-9988-3488}} }
 \end{center}
-\vspace{20pt}
-
-%\setlength{\parskip}{1pt}
-%\renewcommand{\arraystretch}{1.25}
-
-% Contact Information
-
-\noindent Researcher, Data Assimilation Group \hfill ORCID: \href{https://orcid.org/0000-0001-9988-3488}{\texttt{0000-0001-9988-3488}} \\
-\noindent Nansen Environmental and Remote Sensing Center (NERSC) \hfill E-mail: \href{mailto:yue.ying@nersc.no}{\texttt{yue.ying@nersc.no}} \\
-\noindent Jahnebakken 3, 5007 Bergen, Norway \hfill \url{https://myying.github.io}
-%\setlength{\parskip}{3pt}
 
 
-% Summary / Statement
 \cvsection{Research Interests}
 \begin{itemize}[leftmargin=2em, topsep=0pt, itemsep=0pt]
     \item Advancing data assimilation methodologies for multiscale dynamical systems
@@ -60,33 +48,26 @@
 \end{itemize}
 
 
-% Education
-%\cvsection{Education}
-%\indent 
+\cvsection{Educational Background}
+\noindent
+2018: Ph.D. Meteorology, Computational Science (minor), Pennsylvania State University \\
+\indent \textit{Dissertation}: ``Ensemble data assimilation for the analysis and prediction of multiscale tropical weather systems''. \\
+\indent \textit{Advisor}: Dr. Fuqing Zhang \\
 
-%\textbf{University of Electronic Science and Technology of China (UESTC)}, Chengdu, China
+\noindent
+2012: M.S. Meteorology, Peking University \\
+\indent \textit{Thesis}: ``Tropical cyclone structural changes in response to ambient moisture perturbations''. \\
+\indent \textit{Advisor}: Dr. Qinghong Zhang \\
 
-%\hspace{2em}Ph.D. Student, Computer Science, 2021 to 2025 (expc.)
+\noindent
+2009: B.S. Atmospheric Sciences, Peking University \\
 
-%\hspace{2em}M.S., Software Engineering, 2021
-
-%\hspace{2em}B.S., Software Engineering, 2018
-
-
-% below is another kind of style
-\cvsection{Education (Another Style)}
-%\indent 
-
-%Ph.D., Computer Science, University of Electronic Science and Technology of China, 2021 to 2025 (expc.)
-
-%M.S., Software Engineering, University of Electronic Science and Technology of China, 2021
-
-%B.S., Software Engineering, University of Electronic Science and Technology of China, 2018
-
-
-% academic employment
-%\cvsection{Academic Employment}
-%\indent
+\cvsection{Professional Experiences}
+\cvsubsection{Research}
+2020-present \hfill Researcher, Data Assimilation group, NERSC \\
+2018-2020 Postdoctoral Fellow, Advanced Study Program, NCAR \\
+2012-2018 Graduate Research Assistant, Pennsylvania State University \\
+2009-2012 Graduate Research Assistant, Peking University \\
 
 %\textbf{Standard University}, CA, USA
 
@@ -149,68 +130,14 @@
 
 
 % publication
-\section*{Publication}
+\cvsection{Publication}
 
-%\cvsubsection{Refereed Journal Articles}
-
-%\begin{enumerate}[resume]
-%    \item Fan Zhou, Xovee Xu*, Goce Trajcevski, Kunpeng Zhang. 2021. A survey of information cascade analysis: Models, predictions, and recent advances. \textit{ACM Computing Surveys (CSUR)}, vol. 54, no. 2, article 27, 36 pages, Mar 2021, doi:\href{https://xovee.cn/html/paper-redirects/csur2021.html}{10.1145/3433000}, \href{https://arxiv.org/abs/2005.11041}{arXiv:2005.11041}
-%\end{enumerate}
-
-%\cvsubsection{Refereed Conference Articles}
-
-%\begin{enumerate}[resume]
-%    \item Fan Zhou, Xovee Xu, Kunpeng Zhang, Goce Trajcevski, and Ting Zhong*. 2020. Variational information diffusion for probabilistic cascade prediction. IEEE International Conference on Computer Communications (INFOCOM), Virtual Conference, Jul 6-9, 2020, pp. 1618-1627, doi:\href{https://doi.org/10.1109/INFOCOM41043.2020.9155349}{10.1109/INFOCOM41043.2020.9155349}
-%    \newline \textbf{\color{red}INFOCOM 2020 Student Conference Award}
-%\end{enumerate}
+\input{publications.tex}
+    %\item Fan Zhou, Xovee Xu*, Goce Trajcevski, Kunpeng Zhang. 2021. A survey of information cascade analysis: Models, predictions, and recent advances. \textit{ACM Computing Surveys (CSUR)}, vol. 54, no. 2, article 27, 36 pages, Mar 2021, doi:\href{https://xovee.cn/html/paper-redirects/csur2021.html}{10.1145/3433000}, \href{https://arxiv.org/abs/2005.11041}{arXiv:2005.11041}
 
 
-
-
-% talks
-%\cvsection{Invited Talk}
-%\indent 
-
-%University of CV, Dept. of Linguistics, 2077 
-
-
-
-% teaching experience 
-%\cvsection{Teaching Experience}
-%\indent
-
-%\textbf{C Programming Language}\hfill Spring 2020
-
-%\hspace{2em}Teaching Assistant, with Prof. Ting Zhong, at UESTC
-
-%\textbf{Software Project Management}\hfill Summer 2019
-
-%\hspace{2em}Teaching Assistant, with Prof. Gianmario Motta (University of Pavia), at UESTC
-
-
-
-
-% industrial experience
-% \section*{Industrial Experience}
-% \indent
-
-% \textbf{Strawberry Inc.}, Beijing, China
-
-% \hspace{2em}Co-funder, 2077 - 
-
-% \textbf{Delicious Mango Holdings Ltd.}, London, UK
-
-% \hspace{2em}\LaTeX~Engineer Intern, 2076 - 2077
-
-% \textbf{CV Agency Co. Ltd.}, Hawaii, USA
-
-% \hspace{2em}CV Broker, 2075 - 2076
-% \begin{itemize}[leftmargin=5em, topsep=0pt, itemsep=0pt]
-%     \item Helped a three-year old child create her first CV
-%     \item Hilight 2 ...
-%     \item Hilight 3 ...
-% \end{itemize}
-
+% talk
+\cvsection{Conference and Seminar Presentations}
 
 \end{document}
 

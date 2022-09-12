@@ -71,13 +71,13 @@ EOF
 
 
 ###index page (home, about)
-rm index.html
+rm -f index.html
 html_start >> index.html
 cat pages/about.html >> index.html
 html_end >> index.html
 
 ###publication page
-rm publications.html
+rm -f publications.html
 html_start >> publications.html
 echo '    <div class="page" id="publications">' >> publications.html
 

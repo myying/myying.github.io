@@ -13,7 +13,7 @@ done
 
 
 ###publication section
-rm publications.tex
+rm -f publications.tex
 echo "\begin{enumerate}" >> publications.tex
 
 ##read list in reverse order (newer first)
@@ -40,7 +40,7 @@ echo "\end{enumerate}" >> publications.tex
 
 
 ###presentation section
-rm presentations.tex
+rm -f presentations.tex
 echo "\begin{enumerate}" >> presentations.tex
 
 ##read list in reverse order (newer first)
@@ -60,5 +60,60 @@ done
 echo "\end{enumerate}" >> presentations.tex
 
 
-###build cv/main.pdf
-latexmk -pdf -quiet main.tex
+###build cv/main.pdf and main.html
+latexmk -f -pdf -quiet main.tex
+
+rm -f main.html
+cat << EOF >> main.html
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="Yue (Michael) Ying">
+<meta name="keywords" content="data assimilation, predictability, multiscale, meteorology, research">
+<meta name="author" content="Yue Ying">
+
+<link rel="apple-touch-icon" sizes="180x180" href="site_img/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="site_img/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="site_img/favicon-16x16.png">
+<link rel="manifest" href="site_img/site.webmanifest">
+
+<link href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../style.css">
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-148955805-2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'UA-148955805-2');
+</script>
+
+<!-- MathJax -->
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+<title>Yue (Michael) Ying Curriculum Vitae</title>
+</head>
+<body>
+  <div class="container">
+    <div class="page" id="cv">
+EOF
+
+pandoc main.tex --mathjax -t html >> main.html
+
+cat << EOF >> main.html
+    </div>
+  </div>
+
+  <script>
+    document.write('<div class="footer">');
+    document.write('Last updated: ');
+    document.write(document.lastModified.split(' ')[0]);
+  </script>
+</body>
+</html>
+EOF

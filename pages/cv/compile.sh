@@ -1,5 +1,15 @@
 #!/bin/bash
-
+###system check
+date_cmd='date'
+if [ `uname` == 'Darwin' ]; then
+    date_cmd='gdate'
+fi
+for app in pandoc latexmk; do
+    if ! command -v $app &> /dev/null; then
+        echo "$app is not found! aborting"
+        exit
+    fi
+done
 
 
 ###publication section
@@ -39,7 +49,7 @@ i=$#
 while [ $i -gt 0 ]; do
     eval "item=\${$i}"  ##date list
     date=`basename $item`
-    echo "\item "`pandoc -f html -t latex $item/author`", \textit{\`\`"`cat $item/title`"''}, "`cat $item/place`", "`gdate -d $date +'%_d %b, %Y'` >> presentations.tex ###note: gdate works on macos, on linux use date
+    echo "\item "`pandoc -f html -t latex $item/author`", \textit{\`\`"`cat $item/title`"''}, "`cat $item/place`", "`$date_cmd -d $date +'%_d %b, %Y'` >> presentations.tex
     if [ -f $item/invited ]; then
         echo '(invited)' >> presentations.tex
     fi
@@ -48,3 +58,7 @@ while [ $i -gt 0 ]; do
 done
 
 echo "\end{enumerate}" >> presentations.tex
+
+
+###build cv/main.pdf
+latexmk -pdf -quiet main.tex

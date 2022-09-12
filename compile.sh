@@ -1,4 +1,16 @@
 #!/bin/bash
+###check system
+date_cmd='date'
+if [ `uname` == 'Darwin' ]; then
+    date_cmd='gdate'
+fi
+for app in pandoc; do
+    if ! command -v $app &> /dev/null; then
+        echo "$app is not found! aborting"
+        exit
+    fi
+done
+
 ##common html start and end to all pages:
 function html_start() {
 cat << EOF
@@ -112,3 +124,7 @@ html_end >> publications.html
 
 ###blog page
 
+
+
+###build cv
+pushd pages/cv; ./compile.sh; popd

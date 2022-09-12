@@ -49,7 +49,7 @@ i=$#
 while [ $i -gt 0 ]; do
     eval "item=\${$i}"  ##date list
     date=`basename $item`
-    echo "\item "`pandoc -f html -t latex $item/author`", \textit{\`\`"`cat $item/title`"''}, "`cat $item/place`", "`$date_cmd -d $date +'%_d %b, %Y'` >> presentations.tex
+    echo "\item "`pandoc -f html -t latex $item/author`", \textit{\`\`"`cat $item/title`"''}, "`cat $item/place`", "`$date_cmd -d $date +'%b %_d, %Y'` >> presentations.tex
     if [ -f $item/invited ]; then
         echo '(invited)' >> presentations.tex
     fi

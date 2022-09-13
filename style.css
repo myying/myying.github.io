@@ -15,15 +15,15 @@ a {
   text-decoration: underline;
 }
 h1{
-  font-size: 23px;
+  font-size: 22px;
 }
 h2{
-  font-size: 20px;
+  font-size: 18px;
   margin-top: 20px;
   margin-bottom: 5px;
 }
 p {
-  font-size: 17px;
+  font-size: 16px;
   line-height: 24px;
   margin-top: 7px;
   margin-bottom: 15px;
@@ -46,7 +46,7 @@ p {
 .nav li {
   display: inline-block;
   font-size: 18px;
-  line-height: 30px;
+  line-height: 10px;
 }
 .nav a {
   display: block;
@@ -114,6 +114,16 @@ p {
 }
 #cv h1{
   margin-top: 36px;
+}
+
+#blog h2{
+  margin-top:50px;
+}
+#blog iframe{
+  width:95vw;
+  height:60vw;
+  max-width:720px;
+  max-height:440px;
 }
 
 .footer {

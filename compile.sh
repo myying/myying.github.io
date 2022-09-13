@@ -102,17 +102,21 @@ done
 echo '    </div>' >> publications.html
 html_end >> publications.html
 
-
-###research projects page
-
-
-###courses page
-
-
-
-###software tutorial page
-
-
+###research projects, courses and software/tutorial pages
+for page in research courses software; do
+    rm -f $page.html
+    html_start >> $page.html
+    echo '    <div class="page" id="'$page'">' >> $page.html
+    for item in `find pages/$page/* -maxdepth 0 |sort -t'/' -k3 -r`; do
+        echo '<h2 id="'`basename $item`'">'`cat $item/title`'</h2>' >> $page.html
+        cat $item/abstract.html >> $page.html
+        if [ -f $item/article.html ]; then
+            echo '<p><i class="fa fa-caret-right"></i> <a href="'$item'/article.html">Read More</a></p>' >> $page.html
+        fi
+        echo '<br/>' >> $page.html
+    done
+    html_end >> $page.html
+done
 
 ###blog page
 rm -f blog.html

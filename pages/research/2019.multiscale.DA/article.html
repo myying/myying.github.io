@@ -1,0 +1,69 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="author" content="Yue Ying">
+<link rel="stylesheet" href="../../../style.css">
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-148955805-2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'UA-148955805-2');
+</script>
+
+<!-- MathJax -->
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+<title></title>
+</head>
+<body>
+<div class="header">
+<h1></h1>
+</div>
+
+<div class="container">
+<div class="page" id="about">
+<div class="content">
+        <div class="image" style="max-width:300px"><img width="100%" alt="Ensemble data assimilation methodologies" src="pages/research/Zoo_DA_methods.png"/> </div>
+        <div>
+          <p>Ever-increasing complexity of multiscale dynamical systems poses challenges to data assimilation methods. Rapid error growth at small scales gives rise to nonlinearity, and multiscale systems typically have large dimensionality as well. Currently, methods based on linearization, such as the Ensemble Kalman Filter (EnKF), work efficiently for large problems but cannot handle high nonlinearity. On the other hand, nonlinear methods, such as the Particle Filter, are still not feasible for large dimensional problems. I have been developing new methods that can both handle nonlinearity and be efficient enough for the multiscale prediction problems.</p>
+        </div>
+      <br/>
+
+      <h2 id="multiscale_localization"><i class="fa fa-caret-right"></i> The "multiscale localization" approach</h2>
+      <p>My first attempt was to reduce the dimensionality through localization. In <a href="pages/publications/Ying_2018MWR.pdf">Ying et al. 2018</a>, we tested the scale dependency of best localization distances using a quasi-geostrophic model. The following figures show the correlation map between the observation "+" and the model state at each scale, and the circles show the best localization distances.</p>
+      <div style="max-width:500px"><img width="100%" alt="" src="pages/research/Scale_dependent_localization.png"/></div>
+      <p>These results motivate a scale-aware data assimilation approach, where large- and small-scale components of the system can be treated separately.</p>
+      <br/>
+
+      <h2 id="multiscale_alignment"><i class="fa fa-caret-right"></i> Reducing displacement errors through "multiscale alignment"</h2>
+      <p>I then noticed that displacement of coherent structures (position errors) is a major source of nonlinearity at small scales. The following figures show ensemble <a href="https://en.wikipedia.org/wiki/Spaghetti_plot">spaghetti plots</a> of Rankine vortices before and after assimilating observations using EnKF. The ensemble members only differ in location of the vortex. As the location spread increases, the prior error distribution deviates more from a Gaussian, causing the EnKF analyses to be suboptimal.</p>
+      <div style="max-width:550px"><img width="100%" alt="" src="pages/research/Displacement_error_Rankine_example.png"/></div>
+      <p>I was inspired by the computer vision literature on <a href="https://en.wikipedia.org/wiki/Optical_flow">optical flows</a>, and developed a "multiscale alignment" method that can successively reduce displacement errors from large to small scales of the system. The method is described in detail in <a href="pages/publications/Ying2019MWR.pdf">Ying 2019</a> and I performed a proof of concept test with a two-layer quasi-geostrophic model.</p>
+      <p>Now, I am further developing the new method in more realistic and complex scenarios. The following figures show a sequence of surface zonal wind maps from large to small scales during one analysis cycle of Hurricane Patricia (2015).</p>
+      <div style="max-width:600px"><img width="100%" alt="" src="pages/research/MSA_Patricia_demo.png"/></div>
+      <p>Displacement vectors are derived from the analysis increment from the assimilation at each scale, which are then used to warp the state at the subsequent smaller scales (to form the "aligned prior") before the observations are assimilated.</p>
+      <br/>
+
+      <h2 id="adaptive_algorithms"><i class="fa fa-caret-right"></i> Adaptive algorithms to achieve the best use of observations</h2>
+      <p>Tuning of parameters in a data assimilation system, such as covariance localization and inflation, is important for filter performance but also very time consuming. Adaptive methods that set the parameters automatically are favorable. To achieve the best use of observation information, the correct error covariances need to be specified for both the prior state and observations.</p>
+      <p>In <a href="pages/publications/YingZhang2015QJ.pdf">Ying and Zhang 2015</a>, we introduced an adaptive version of the <a href="https://doi.org/10.1175/MWR-D-11-00276.1">relax-to-prior-spread</a> (RTPS) covariance inflation method. This method can adapt to temporally and spatially varying observation density and quality. It is now adopted in the <a href="teaching.html#psu_wrf_enkf">PSU_WRF_EnKF</a> system, as well as by other data assimilation research groups.</p>
+      <p>Scale mismatch between the state and the observation give rise to representation errors that have non-zero spatial correlations. For a serial EnKF that assumes uncorrelated observation errors, tuning a fixed inflation factor cannot resolve this issue. A multiscale scheme that decompose the observations into scale components is proposed to allow the state/observation inflation to be tuned differently for each scale (Ying 2020).</p>
+      <br/>
+
+      <h2 id="multiscale_approach"><i class="fa fa-caret-right"></i> Towards an integrated multiscale approach</h2>
+      <p>Putting everything together, the workflow of the proposed multiscale approach can be shown as follows.</p>
+      <div style="max-width:400px"><img width="100%" alt="" src="pages/research/multiscale_framework.png"/></div>
+      <p> \(\mathbf{x}\) is the model state, \(\mathbf{y} = h(\mathbf{x})\) is the observation prior, and \(\mathbf{y}^o\) is the actual observation. The double-lined arrow is a bandpass filter that extracts a certain scale component indexed by \(s\). \(\delta\mathbf{x}\) is the analysis increment found by a core assimilation algorithm (serial EnSRF in this case). \(\sigma^o\) is the specified observation error std, and \(\boldsymbol{\rho}\) is the localization function. The multiscale approach processes large to small scale components sequentially (for \(s=1, 2, \ldots, N_s\)) and update the model state iteratively. </p>
+      <p>I am currently working on the implementation of such multiscale approach in the PSU_WRF_EnKF system (partially done) and the DART system (on-going). If you are working on a problem where you think the multiscale data assimilation method might help, please don't hesitate to contact me!</p>
+
+</div>
+</div></div>
+<div class="footer">&copy; Yue Ying</div>
+</body>
+</html>

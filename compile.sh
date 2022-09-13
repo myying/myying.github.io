@@ -27,7 +27,6 @@ cat << EOF
 <link rel="icon" type="image/png" sizes="16x16" href="site_img/favicon-16x16.png">
 <link rel="manifest" href="site_img/site.webmanifest">
 
-<link href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="style.css">
 
@@ -80,12 +79,7 @@ html_end >> index.html
 rm -f publications.html
 html_start >> publications.html
 echo '    <div class="page" id="publications">' >> publications.html
-
-##read list in reverse order (newer first)
-set -- pages/publications/*
-i=$#
-while [ $i -gt 0 ]; do
-    eval "item=\${$i}"  ##item in the publication list
+for item in `find pages/publications/* -maxdepth 0 |sort -r`; do
     echo '<p><i class="fa fa-file-text-o"></i> ' >> publications.html
     echo `cat $item/author`', '`cat $item/year`':<br/> ' >> publications.html
     echo `cat $item/title`'.<br/>' >> publications.html
@@ -104,9 +98,7 @@ while [ $i -gt 0 ]; do
         echo 'in prep.' >> publications.html
     fi
     echo '</p><br/>' >> publications.html
-    i=$((i-1))
 done
-
 echo '    </div>' >> publications.html
 html_end >> publications.html
 
@@ -123,8 +115,17 @@ html_end >> publications.html
 
 
 ###blog page
-
+rm -f blog.html
+html_start >> blog.html
+echo '    <div class="page" id="blog">' >> blog.html
+for item in `find pages/presentations/* pages/other_events/* -maxdepth 0 |sort -t'/' -k3 -r`; do
+    date=`basename $item`
+    echo "<h2 id='$date'>"`$date_cmd -d $date +'%b %_d, %Y'`"</h2>" >> blog.html
+    echo "<p>"`cat $item/post.html`"</p>" >> blog.html
+done
+echo '    </div>' >> blog.html
+html_end >> blog.html
 
 
 ###build cv
-pushd pages/cv; ./compile.sh; popd
+pushd pages/cv; bash compile.sh; popd

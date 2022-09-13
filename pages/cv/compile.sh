@@ -11,16 +11,10 @@ for app in pandoc latexmk; do
     fi
 done
 
-
 ###publication section
 rm -f publications.tex
 echo "\begin{enumerate}" >> publications.tex
-
-##read list in reverse order (newer first)
-set -- ../publications/*
-i=$#
-while [ $i -gt 0 ]; do
-    eval "item=\${$i}"  ##item in the publication list
+for item in `find ../publications/* -maxdepth 0 |sort -r`; do
     echo "\item "`pandoc -f html -t latex $item/author`", "`cat $item/year`": "`cat $item/title`". " >> publications.tex
     if [[ `cat $item/status` == "published" ]]; then
         echo "\textit{"`cat $item/journal`"}, "`cat $item/issue`", "`cat $item/pages`". " >> publications.tex
@@ -33,32 +27,27 @@ while [ $i -gt 0 ]; do
         echo "in prep." >> publications.tex
     fi
     echo >> publications.tex
-    i=$((i-1))
 done
-
 echo "\end{enumerate}" >> publications.tex
-
 
 ###presentation section
 rm -f presentations.tex
 echo "\begin{enumerate}" >> presentations.tex
-
-##read list in reverse order (newer first)
-set -- ../presentations/*
-i=$#
-while [ $i -gt 0 ]; do
-    eval "item=\${$i}"  ##date list
+for item in `find ../presentations/* -maxdepth 0 |sort -r`; do
     date=`basename $item`
-    echo "\item "`pandoc -f html -t latex $item/author`", \textit{\`\`"`cat $item/title`"''}, "`cat $item/place`", "`$date_cmd -d $date +'%b %_d, %Y'` >> presentations.tex
+    echo "\item "`pandoc -f html -t latex $item/author`"," >> presentations.tex
+    if [ ! -f $item/poster.pdf ]; then
+        echo "\textit{\`\`"`cat $item/title`"''}," >> presentations.tex
+    else
+        echo "\textit{\`\`"`cat $item/title`"''}(poster)," >> presentations.tex
+    fi
+    echo `cat $item/place`", "`$date_cmd -d $date +'%b %_d, %Y'` >> presentations.tex
     if [ -f $item/invited ]; then
         echo '(invited)' >> presentations.tex
     fi
     echo >> presentations.tex
-    i=$((i-1))
 done
-
 echo "\end{enumerate}" >> presentations.tex
-
 
 ###build cv/main.pdf and main.html
 latexmk -f -pdf -quiet main.tex
@@ -78,7 +67,6 @@ cat << EOF >> main.html
 <link rel="icon" type="image/png" sizes="16x16" href="site_img/favicon-16x16.png">
 <link rel="manifest" href="site_img/site.webmanifest">
 
-<link href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="../../style.css">
 

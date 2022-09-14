@@ -4,9 +4,6 @@ body {
   padding: 0;
   background: #fff;
 }
-img,video {
-  border: 1px solid #666;
-}
 #research img{
   border: none;
 }
@@ -116,14 +113,15 @@ p {
   margin-top: 36px;
 }
 
-#blog h2{
-  margin-top:50px;
-}
 #blog iframe{
+  border: 1px solid black;
   width:95vw;
   height:60vw;
   max-width:720px;
   max-height:440px;
+}
+#blog img,video {
+  border: 1px solid black;
 }
 
 .footer {

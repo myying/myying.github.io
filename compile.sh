@@ -111,7 +111,7 @@ for page in research courses software; do
         echo '<h2 id="'`basename $item`'">'`cat $item/title`'</h2>' >> $page.html
         cat $item/abstract.html >> $page.html
         if [ -f $item/article.html ]; then
-            echo '<p><i class="fa fa-caret-right"></i> <a href="'$item'/article.html">Read More</a></p>' >> $page.html
+            echo '<p><font size=2><i class="fa fa-hand-o-right"></i> <a href="'$item'/article.html">Read More</a></font></p>' >> $page.html
         fi
         echo '<br/>' >> $page.html
     done
@@ -125,9 +125,13 @@ echo '    <div class="page" id="blog">' >> blog.html
 for item in `find pages/presentations/* pages/other_events/* -maxdepth 0 |sort -t'/' -k3 -r`; do
     date=`basename $item`
     echo "<h2 id='$date'>"`$date_cmd -d $date +'%b %_d, %Y'`"</h2>" >> blog.html
-    echo "<p>"`cat $item/post.html`"</p>" >> blog.html
+    echo "<p>"`cat $item/abstract.html`"</p>" >> blog.html
+    if [ -f $item/article.html ]; then
+        echo '<p><font size=2><i class="fa fa-hand-o-right"></i> <a href="'$item'/article.html">Read More</a></font></p>' >> blog.html
+    fi
+    echo '<br/>' >> blog.html
 done
-echo '    </div>' >> blog.html
+echo '   </div>' >> blog.html
 html_end >> blog.html
 
 

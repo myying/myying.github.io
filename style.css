@@ -107,6 +107,7 @@ p {
   margin-bottom:0px;
 }
 #cv table td {
+  font-size: 16px;
   vertical-align: top;
   padding-left: 5px;
   padding-right: 10px;
@@ -127,6 +128,7 @@ p {
 }
 
 .footer {
+  font-size: 12px;
   margin-top: 50px;
   margin-bottom: 50px;
   text-align: center;

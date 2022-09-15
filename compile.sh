@@ -85,13 +85,13 @@ for item in `find pages/publications/* -maxdepth 0 |sort -r`; do
     echo `cat $item/title`'.<br/>' >> publications.html
     if [[ `cat $item/status` == 'published' ]]; then
         echo '<i>'`cat $item/journal`'</i>, '`cat $item/issue`', '`cat $item/pages`'. ' >> publications.html
-        echo '<font size=2><i class="fa fa-external-link"></i> <a href="https://doi.org/'`cat $item/doi`'">Web link</a></font> &nbsp;' >> publications.html
-        echo '<font size=2><i class="fa fa-download"></i> <a href="'$item'/print.pdf">PDF</a></font>' >> publications.html
+        echo '<font style="font-size:14px;"><i class="fa fa-external-link"></i> <a href="https://doi.org/'`cat $item/doi`'">Web link</a></font> &nbsp;' >> publications.html
+        echo '<font style="font-size:14px;"><i class="fa fa-download"></i> <a href="'$item'/print.pdf">PDF</a></font>' >> publications.html
     fi
     if [[ `cat $item/status` == 'in review' ]]; then
         echo '<i>'`cat $item/journal`'</i>, in review.' >> publications.html
         if [ -f $item/preprint.pdf ]; then
-            echo '<font size=2><i class="fa fa-download"></i> <a href="'$item'/preprint.pdf">preprint</a></font>' >> publications.html
+            echo '<font style="font-size:14px;"><i class="fa fa-download"></i> <a href="'$item'/preprint.pdf">preprint</a></font>' >> publications.html
         fi
     fi
     if [[ `cat $item/status` == 'in prep' ]]; then
@@ -111,7 +111,7 @@ for page in research courses software; do
         echo '<h2 id="'`basename $item`'">'`cat $item/title`'</h2>' >> $page.html
         cat $item/abstract.html >> $page.html
         if [ -f $item/article.html ]; then
-            echo '<p><font size=2><i class="fa fa-hand-o-right"></i> <a href="'$item'/article.html">Read More</a></font></p>' >> $page.html
+            echo '<p><font style="font-size:14px;"><i class="fa fa-hand-o-right"></i> <a href="'$item'/article.html">Read More</a></font></p>' >> $page.html
         fi
         echo '<br/>' >> $page.html
     done
@@ -127,7 +127,7 @@ for item in `find pages/presentations/* pages/other_events/* -maxdepth 0 |sort -
     echo "<h2 id='$date'>"`$date_cmd -d $date +'%b %_d, %Y'`"</h2>" >> blog.html
     echo `cat $item/abstract.html` >> blog.html
     if [ -f $item/article.html ]; then
-        echo '<p><font size=2><i class="fa fa-hand-o-right"></i> <a href="'$item'/article.html">Read More</a></font></p>' >> blog.html
+        echo '<p><font style="font-size:14px;"><i class="fa fa-hand-o-right"></i> <a href="'$item'/article.html">Read More</a></font></p>' >> blog.html
     fi
     echo '<br/>' >> blog.html
 done

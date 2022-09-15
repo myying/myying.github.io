@@ -125,7 +125,7 @@ echo '    <div class="page" id="blog">' >> blog.html
 for item in `find pages/presentations/* pages/other_events/* -maxdepth 0 |sort -t'/' -k3 -r`; do
     date=`basename $item`
     echo "<h2 id='$date'>"`$date_cmd -d $date +'%b %_d, %Y'`"</h2>" >> blog.html
-    echo "<p>"`cat $item/abstract.html`"</p>" >> blog.html
+    echo `cat $item/abstract.html` >> blog.html
     if [ -f $item/article.html ]; then
         echo '<p><font size=2><i class="fa fa-hand-o-right"></i> <a href="'$item'/article.html">Read More</a></font></p>' >> blog.html
     fi

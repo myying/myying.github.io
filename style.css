@@ -4,8 +4,9 @@ body {
   padding: 0;
   background: #fff;
 }
-#research img{
+img{
   border: none;
+  width: 100%;
 }
 a {
   color: #b54;
@@ -79,7 +80,7 @@ p {
   padding-right: 10px;
   max-width: 800px;
 }
-.content {
+.content{
   overflow: auto;
 }
 
@@ -87,6 +88,7 @@ p {
   float: left;
   padding-top: 10px;
   padding-right: 20px;
+  padding-bottom: 10px;
 }
 @media (max-width: 560px) {
   .image {

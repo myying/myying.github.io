@@ -9,89 +9,42 @@
 
 <url>
   <loc>https://myying.github.io/</loc>
-  <lastmod>2019-10-01T19:58:29+00:00</lastmod>
+  <lastmod>2022-10-01T19:58:29+00:00</lastmod>
   <priority>1.00</priority>
 </url>
 <url>
   <loc>https://myying.github.io/index.html</loc>
-  <lastmod>2019-10-01T19:58:29+00:00</lastmod>
+  <lastmod>2022-10-01T19:58:29+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://myying.github.io/publications.html</loc>
-  <lastmod>2019-10-01T19:58:30+00:00</lastmod>
+  <lastmod>2022-10-01T19:58:30+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://myying.github.io/research.html</loc>
-  <lastmod>2019-10-01T19:58:30+00:00</lastmod>
+  <lastmod>2022-10-01T19:58:30+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
-  <loc>https://myying.github.io/teaching.html</loc>
-  <lastmod>2019-10-01T19:58:30+00:00</lastmod>
+  <loc>https://myying.github.io/courses.html</loc>
+  <lastmod>2022-10-01T19:58:30+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
-  <loc>https://myying.github.io/news.html</loc>
-  <lastmod>2019-10-01T19:58:29+00:00</lastmod>
+  <loc>https://myying.github.io/software.html</loc>
+  <lastmod>2022-10-01T19:58:30+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
-  <loc>https://myying.github.io/Ying_CV.pdf</loc>
-  <lastmod>2019-10-01T19:58:29+00:00</lastmod>
+  <loc>https://myying.github.io/blog.html</loc>
+  <lastmod>2022-10-01T19:58:29+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
-  <loc>https://myying.github.io/paper/11_Ying2019MWR.pdf</loc>
-  <lastmod>2019-10-01T19:58:30+00:00</lastmod>
-  <priority>0.64</priority>
+  <loc>https://myying.github.io/pages/cv/main.html</loc>
+  <lastmod>2022-10-01T19:58:29+00:00</lastmod>
+  <priority>0.80</priority>
 </url>
-<url>
-  <loc>https://myying.github.io/paper/10_YingZhang2018JAS.pdf</loc>
-  <lastmod>2019-10-01T19:58:30+00:00</lastmod>
-  <priority>0.64</priority>
-</url>
-<url>
-  <loc>https://myying.github.io/paper/09_Ying_2018MWR.pdf</loc>
-  <lastmod>2019-10-01T19:58:30+00:00</lastmod>
-  <priority>0.64</priority>
-</url>
-<url>
-  <loc>https://myying.github.io/paper/08_YingZhang2017JAS.pdf</loc>
-  <lastmod>2019-10-01T19:58:30+00:00</lastmod>
-  <priority>0.64</priority>
-</url>
-<url>
-  <loc>https://myying.github.io/paper/07_YingZhang2015QJ.pdf</loc>
-  <lastmod>2019-10-01T19:58:30+00:00</lastmod>
-  <priority>0.64</priority>
-</url>
-<url>
-  <loc>https://myying.github.io/paper/06_Wang_2015JC.pdf</loc>
-  <lastmod>2019-10-01T19:58:30+00:00</lastmod>
-  <priority>0.64</priority>
-</url>
-<url>
-  <loc>https://myying.github.io/paper/04_YingZhang2012JMSJ.pdf</loc>
-  <lastmod>2019-10-01T19:58:30+00:00</lastmod>
-  <priority>0.64</priority>
-</url>
-<url>
-  <loc>https://myying.github.io/courses/PennState_Meteo597/syllabus.pdf</loc>
-  <lastmod>2019-10-01T19:58:29+00:00</lastmod>
-  <priority>0.64</priority>
-</url>
-<url>
-  <loc>https://myying.github.io/software/PSU_WRF_EnKF_system_technote.pdf</loc>
-  <lastmod>2019-10-01T19:58:30+00:00</lastmod>
-  <priority>0.64</priority>
-</url>
-<url>
-  <loc>https://myying.github.io/software/Cluster_User_Guide_V2.pdf</loc>
-  <lastmod>2019-10-01T19:58:30+00:00</lastmod>
-  <priority>0.64</priority>
-</url>
-
-
 </urlset>

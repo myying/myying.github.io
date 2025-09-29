@@ -40,6 +40,18 @@
 
   <div class="container">
     <div class="page" id="software">
+<h2 id="2025.nextsimdg.assimilation">Data assimilation in neXtSIM-DG with NEDAS</h2>
+<p>A <a href="https://github.com/sasip-climate/notebooks-nextsim-workshop2025/blob/main/assimilation/demo-osse.ipynb">tutorial session</a> was offered in the neXtSIM workshop in 2025. In this tutorial, we show how DA works for neXtSIM-DG in an Observing System Simulation Experiment (OSSE):
+<ul>
+    <li>Synthetic observations are simulated from a truth run</li>
+    <li>An ensemble forecast with perturbed boundary forcing is run</li>
+    <li>The observations are assimilated to reduce errors in the model states</li>
+    <li>The errors in model states are diagnosed against the truth</li>
+</ul>
+This is a rather idealized setting, using very small ensemble size, low model resolution and short test time period. Real practice is of course more complex than this small demo. However, this tutorial is a good entry point for those who want a hands-on view of how DA works and start to dig into the details.
+</p>
+
+<br/>
 <h2 id="2022.NEDAS">NEDAS: The Next-generation Ensemble Data Assimilation System</h2>
 <p><a href="https://github.com/nansencenter/NEDAS">NEDAS</a> provides a light-weight Python solution to the ensemble data assimilation (DA) problem for geophysical models. It serves as a new test environment for DA researchers. Thanks to its modular and scalable design, new DA algorithms can be rapidly tested and developed even for large-dimensional models. NEDAS offers a collection of state-of-the-art DA algorithms, including both serial and batch assimilation approaches. NEDAS offers DA researchers with new ideas to test their prototypes early-on in real-model-like environments, before committing resources to full implementation in operational systems. <p>
 <br/>

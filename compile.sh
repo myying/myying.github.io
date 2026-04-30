@@ -86,7 +86,12 @@ for item in `find pages/publications/* -maxdepth 0 |sort -r`; do
     if [[ `cat $item/status` == 'published' ]]; then
         echo '<i>'`cat $item/journal`'</i>, '`cat $item/issue`', '`cat $item/pages`'. ' >> publications.html
         echo '<font style="font-size:14px;"><i class="fa fa-external-link"></i> <a href="https://doi.org/'`cat $item/doi`'">Web link</a></font> &nbsp;' >> publications.html
-        echo '<font style="font-size:14px;"><i class="fa fa-download"></i> <a href="'$item'/print.pdf">PDF</a></font>' >> publications.html
+        if [[ -f $item/open_access ]]; then
+            echo '<font style="font-size:14px;"><i class="fa fa-unlock"></i> open access</font> &nbsp;' >> publications.html
+        fi
+        if [[ -f $item/print.pdf ]]; then
+           echo '<font style="font-size:14px;"><i class="fa fa-download"></i> <a href="'$item'/print.pdf">PDF</a></font>' >> publications.html
+        fi
     fi
     if [[ `cat $item/status` == 'in review' ]]; then
         echo '<i>'`cat $item/journal`'</i>, in review.' >> publications.html

@@ -15,16 +15,19 @@ done
 rm -f publications.tex
 echo "\begin{enumerate}" >> publications.tex
 for item in `find ../publications/* -maxdepth 0 |sort -r`; do
+    status=`cat $item/status`
+    if [[ "$status" != "published" && "$status" != "accepted" ]]; then
+        continue
+    fi
     echo "\item "`pandoc -f html -t latex $item/author`", "`cat $item/year`": "`cat $item/title`". " >> publications.tex
-    if [[ `cat $item/status` == "published" ]]; then
+    if [[ "$status" == "published" ]]; then
         echo "\textit{"`cat $item/journal`"}, "`cat $item/issue`", "`cat $item/pages`". " >> publications.tex
         echo "\href{https://doi.org/"`cat $item/doi`"}{doi:"`cat $item/doi`"}." >> publications.tex
-    fi
-    if [[ `cat $item/status` == "in review" ]]; then
-        echo "\textit{"`cat $item/journal`"}, in review." >> publications.tex
-    fi
-    if [[ `cat $item/status` == "in prep" ]]; then
-        echo "in prep." >> publications.tex
+    else
+        echo "\textit{"`cat $item/journal`"}, accepted." >> publications.tex
+        if [ -f $item/doi ]; then
+            echo "\href{https://doi.org/"`cat $item/doi`"}{doi:"`cat $item/doi`"}." >> publications.tex
+        fi
     fi
     echo >> publications.tex
 done

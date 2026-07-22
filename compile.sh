@@ -93,6 +93,12 @@ for item in `find pages/publications/* -maxdepth 0 |sort -r`; do
            echo '<font style="font-size:14px;"><i class="fa fa-download"></i> <a href="'$item'/print.pdf">PDF</a></font>' >> publications.html
         fi
     fi
+    if [[ `cat $item/status` == 'accepted' ]]; then
+        echo '<i>'`cat $item/journal`'</i>, accepted. ' >> publications.html
+        if [ -f $item/doi ]; then
+            echo '<font style="font-size:14px;"><i class="fa fa-external-link"></i> <a href="https://doi.org/'`cat $item/doi`'">Web link</a></font> &nbsp;' >> publications.html
+        fi
+    fi
     if [[ `cat $item/status` == 'in review' ]]; then
         echo '<i>'`cat $item/journal`'</i>, in review.' >> publications.html
         if [ -f $item/preprint.pdf ]; then

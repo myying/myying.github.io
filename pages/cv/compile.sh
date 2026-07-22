@@ -19,7 +19,12 @@ for item in `find ../publications/* -maxdepth 0 |sort -r`; do
     if [[ "$status" != "published" && "$status" != "accepted" ]]; then
         continue
     fi
-    echo "\item "`pandoc -f html -t latex $item/author`", "`cat $item/year`": "`cat $item/title`". " >> publications.tex
+    year=`cat $item/year`
+    if [[ -n "$year" ]]; then
+        echo "\item "`pandoc -f html -t latex $item/author`", "$year": "`cat $item/title`". " >> publications.tex
+    else
+        echo "\item "`pandoc -f html -t latex $item/author`": "`cat $item/title`". " >> publications.tex
+    fi
     if [[ "$status" == "published" ]]; then
         echo "\textit{"`cat $item/journal`"}, "`cat $item/issue`", "`cat $item/pages`". " >> publications.tex
         echo "\href{https://doi.org/"`cat $item/doi`"}{doi:"`cat $item/doi`"}." >> publications.tex

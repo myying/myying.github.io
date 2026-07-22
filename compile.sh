@@ -81,7 +81,12 @@ html_start >> publications.html
 echo '    <div class="page" id="publications">' >> publications.html
 for item in `find pages/publications/* -maxdepth 0 |sort -r`; do
     echo '<p><i class="fa fa-file-text-o"></i> ' >> publications.html
-    echo `cat $item/author`', '`cat $item/year`':<br/> ' >> publications.html
+    year=`cat $item/year`
+    if [[ -n "$year" ]]; then
+        echo `cat $item/author`', '"$year"':<br/> ' >> publications.html
+    else
+        echo `cat $item/author`':<br/> ' >> publications.html
+    fi
     echo `cat $item/title`'.<br/>' >> publications.html
     if [[ `cat $item/status` == 'published' ]]; then
         echo '<i>'`cat $item/journal`'</i>, '`cat $item/issue`', '`cat $item/pages`'. ' >> publications.html

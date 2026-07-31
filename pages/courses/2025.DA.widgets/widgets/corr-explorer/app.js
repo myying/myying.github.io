@@ -312,9 +312,16 @@
       const { i, j } = mapPosToIJ(cv, e.clientX, e.clientY);
       if (dragging || e.type === "click") setMarker(i, j, true);
     };
-    cv.addEventListener("pointerdown", (e) => { dragging = true; move(e); cv.setPointerCapture(e.pointerId); });
+    cv.addEventListener("pointerdown", (e) => {
+      dragging = true;
+      move(e);
+      try { cv.setPointerCapture(e.pointerId); } catch (err) { /* touch on some iOS versions */ }
+    });
     cv.addEventListener("pointermove", (e) => { if (dragging) move(e); });
     cv.addEventListener("pointerup", () => { dragging = false; hideTooltip(); });
+    // belt-and-braces: stop the browser from turning a touch drag on the maps
+    // into a page scroll (in addition to touch-action:none in the CSS)
+    cv.addEventListener("touchstart", (e) => e.preventDefault(), { passive: false });
     // hover tooltip (mouse only — on touch it would linger after the drag)
     cv.addEventListener("pointermove", (e) => {
       if (e.pointerType !== "mouse") return;

@@ -49,8 +49,10 @@
   .keyidea { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 6px 18px 10px; }
   .keyidea h3 { margin-top: 18px; }
   /* wide display equations scroll inside their own box instead of widening
-     the page (the .page is inline-block, so any wide child stretches it) */
-  html, body { overflow-x: hidden; }
+     the page (the .page is inline-block, so any wide child stretches it).
+     NOTE: no overflow-x:hidden on html/body — on iOS Safari that turns body
+     into a scroll container and the bottom of long pages becomes
+     unreachable, which hid the last panel. */
   .formula { overflow-x: auto; }
   @media (max-width: 560px) {
     #widget-page { padding-left: 14px; padding-right: 14px; }
@@ -122,17 +124,17 @@
                 </div>
                 <section class="panel">
                   <h2 class="panel-title">Truth T</h2>
-                  <canvas class="map" id="map-truth"></canvas>
+                  <div class="map-frame"><canvas class="map" id="map-truth"></canvas></div>
                   <div class="colorbar"><canvas id="cb-truth"></canvas><div class="cb-labels"><span class="cb-min"></span><span class="cb-mid"></span><span class="cb-max"></span></div></div>
                 </section>
                 <section class="panel">
                   <h2 class="panel-title">Corr(Obs T, State T)</h2>
-                  <canvas class="map" id="map-corr"></canvas>
+                  <div class="map-frame"><canvas class="map" id="map-corr"></canvas></div>
                   <div class="colorbar"><canvas id="cb-corr"></canvas><div class="cb-labels"><span class="cb-min"></span><span class="cb-mid"></span><span class="cb-max"></span></div></div>
                 </section>
                 <section class="panel">
                   <h2 class="panel-title" id="t-scat">r = —</h2>
-                  <canvas class="scatter" id="scat"></canvas>
+                  <div class="map-frame"><canvas class="scatter" id="scat"></canvas></div>
                 </section>
               </div>
             </div>

@@ -145,10 +145,19 @@
   text-align: center;
 }
 
-.da-widget canvas.map, .da-widget canvas.scatter {
-  display: block;
+/* square plot frames: the classic padding-top:100% trick keeps the plots
+   square in every browser (canvas + CSS aspect-ratio is flaky on older iOS) */
+.da-widget .map-frame {
+  position: relative;
   width: 100%;
-  aspect-ratio: 1 / 1;
+  padding-top: 100%;
+}
+.da-widget canvas.map, .da-widget canvas.scatter {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   border-radius: 8px;
   background: var(--surface-1);
 }

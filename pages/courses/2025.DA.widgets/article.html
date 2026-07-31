@@ -1,0 +1,203 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="Yue (Michael) Ying — Data Assimilation Interactive Tutorials, Part 1: Observation–State Correlation Explorer">
+<meta name="keywords" content="data assimilation, ensemble, correlation, tutorial, NEDAS">
+<meta name="author" content="Yue Ying">
+
+<link rel="stylesheet" href="../../../style.css">
+<link rel="stylesheet" href="widgets/corr-explorer/style.css">
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-148955805-2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'UA-148955805-2');
+</script>
+
+<!-- MathJax -->
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+<title>Data Assimilation Interactive Tutorials · Yue (Michael) Ying</title>
+
+<style>
+  /* This article hosts an interactive widget, so the standard 800 px page
+     column is widened; everything else reuses the site stylesheet. */
+  #widget-page { max-width: 1180px; }
+  #widget-page h3 { font-size: 17px; margin: 28px 0 8px; }
+  #widget-page .intro { color: var(--text-muted); }
+  .backlink { font-size: 0.85rem; margin-bottom: 4px; }
+  .series-nav {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    margin: 14px 0 4px;
+  }
+  .series-nav .label { font-size: 0.8rem; color: var(--text-muted); margin-right: 4px; }
+  .series-nav .part {
+    font-size: 0.8rem; padding: 4px 12px; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--surface); color: var(--text-muted);
+  }
+  .series-nav .part.current {
+    background: var(--accent); color: #fff; border-color: transparent; font-weight: 600;
+  }
+  .hint { font-size: 0.85rem; color: var(--text-muted); margin: 6px 0 0; }
+  .keyidea { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 6px 18px 10px; }
+  .keyidea h3 { margin-top: 18px; }
+</style>
+</head>
+
+<body>
+  <div class="header">
+    <h1>Yue (Michael) Ying</h1>
+  </div>
+
+  <div class="container">
+    <div class="page" id="widget-page">
+
+      <p class="backlink"><a href="../../../courses.html">&#8592; Courses</a></p>
+
+      <h2>Data Assimilation Interactive Tutorials</h2>
+      <p class="intro">
+        A series of small interactive widgets that demonstrate the core ideas of
+        ensemble data assimilation. Each widget is a web port of a section of the
+        <a href="https://github.com/myying/NEDAS_tutorials">NEDAS tutorial notebooks</a>,
+        reduced to its essential idea and made explorable.
+      </p>
+
+      <div class="series-nav">
+        <span class="label">Series:</span>
+        <span class="part current">Part 1 &#183; Observation&#8211;State Correlation</span>
+        <span class="part">more parts in preparation</span>
+      </div>
+
+      <h3>Part 1 &#183; Observation&#8211;State Correlation Explorer</h3>
+      <p>
+        A single <strong>temperature</strong> observation (red circle) is assimilated from a
+        smooth 2-D field. The ensemble gives an <em>estimate</em> of how that observation
+        correlates with the temperature state at every grid point — the core quantity of
+        covariance-based data assimilation, reduced to a single variable so the idea is
+        unmistakable. The numbered annotations below explain what each panel shows.
+      </p>
+      <p class="hint">
+        <strong>Try it:</strong> click or drag anywhere on a map, or use the i / j sliders,
+        to move the black state marker — the correlation map and the scatter respond live.
+      </p>
+
+      <!-- ================= Observation–State Correlation Explorer ============= -->
+      <div class="da-widget" id="corr-explorer">
+
+        <main class="viz-root">
+
+          <div class="workspace">
+            <!-- vertical j slider column -->
+            <div class="j-col">
+              <label for="jslider">j</label>
+              <input id="jslider" type="range" class="vertical" aria-label="state row j">
+              <output id="j-val" for="jslider"></output>
+            </div>
+
+            <div class="panels-wrap">
+              <!-- three panels: truth | correlation | scatter. The i slider
+                   lives in column 1 of the grid so it lines up with the first
+                   panel. Panel explanations live in the "Reading the panels"
+                   section below the widget. -->
+              <div class="panel-grid">
+                <div class="i-row">
+                  <label for="islider">i</label>
+                  <input id="islider" type="range" aria-label="state column i">
+                  <output id="i-val" for="islider"></output>
+                </div>
+                <section class="panel">
+                  <h2 class="panel-title">Truth T</h2>
+                  <canvas class="map" id="map-truth"></canvas>
+                  <div class="colorbar"><canvas id="cb-truth"></canvas><div class="cb-labels"><span class="cb-min"></span><span class="cb-mid"></span><span class="cb-max"></span></div></div>
+                </section>
+                <section class="panel">
+                  <h2 class="panel-title">Corr(Obs T, State T)</h2>
+                  <canvas class="map" id="map-corr"></canvas>
+                  <div class="colorbar"><canvas id="cb-corr"></canvas><div class="cb-labels"><span class="cb-min"></span><span class="cb-mid"></span><span class="cb-max"></span></div></div>
+                </section>
+                <section class="panel">
+                  <h2 class="panel-title" id="t-scat">r = —</h2>
+                  <canvas class="scatter" id="scat"></canvas>
+                </section>
+              </div>
+            </div>
+          </div>
+
+          <p class="readout" id="readout" role="status"></p>
+
+          <ul class="legend">
+            <li><span class="mark obs"></span> T observation (assimilated)</li>
+            <li><span class="mark state"></span> state location (i, j)</li>
+            <li><span class="mark dot"></span> ensemble members</li>
+            <li><span class="mark amber"></span> observation value</li>
+            <li><span class="mark ink"></span> truth value at (i, j)</li>
+          </ul>
+        </main>
+
+      </div>
+      <!-- ================= end widget ========================================= -->
+
+      <h3>Reading the panels</h3>
+      <p>
+        <b>1 &#183; The truth field</b> — the &#8220;answer key&#8221; we are trying to estimate from sparse
+        observations: a single warm blob (peak &#8776; 7.9 K, radius scale 100 km) on a 50&#215;50 grid
+        with 10 km cells. The black square marks the state location <code>(i, j)</code> you are
+        inspecting.
+      </p>
+      <p>
+        <b>2 &#183; The correlation map</b> — how the observation covaries with the state at every grid
+        point, estimated from the 100-member ensemble. The ensemble perturbs only the blob&#8217;s
+        position (std 50 km), so the pattern is a clean dipole: <b>+0.98</b> right at the observation,
+        <b>&#8722;0.64</b> on the far side, fading with distance. Position uncertainty is the classic
+        mechanism that produces strong <em>negative</em> correlation.
+      </p>
+      <p>
+        <b>3 &#183; The scatter</b> — the joint distribution of the observation ensemble (x) and the
+        state ensemble at the marker (y). Each dot is one member; the amber line is the observed
+        value, the ink line the truth. Move the marker across the dipole and watch the slope — and
+        the reported <code>r</code> — flip sign.
+      </p>
+
+      <div class="keyidea">
+        <h3>Key idea: correlation is what the analysis uses</h3>
+        <p>
+          Every covariance-based assimilation method (EnKF, 3D-Var, &#8230;) needs the same quantity
+          this widget visualises: the correlation between each observation and each state variable.
+          The ensemble estimate, computed with the same <code>ens_corr</code> formula as
+          <code>vort2d/diagnostics.py</code> in the NEDAS tutorials, is
+        </p>
+        <p style="text-align:center">
+          \[ r = \frac{\sum_{m=1}^{M} (x_m - \bar{x})(y_m - \bar{y})}
+                       {\sqrt{\sum_{m=1}^{M} (x_m - \bar{x})^2}\;\sqrt{\sum_{m=1}^{M} (y_m - \bar{y})^2}}, \]
+        </p>
+        <p>
+          with \(x_m\) the observation-prior ensemble and \(y_m\) the state ensemble at the marker.
+          In the analysis step the increment at a grid point is proportional to its correlation with
+          the observation times the innovation (observed &#8722; prior),
+        </p>
+        <p style="text-align:center">
+          \[ \Delta T(i,j) \;\propto\; r(i,j)\cdot\big(y^{o} - \bar{y}\big). \]
+        </p>
+        <p>
+          Points on the positive lobe warm up when the observation is warm and points on the negative
+          lobe cool down — the dipole tells the analysis to <em>move the warm blob toward the
+          observation</em> rather than merely smear the warmth around it. That is the microscopic
+          picture behind the correlation maps used throughout the
+          <a href="https://github.com/myying/NEDAS_tutorials">NEDAS tutorials</a>.
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="../../../footer.js"></script>
+  <script src="widgets/corr-explorer/data.js"></script>
+  <script src="widgets/corr-explorer/app.js"></script>
+</body>
+</html>

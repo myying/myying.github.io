@@ -1,0 +1,238 @@
+/* Observation–State Correlation Explorer — embedding stylesheet.
+   Scoped variant of the standalone style.css: every selector is prefixed
+   with .da-widget so the widget can be dropped into a site page without
+   touching the page's own styles. Custom properties are declared on the
+   .da-widget wrapper (they inherit down into the widget's DOM).
+
+   Source of truth: notes/software_tutorial/DA/style.css (standalone).
+*/
+.da-widget {
+  --surface-1:      #fcfcfb;   /* chart surface */
+  --surface-2:      #f9f9f7;   /* page plane */
+  --surface-hair:   #f3f2ef;   /* panels / wells */
+  --ink-1:          #0b0b0b;
+  --ink-2:          #52514e;
+  --ink-3:          #898781;   /* muted, axis labels */
+  --line:           #e1e0d9;   /* hairline gridline */
+  --axis:           #c3c2b7;   /* baseline / axis */
+  --border:         rgba(11,11,11,0.10);
+  --series-aqua:    #1baf7a;
+  --series-amber:   #eda100;
+  --series-red:     #e34948;
+  --series-ink:     #0b0b0b;
+  --accent-fill:    #ffffff;   /* marker face fill */
+  --shadow:         0 1px 2px rgba(11,11,11,0.06), 0 4px 16px rgba(11,11,11,0.05);
+}
+
+.da-widget[data-theme="dark"] {
+  --surface-1:      #1a1a19;
+  --surface-2:      #0d0d0d;
+  --surface-hair:   #232321;
+  --ink-1:          #ffffff;
+  --ink-2:          #c3c2b7;
+  --ink-3:          #898781;
+  --line:           #2c2c2a;
+  --axis:           #383835;
+  --border:         rgba(255,255,255,0.10);
+  --series-aqua:    #199e70;
+  --series-amber:   #c98500;
+  --series-red:     #e66767;
+  --series-ink:     #ffffff;
+  --accent-fill:    #1a1a19;
+  --shadow:         0 1px 2px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.35);
+}
+
+.da-widget, .da-widget * { box-sizing: border-box; }
+
+.da-widget {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--surface-2);
+  color: var(--ink-1);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  margin: 20px 0 8px;
+}
+
+.da-widget .viz-root {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 22px 22px 26px;
+}
+
+/* ------------------------------------------------------------ workspace */
+.da-widget .workspace {
+  display: flex;
+  gap: 14px;
+  align-items: stretch;
+}
+
+/* vertical j slider */
+.da-widget .j-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 46px;
+  flex: 0 0 46px;
+  padding-top: 10px;
+  font-size: 0.75rem;
+  color: var(--ink-3);
+}
+.da-widget .j-col input.vertical {
+  flex: 1;
+  writing-mode: vertical-lr;
+  direction: rtl;
+  appearance: slider-vertical;
+  -webkit-appearance: slider-vertical;
+  width: 22px;
+  cursor: ns-resize;
+}
+
+/* i slider row (inside .panel-grid; spans the single column on phones) */
+.da-widget .i-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  grid-column: 1 / -1;
+  font-size: 0.75rem;
+  color: var(--ink-3);
+}
+.da-widget .i-row input { flex: 1; cursor: ew-resize; }
+
+/* inputs */
+.da-widget input[type="range"] {
+  accent-color: var(--series-aqua);
+  background: transparent;
+}
+.da-widget output {
+  font-size: 0.78rem;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  min-width: 3ch;
+  text-align: center;
+}
+
+/* ---------------------------------------------------------- panel grid */
+.da-widget .panels-wrap { flex: 1; min-width: 0; }
+
+.da-widget .panel-grid {
+  display: grid;
+  grid-template-columns: 1fr;      /* vertical stack — phone-first */
+  gap: 14px;
+}
+@media (min-width: 900px) {
+  .da-widget .panel-grid { grid-template-columns: repeat(3, 1fr); }  /* side-by-side on wide screens */
+  .da-widget .i-row { grid-column: 1 / 2; grid-row: 1; }            /* slider above the first panel */
+  .da-widget .panel { grid-row: 2; }                                /* panels in the second grid row */
+}
+
+.da-widget .panel {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 12px 10px;
+  box-shadow: var(--shadow);
+}
+
+.da-widget .panel-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-2);
+  margin: 0 0 8px;
+  letter-spacing: 0.01em;
+  text-align: center;
+}
+
+.da-widget canvas.map, .da-widget canvas.scatter {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 8px;
+  background: var(--surface-1);
+}
+
+.da-widget .colorbar { margin-top: 6px; }
+.da-widget .colorbar canvas { display: block; width: 100%; height: 10px; border-radius: 4px; }
+.da-widget .cb-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  color: var(--ink-3);
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* -------------------------------------------------------------- readout */
+.da-widget .readout {
+  margin: 18px 0 8px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-1);
+  font-size: 0.85rem;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  box-shadow: var(--shadow);
+}
+.da-widget .readout strong { color: var(--ink-1); font-weight: 650; }
+
+/* --------------------------------------------------------------- legend */
+.da-widget .legend {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+  font-size: 0.78rem;
+  color: var(--ink-2);
+}
+.da-widget .legend li { display: flex; align-items: center; gap: 7px; }
+.da-widget .mark { display: inline-block; width: 12px; height: 12px; flex: 0 0 12px; }
+.da-widget .mark.obs {
+  border: 2px solid var(--series-red);
+  background: var(--accent-fill);
+  border-radius: 50%;
+}
+.da-widget .mark.state {
+  border: 2px solid var(--series-ink);
+  background: var(--accent-fill);
+  border-radius: 2px;
+}
+.da-widget .mark.dot { border-radius: 50%; background: var(--series-aqua); }
+.da-widget .mark.amber { height: 2px; width: 16px; background: var(--series-amber); }
+.da-widget .mark.ink  { height: 2px; width: 16px; background: var(--series-ink); }
+
+/* --------------------------------------------------------------- tooltip */
+.da-widget #tooltip {
+  position: fixed;
+  pointer-events: none;
+  display: none;
+  background: var(--surface-1);
+  color: var(--ink-1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  box-shadow: var(--shadow);
+  z-index: 20;
+  white-space: nowrap;
+}
+.da-widget #tooltip strong { color: var(--ink-1); }
+
+/* ------------------------------------------------------------- responsive */
+@media (max-width: 900px) {
+  /* panels keep the base 1-column vertical stack on phones */
+  .da-widget .workspace { flex-direction: column; }
+  .da-widget .j-col { flex-direction: row; width: auto; padding-top: 0; }
+  .da-widget .j-col input.vertical {
+    writing-mode: horizontal-tb;
+    direction: ltr;
+    -webkit-appearance: auto;
+    appearance: auto;
+    width: 100%;
+  }
+}

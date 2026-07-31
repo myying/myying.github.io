@@ -83,7 +83,6 @@
 .da-widget .j-col input.vertical {
   flex: 1;
   writing-mode: vertical-lr;
-  direction: rtl;
   appearance: slider-vertical;
   -webkit-appearance: slider-vertical;
   width: 22px;
@@ -148,7 +147,6 @@
 .da-widget canvas.map, .da-widget canvas.scatter {
   display: block;
   width: 100%;
-  height: auto;          /* override intrinsic 300×150 — aspect-ratio keeps it square */
   aspect-ratio: 1 / 1;
   border-radius: 8px;
   background: var(--surface-1);

@@ -57,8 +57,10 @@ physics and data generation). The copies here are adapted for embedding.
   `.da-widget` wrapper and its own `widgets/<name>/` asset folder (give the
   widget's element ids a unique prefix if a page will ever host more than one
   widget, since `app.js` looks them up by id).
-- Update the `.series-nav` block at the top of every part page so the series
-  index stays in sync (mark the current part with class `current`).
-- Each widget part page lives in its own `pages/software/<year>.<name>/`
+- Update the `.widget-nav` block at the top of every part page: point the
+  `.nav-home` link at `courses.html`, set the part title in `.nav-current`,
+  and replace the disabled prev/next `.nav-arrow` spans with `<a href>` links
+  once the neighbouring part exists.
+- Each widget part page lives in its own `pages/courses/<year>.<name>/`
   directory with `title` + `abstract.html`; re-run `compile.sh` afterwards to
-  regenerate the `software.html` listing.
+  regenerate the `courses.html` listing.

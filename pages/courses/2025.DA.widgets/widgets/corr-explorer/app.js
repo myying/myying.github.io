@@ -100,17 +100,34 @@
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
   // ------------------------------------------------------ canvas utils
+  const ctxNullWarned = new Set();
+  function warnCtxNull(id) {
+    if (!ctxNullWarned.has(id)) {
+      ctxNullWarned.add(id);
+      console.warn(`[corr-explorer] canvas "${id}" has no 2d context ` +
+        "(device canvas memory limit?) — skipping draw until it recovers");
+    }
+  }
+
   function fitCanvas(cv) {
     const rect = cv.getBoundingClientRect();
     // Bail out if the canvas isn't laid out yet (first paint on a phone page,
     // or while the widget is below the fold): drawing into a zero-sized canvas
     // draws everything off-screen and a later redraw fixes it.
     if (!(rect.width > 0.5) || !(rect.height > 0.5)) return null;
-    const dpr = window.devicePixelRatio || 1;
+    // Cap devicePixelRatio at 2: on high-DPI phones (3x, 3.5x) three canvases
+    // each multiplied by dpr can exhaust the WebView's canvas memory, after
+    // which getContext("2d") returns null and the panel silently stays blank.
+    // 2x is plenty sharp for these line/scatter plots.
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const w = Math.max(1, Math.round(rect.width * dpr));
     const h = Math.max(1, Math.round(rect.height * dpr));
     if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
     const ctx = cv.getContext("2d");
+    if (!ctx) {                 // context lost / out of memory: skip this frame;
+      warnCtxNull(cv.id);       // a later resize/theme render may recover.
+      return null;
+    }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, rect.width, rect.height);
     return { ctx, w: rect.width, h: rect.height };
@@ -184,8 +201,12 @@
     const fit = fitCanvas(cv);
     if (!fit) return;
     const { ctx, w, h } = fit;
+    // w is the CSS width, which can be fractional (e.g. 268.31 on a high-DPI
+    // phone): without clamping, the last iteration reads lut[256] and throws,
+    // aborting render() before the scatter panel is ever drawn. Clamp the LUT
+    // index to [0,255].
     for (let k = 0; k < w; k++) {
-      const c = lut[Math.round((k / (w - 1)) * 255)];
+      const c = lut[Math.max(0, Math.min(255, Math.round((k / (w - 1)) * 255)))];
       ctx.fillStyle = `rgb(${c[0] | 0},${c[1] | 0},${c[2] | 0})`;
       ctx.fillRect(k, 0, 1, h);
     }
@@ -235,12 +256,15 @@
     ctx.fillText(`State T (K)`, 0, 0);
     ctx.restore();
 
-    // ensemble points (aqua)
+    // ensemble points (aqua); skip any non-finite member so a single bad value
+    // can't silently break the rest of the panel
     ctx.fillStyle = cssVar("--series-aqua");
     for (let m = 0; m < nens; m++) {
+      const x = X(obsEns[m]), y = Y(ensVals[m]);
+      if (!isFinite(x) || !isFinite(y)) continue;
       ctx.globalAlpha = 0.75;
       ctx.beginPath();
-      ctx.arc(X(obsEns[m]), Y(ensVals[m]), 2.4, 0, Math.PI * 2);
+      ctx.arc(x, y, 2.4, 0, Math.PI * 2);
       ctx.fill();
     }
     ctx.globalAlpha = 1;
@@ -276,8 +300,11 @@
     drawColorbar($("cb-corr"), -1, 1);
 
     // scatter panel
-    const r = corrT[sj][si];
-    drawScatter($("scat"), ensT[sj][si], truthT[sj][si], r, "T");
+    let r = corrT[sj][si];
+    if (!isFinite(r)) r = 0;      // defensive: a degenerate correlation (0/0)
+                                  // would otherwise print "r = NaN"
+    const ensVals = ensT[sj][si];
+    drawScatter($("scat"), ensVals || [], truthT[sj][si], r, "T");
     $("t-scat").textContent = "r = " + r.toFixed(2);
 
     $("readout").innerHTML =

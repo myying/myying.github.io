@@ -35,27 +35,60 @@
   #widget-page h3 { font-size: 17px; margin: 28px 0 8px; }
   #widget-page code { overflow-wrap: break-word; }
   .widget-nav {
-    display: flex; align-items: center; gap: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
     margin: 6px 0 18px;
     font-size: 0.85rem;
   }
-  .widget-nav .nav-back { color: var(--accent-link); text-decoration: none; border-bottom: none; white-space: nowrap; }
-  /* on phones the long series title truncates instead of widening the page */
-  .widget-nav .nav-current { flex: 1; font-weight: 600; color: var(--text); white-space: nowrap; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-  .widget-nav .nav-arrow { color: var(--accent-link); text-decoration: none; border-bottom: none; padding: 2px 6px; font-size: 1rem; }
+  /* "Courses" home tab, far left */
+  .widget-nav .nav-home {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--accent-link);
+    text-decoration: none;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .widget-nav .nav-home:hover { border-color: var(--accent); }
+  /* prev/next arrows grouped around the highlighted current-part title */
+  .widget-nav .nav-page {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    margin: 0 auto;
+  }
+  .widget-nav .nav-arrow {
+    color: var(--accent-link);
+    text-decoration: none;
+    border-bottom: none;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 2px 4px;
+  }
   .widget-nav .nav-disabled { color: var(--text-muted); pointer-events: none; }
+  /* current part shown as an active (red) tab; truncates on narrow phones */
+  .widget-nav .nav-current {
+    white-space: nowrap;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-weight: 600;
+  }
   .hint { font-size: 0.85rem; color: var(--text-muted); margin: 6px 0 0; }
-  .keyidea { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 6px 18px 10px; }
-  .keyidea h3 { margin-top: 18px; }
-  /* wide display equations scroll inside their own box instead of widening
-     the page (the .page is inline-block, so any wide child stretches it).
-     NOTE: no overflow-x:hidden on html/body — on iOS Safari that turns body
-     into a scroll container and the bottom of long pages becomes
-     unreachable, which hid the last panel. */
-  .formula { overflow-x: auto; }
   @media (max-width: 560px) {
     #widget-page { padding-left: 14px; padding-right: 14px; }
-    .keyidea { padding-left: 12px; padding-right: 12px; }
   }
   /* prevent slight horizontal overflow from vertical scrollbar width on
      some mobile engines (html-only — not body, to avoid iOS scroll break) */
@@ -72,9 +105,12 @@
     <div class="page" id="widget-page">
 
       <nav class="widget-nav">
-        <a href="../../../courses.html" class="nav-back">&#8592; Courses</a>
-        <span class="nav-current">Part 1 &#183; Observation–State Correlation Explorer</span>
-        <span class="nav-arrow nav-disabled">&#8594;</span>
+        <a href="../../../courses.html" class="nav-home">&#8592; Courses</a>
+        <span class="nav-page">
+          <span class="nav-arrow nav-disabled" aria-hidden="true">&#8592;</span>
+          <span class="nav-current">Part 1 &#183; Observation–State Correlation Explorer</span>
+          <span class="nav-arrow nav-disabled" aria-hidden="true">&#8594;</span>
+        </span>
       </nav>
 
       <h3>Observation–State Correlation Explorer</h3>
@@ -151,35 +187,6 @@
         value, the ink line the truth. Move the marker across the dipole and watch the slope — and
         the reported <code>r</code> — flip sign.
       </p>
-
-      <div class="keyidea">
-        <h3>Key idea: correlation is what the analysis uses</h3>
-        <p>
-          Every covariance-based assimilation method (EnKF, 3D-Var, &#8230;) needs the same quantity
-          this widget visualises: the correlation between each observation and each state variable.
-          The ensemble estimate, computed with the same <code>ens_corr</code> formula as
-          <code>vort2d/diagnostics.py</code> in the NEDAS tutorials, is
-        </p>
-        <p class="formula" style="text-align:center">
-          \[ r = \frac{\sum_{m=1}^{M} (x_m - \bar{x})(y_m - \bar{y})}
-                       {\sqrt{\sum_{m=1}^{M} (x_m - \bar{x})^2}\;\sqrt{\sum_{m=1}^{M} (y_m - \bar{y})^2}}, \]
-        </p>
-        <p>
-          with \(x_m\) the observation-prior ensemble and \(y_m\) the state ensemble at the marker.
-          In the analysis step the increment at a grid point is proportional to its correlation with
-          the observation times the innovation (observed &#8722; prior),
-        </p>
-        <p class="formula" style="text-align:center">
-          \[ \Delta T(i,j) \;\propto\; r(i,j)\cdot\big(y^{o} - \bar{y}\big). \]
-        </p>
-        <p>
-          Points on the positive lobe warm up when the observation is warm and points on the negative
-          lobe cool down — the dipole tells the analysis to <em>move the warm blob toward the
-          observation</em> rather than merely smear the warmth around it. That is the microscopic
-          picture behind the correlation maps used throughout the
-          <a href="https://github.com/myying/NEDAS_tutorials">NEDAS tutorials</a>.
-        </p>
-      </div>
 
     </div>
   </div>

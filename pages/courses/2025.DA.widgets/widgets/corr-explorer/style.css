@@ -152,6 +152,9 @@
   border-radius: 8px;
   background: var(--surface-1);
 }
+/* the maps are draggable: stop the browser from turning a touch drag into
+   page scrolling (tap-to-place keeps working) */
+.da-widget canvas.map { touch-action: none; }
 
 .da-widget .colorbar { margin-top: 6px; }
 .da-widget .colorbar canvas { display: block; width: 100%; height: 10px; border-radius: 4px; }

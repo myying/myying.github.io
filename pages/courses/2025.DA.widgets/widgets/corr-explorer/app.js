@@ -314,9 +314,10 @@
     };
     cv.addEventListener("pointerdown", (e) => { dragging = true; move(e); cv.setPointerCapture(e.pointerId); });
     cv.addEventListener("pointermove", (e) => { if (dragging) move(e); });
-    cv.addEventListener("pointerup", () => { dragging = false; });
-    // hover tooltip
+    cv.addEventListener("pointerup", () => { dragging = false; hideTooltip(); });
+    // hover tooltip (mouse only — on touch it would linger after the drag)
     cv.addEventListener("pointermove", (e) => {
+      if (e.pointerType !== "mouse") return;
       const { i, j } = mapPosToIJ(cv, e.clientX, e.clientY);
       showTooltip(e.clientX, e.clientY, i, j);
     });

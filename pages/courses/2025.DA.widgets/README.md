@@ -42,6 +42,9 @@ physics and data generation). The copies here are adapted for embedding.
    - the light/dark toggle button is dropped: the theme follows the browser's
      `prefers-color-scheme` setting automatically (upstream still has the
      button); the `nens-label` lookup is guarded for the same reason.
+   - the maps get `touch-action: none` (scoped CSS) and the tooltip is
+     mouse-only + hidden on drag end, so touch dragging moves the marker
+     instead of scrolling the page.
    The embedded page also omits the widget's hero and footnote text, which the
    article page itself supplies.
 4. `data.js` is copied from `generate_data.py` output (deterministic, seed 42).

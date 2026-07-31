@@ -28,9 +28,10 @@
 <style>
   /* This article hosts an interactive widget, so the standard 800 px page
      column is widened; everything else reuses the site stylesheet. */
-  #widget-page { max-width: 1180px; }
+  #widget-page { max-width: min(1180px, 100%); }
   #widget-page h3 { font-size: 17px; margin: 28px 0 8px; }
   #widget-page .intro { color: var(--text-muted); }
+  #widget-page code { overflow-wrap: break-word; }
   .backlink { font-size: 0.85rem; margin-bottom: 4px; }
   .series-nav {
     display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
@@ -47,6 +48,14 @@
   .hint { font-size: 0.85rem; color: var(--text-muted); margin: 6px 0 0; }
   .keyidea { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 6px 18px 10px; }
   .keyidea h3 { margin-top: 18px; }
+  /* wide display equations scroll inside their own box instead of widening
+     the page (the .page is inline-block, so any wide child stretches it) */
+  html, body { overflow-x: hidden; }
+  .formula { overflow-x: auto; }
+  @media (max-width: 560px) {
+    #widget-page { padding-left: 14px; padding-right: 14px; }
+    .keyidea { padding-left: 12px; padding-right: 12px; }
+  }
 </style>
 </head>
 
@@ -172,7 +181,7 @@
           The ensemble estimate, computed with the same <code>ens_corr</code> formula as
           <code>vort2d/diagnostics.py</code> in the NEDAS tutorials, is
         </p>
-        <p style="text-align:center">
+        <p class="formula" style="text-align:center">
           \[ r = \frac{\sum_{m=1}^{M} (x_m - \bar{x})(y_m - \bar{y})}
                        {\sqrt{\sum_{m=1}^{M} (x_m - \bar{x})^2}\;\sqrt{\sum_{m=1}^{M} (y_m - \bar{y})^2}}, \]
         </p>
@@ -181,7 +190,7 @@
           In the analysis step the increment at a grid point is proportional to its correlation with
           the observation times the innovation (observed &#8722; prior),
         </p>
-        <p style="text-align:center">
+        <p class="formula" style="text-align:center">
           \[ \Delta T(i,j) \;\propto\; r(i,j)\cdot\big(y^{o} - \bar{y}\big). \]
         </p>
         <p>

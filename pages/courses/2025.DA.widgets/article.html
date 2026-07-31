@@ -30,21 +30,16 @@
      column is widened; everything else reuses the site stylesheet. */
   #widget-page { max-width: 1180px; }
   #widget-page h3 { font-size: 17px; margin: 28px 0 8px; }
-  #widget-page .intro { color: var(--text-muted); }
   #widget-page code { overflow-wrap: break-word; }
-  .backlink { font-size: 0.85rem; margin-bottom: 4px; }
-  .series-nav {
-    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
-    margin: 14px 0 4px;
+  .widget-nav {
+    display: flex; align-items: center; gap: 14px;
+    margin: 6px 0 18px;
+    font-size: 0.85rem;
   }
-  .series-nav .label { font-size: 0.8rem; color: var(--text-muted); margin-right: 4px; }
-  .series-nav .part {
-    font-size: 0.8rem; padding: 4px 12px; border-radius: 999px;
-    border: 1px solid var(--border); background: var(--surface); color: var(--text-muted);
-  }
-  .series-nav .part.current {
-    background: var(--accent); color: #fff; border-color: transparent; font-weight: 600;
-  }
+  .widget-nav .nav-back { color: var(--accent-link); text-decoration: none; border-bottom: none; white-space: nowrap; }
+  .widget-nav .nav-current { flex: 1; font-weight: 600; color: var(--text); white-space: nowrap; }
+  .widget-nav .nav-arrow { color: var(--accent-link); text-decoration: none; border-bottom: none; padding: 2px 6px; font-size: 1rem; }
+  .widget-nav .nav-disabled { color: var(--text-muted); pointer-events: none; }
   .hint { font-size: 0.85rem; color: var(--text-muted); margin: 6px 0 0; }
   .keyidea { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 6px 18px 10px; }
   .keyidea h3 { margin-top: 18px; }
@@ -58,6 +53,9 @@
     #widget-page { padding-left: 14px; padding-right: 14px; }
     .keyidea { padding-left: 12px; padding-right: 12px; }
   }
+  /* prevent slight horizontal overflow from vertical scrollbar width on
+     some mobile engines (html-only — not body, to avoid iOS scroll break) */
+  html { overflow-x: hidden; }
 </style>
 </head>
 
@@ -69,23 +67,13 @@
   <div class="container">
     <div class="page" id="widget-page">
 
-      <p class="backlink"><a href="../../../courses.html">&#8592; Courses</a></p>
+      <nav class="widget-nav">
+        <a href="../../../courses.html" class="nav-back">&#8592; Courses</a>
+        <span class="nav-current">Part 1 &#183; Observation–State Correlation Explorer</span>
+        <span class="nav-arrow nav-disabled">&#8594;</span>
+      </nav>
 
-      <h2>Data Assimilation Interactive Tutorials</h2>
-      <p class="intro">
-        A series of small interactive widgets that demonstrate the core ideas of
-        ensemble data assimilation. Each widget is a web port of a section of the
-        <a href="https://github.com/myying/NEDAS_tutorials">NEDAS tutorial notebooks</a>,
-        reduced to its essential idea and made explorable.
-      </p>
-
-      <div class="series-nav">
-        <span class="label">Series:</span>
-        <span class="part current">Part 1 &#183; Observation&#8211;State Correlation</span>
-        <span class="part">more parts in preparation</span>
-      </div>
-
-      <h3>Part 1 &#183; Observation&#8211;State Correlation Explorer</h3>
+      <h3>Observation–State Correlation Explorer</h3>
       <p>
         A single <strong>temperature</strong> observation (red circle) is assimilated from a
         smooth 2-D field. The ensemble gives an <em>estimate</em> of how that observation
@@ -94,8 +82,7 @@
         unmistakable. The numbered annotations below explain what each panel shows.
       </p>
       <p class="hint">
-        <strong>Try it:</strong> click or drag anywhere on a map, or use the i / j sliders,
-        to move the black state marker — the correlation map and the scatter respond live.
+        <strong>Try it:</strong> click or drag anywhere on a map to move the black state marker — the correlation map and the scatter respond live.
       </p>
 
       <!-- ================= Observation–State Correlation Explorer ============= -->
@@ -104,24 +91,10 @@
         <main class="viz-root">
 
           <div class="workspace">
-            <!-- vertical j slider column -->
-            <div class="j-col">
-              <label for="jslider">j</label>
-              <input id="jslider" type="range" class="vertical" aria-label="state row j">
-              <output id="j-val" for="jslider"></output>
-            </div>
 
             <div class="panels-wrap">
-              <!-- three panels: truth | correlation | scatter. The i slider
-                   lives in column 1 of the grid so it lines up with the first
-                   panel. Panel explanations live in the "Reading the panels"
-                   section below the widget. -->
+              <!-- three panels: truth | correlation | scatter. -->
               <div class="panel-grid">
-                <div class="i-row">
-                  <label for="islider">i</label>
-                  <input id="islider" type="range" aria-label="state column i">
-                  <output id="i-val" for="islider"></output>
-                </div>
                 <section class="panel">
                   <h2 class="panel-title">Truth T</h2>
                   <canvas class="map" id="map-truth"></canvas>

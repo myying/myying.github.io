@@ -96,7 +96,7 @@
   const srange = Math.ceil(smax * 1.05 / 5) * 5;
 
   // ----------------------------------------------------------- state
-  let si = 9, sj = 26;                  // (i, j) of the state marker (far-side anti-correlated lobe)
+  let si = 33, sj = 18;                  // (i, j) of the state marker
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
   // ------------------------------------------------------ canvas utils
@@ -272,11 +272,6 @@
     drawScatter($("scat"), ensT[sj][si], truthT[sj][si], r, "T");
     $("t-scat").textContent = "r = " + r.toFixed(2);
 
-    // sliders + readout
-    $("islider").value = si;
-    $("jslider").value = sj;
-    $("i-val").textContent = si;
-    $("j-val").textContent = sj;
     $("readout").innerHTML =
       `State <strong>(i, j) = (${si}, ${sj})</strong> · ` +
       `truth T = <strong>${truthT[sj][si].toFixed(1)}</strong> K · ` +
@@ -350,18 +345,12 @@
   }
   function hideTooltip() { tip.style.display = "none"; }
 
-  $("islider").addEventListener("input", (e) => setMarker(parseInt(e.target.value, 10), sj, true));
-  $("jslider").addEventListener("input", (e) => setMarker(si, parseInt(e.target.value, 10), true));
-
+  // ----------------------------------------------------------------- init
+  const nensEl = $("nens-label");   // optional: shown in the standalone hero tag
+  if (nensEl) nensEl.textContent = nens;
   window.addEventListener("resize", () => render());
   // re-render when the embedded widget's box changes size (e.g. the site page
   // reflows while fonts/images load); a no-op in the standalone layout.
   if (window.ResizeObserver) new ResizeObserver(() => render()).observe(root);
-
-  // ----------------------------------------------------------------- init
-  const nensEl = $("nens-label");   // optional: shown in the standalone hero tag
-  if (nensEl) nensEl.textContent = nens;
-  $("islider").min = 0; $("islider").max = kx;
-  $("jslider").min = 0; $("jslider").max = ky;
   setTheme(theme);   // sets data-theme + first render
 })();

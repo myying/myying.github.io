@@ -27,8 +27,10 @@
 
 <style>
   /* This article hosts an interactive widget, so the standard 800 px page
-     column is widened; everything else reuses the site stylesheet. */
-  #widget-page { max-width: 1180px; }
+     column is widened; everything else reuses the site stylesheet.
+     display:block (instead of the site's inline-block shrink-to-fit) so the
+     page cannot be forced wider than the viewport by its content on phones. */
+  #widget-page { display: block; max-width: 1180px; margin: 0 auto; }
   #widget-page h3 { font-size: 17px; margin: 28px 0 8px; }
   #widget-page code { overflow-wrap: break-word; }
   .widget-nav {
@@ -37,7 +39,8 @@
     font-size: 0.85rem;
   }
   .widget-nav .nav-back { color: var(--accent-link); text-decoration: none; border-bottom: none; white-space: nowrap; }
-  .widget-nav .nav-current { flex: 1; font-weight: 600; color: var(--text); white-space: nowrap; }
+  /* on phones the long series title truncates instead of widening the page */
+  .widget-nav .nav-current { flex: 1; font-weight: 600; color: var(--text); white-space: nowrap; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
   .widget-nav .nav-arrow { color: var(--accent-link); text-decoration: none; border-bottom: none; padding: 2px 6px; font-size: 1rem; }
   .widget-nav .nav-disabled { color: var(--text-muted); pointer-events: none; }
   .hint { font-size: 0.85rem; color: var(--text-muted); margin: 6px 0 0; }

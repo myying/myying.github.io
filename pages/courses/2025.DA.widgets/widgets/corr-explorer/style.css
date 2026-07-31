@@ -31,11 +31,12 @@
   --ink-1:          #ffffff;
   --ink-2:          #c3c2b7;
   --ink-3:          #898781;
-  --line:           #2c2c2a;
-  --axis:           #383835;
+  --line:           #3f3f3c;    /* hairline grid — brightened so the scatter
+                                   panel isn't an empty-looking dark square */
+  --axis:           #4d4d49;
   --border:         rgba(255,255,255,0.10);
-  --series-aqua:    #199e70;
-  --series-amber:   #c98500;
+  --series-aqua:    #2bcc8b;    /* brighter so the ensemble dots read on dark */
+  --series-amber:   #e0a61d;    /* brighter amber line */
   --series-red:     #e66767;
   --series-ink:     #ffffff;
   --accent-fill:    #1a1a19;
@@ -71,7 +72,9 @@
 /* ---------------------------------------------------------- panel grid */
 .da-widget .panel-grid {
   display: grid;
-  grid-template-columns: 1fr;      /* vertical stack — phone-first */
+  grid-template-columns: minmax(0, 1fr);   /* vertical stack — phone-first;
+       minmax(0,1fr) so a 1fr column can shrink below its content's intrinsic
+       width (canvases default to 300 px), letting the widget fit the viewport */
   gap: 14px;
 }
 /* 2-column: panels 1 &amp; 2 side by side, panel 3 same width centered below.
@@ -89,11 +92,11 @@
 }
 /* 3-column: all three side by side */
 @media (min-width: 900px) {
-  .da-widget .panel-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
-  .da-widget .panel { flex: initial; grid-row: 2; }
+  .da-widget .panel-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 .da-widget .panel {
+  min-width: 0;                 /* let the panel shrink on narrow screens */
   background: var(--surface-1);
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -113,6 +116,7 @@
 .da-widget canvas.map, .da-widget canvas.scatter {
   display: block;
   width: 100%;
+  min-width: 0;                 /* shrink below the 300 px intrinsic width */
   aspect-ratio: 1 / 1;
   border-radius: 8px;
   background: var(--surface-1);

@@ -102,6 +102,10 @@
   // ------------------------------------------------------ canvas utils
   function fitCanvas(cv) {
     const rect = cv.getBoundingClientRect();
+    // Bail out if the canvas isn't laid out yet (first paint on a phone page,
+    // or while the widget is below the fold): drawing into a zero-sized canvas
+    // draws everything off-screen and a later redraw fixes it.
+    if (!(rect.width > 0.5) || !(rect.height > 0.5)) return null;
     const dpr = window.devicePixelRatio || 1;
     const w = Math.max(1, Math.round(rect.width * dpr));
     const h = Math.max(1, Math.round(rect.height * dpr));
@@ -177,7 +181,9 @@
   }
 
   function drawColorbar(cv, lo, hi) {
-    const { ctx, w, h } = fitCanvas(cv);
+    const fit = fitCanvas(cv);
+    if (!fit) return;
+    const { ctx, w, h } = fit;
     for (let k = 0; k < w; k++) {
       const c = lut[Math.round((k / (w - 1)) * 255)];
       ctx.fillStyle = `rgb(${c[0] | 0},${c[1] | 0},${c[2] | 0})`;
@@ -194,7 +200,9 @@
 
   // ------------------------------------------------------------ scatter
   function drawScatter(cv, ensVals, truthVal, r, vname) {
-    const { ctx, w, h } = fitCanvas(cv);
+    const fit = fitCanvas(cv);
+    if (!fit) return;
+    const { ctx, w, h } = fit;
     const mL = 40, mR = 12, mT = 10, mB = 30;
     const pw = w - mL - mR, ph = h - mT - mB;
     const X = (v) => mL + ((v + srange) / (2 * srange)) * pw;
@@ -279,10 +287,11 @@
   }
 
   function drawMap(cv, field, lo, hi) {
-    const { ctx, w, h } = fitCanvas(cv);
-    drawField(ctx, w, h, field, lo, hi);
-    drawMarkers(ctx, w, h);
-    drawMapAxis(ctx, w, h);
+    const fit = fitCanvas(cv);
+    if (!fit) return;
+    drawField(fit.ctx, fit.w, fit.h, field, lo, hi);
+    drawMarkers(fit.ctx, fit.w, fit.h);
+    drawMapAxis(fit.ctx, fit.w, fit.h);
   }
 
   // --------------------------------------------------------- interaction
@@ -349,8 +358,20 @@
   const nensEl = $("nens-label");   // optional: shown in the standalone hero tag
   if (nensEl) nensEl.textContent = nens;
   window.addEventListener("resize", () => render());
-  // re-render when the embedded widget's box changes size (e.g. the site page
+  // Re-render when the embedded widget's box changes size (e.g. the site page
   // reflows while fonts/images load); a no-op in the standalone layout.
-  if (window.ResizeObserver) new ResizeObserver(() => render()).observe(root);
+  if (window.ResizeObserver) {
+    const ro = new ResizeObserver(() => render());
+    ro.observe(root);
+    // Also observe each canvas: a phone browser may lay the canvases out only
+    // after the first render (below-the-fold first paint), and only a size
+    // change on the canvas itself reliably triggers the redraw.
+    for (const id of ["map-truth", "map-corr", "scat"]) ro.observe($(id));
+  }
+  // On some mobile browsers the first render can run before the stylesheet
+  // layout settles (canvases still 0-sized); try again once more on the next
+  // frame and after load so the plot isn't left blank.
+  requestAnimationFrame(render);
+  if (document.readyState !== "complete") addEventListener("load", render);
   setTheme(theme);   // sets data-theme + first render
 })();

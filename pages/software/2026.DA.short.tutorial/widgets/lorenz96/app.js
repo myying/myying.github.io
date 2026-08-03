@@ -30,7 +30,7 @@
   const nensSlider = $("lz-nens"), nensVal = $("lz-nens-val");
   const rerunBtn = $("lz-rerun");
   const showMembersToggle = $("lz-show-members");
-  const readout = $("lz-readout");
+
 
   /* ------------------------------------------------------------- theme */
   const darkMq = window.matchMedia("(prefers-color-scheme: dark)");
@@ -388,17 +388,11 @@
   }
 
   function renderReadout() {
-    readout.innerHTML =
-      "<div><strong>" + state.nens + "</strong>-member ensemble, init &#963; = <strong>" +
-      state.sigma.toExponential(1) + "</strong> on all " + N + " variables (F = " + F + ").</div>" +
-      "<div>Panel (a): the thick contour is the truth, the thin colored contours one per member &mdash; " +
-      "both at x&#772;<sub>i</sub> &#8722; clim<sub>i</sub> = " + contourLvl.toFixed(0) +
-      ". They fan out as the forecast decorrelates.</div>" +
-      "<div>Panel (b): error doubles every &#8776; <strong>" +
-      (Number.isFinite(doublingDays) ? doublingDays.toFixed(1) : "&mdash;") +
-      " days</strong>, saturating at RMSE &#8776; <strong>" + sat.toFixed(2) +
-      "</strong> (limit &#8776; <strong>" + (Number.isFinite(limitTu) ? (limitTu * 5).toFixed(1) : "&mdash;") +
-      " days</strong>); spread tracks error.</div>";
+    const set = (id, txt) => { const el = $(id); if (el) el.innerHTML = txt; };
+    set("lz-lvl", contourLvl.toFixed(0));
+    set("lz-double", Number.isFinite(doublingDays) ? doublingDays.toFixed(1) : "&mdash;");
+    set("lz-sat", sat.toFixed(2));
+    set("lz-limit", Number.isFinite(limitTu) ? (limitTu * 5).toFixed(1) : "&mdash;");
   }
 
   /* ------------------------------------------------------------- events */

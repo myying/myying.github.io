@@ -165,24 +165,6 @@
 }
 .da-widget .ctl-btn:hover { border-color: var(--series-aqua); color: var(--series-aqua); }
 
-/* -------------------------------------------------------------- readout */
-.da-widget .readout {
-  margin: 16px 0 8px;
-  padding: 10px 14px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--surface-1);
-  font-size: 0.85rem;
-  color: var(--ink-2);
-  font-variant-numeric: tabular-nums;
-  box-shadow: var(--shadow);
-}
-.da-widget .side .readout { margin: 0; flex: none; }
-.da-widget .readout div { margin-top: 5px; }
-.da-widget .readout div:first-child { margin-top: 0; }
-.da-widget .readout strong { color: var(--ink-1); font-weight: 650; }
-.da-widget .readout .ro-note { font-size: 0.78rem; }
-
 /* --------------------------------------------------------------- legend */
 .da-widget .legend {
   list-style: none;
@@ -207,6 +189,17 @@
   color: var(--ink-3);
   margin-bottom: 2px;
 }
+.da-widget .legend li.legend-note {
+  display: block;
+  margin-top: 5px;
+  padding-top: 7px;
+  border-top: 1px solid var(--border);
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+.da-widget .legend li.legend-note strong { color: var(--ink-1); font-weight: 650; }
 .da-widget .mark { display: inline-block; flex: 0 0 auto; margin-top: 3px; }
 .da-widget .mark.member  { height: 2px; width: 18px;
   background: linear-gradient(90deg, #1f77b4, #ff7f0e, #2ca02c, #d62728, #9467bd, #17becf);

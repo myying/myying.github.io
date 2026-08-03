@@ -172,6 +172,17 @@ const T = {
   border:  getComputedStyle(document.documentElement).getPropertyValue('--border').trim() || '#e6e8ec',
   surface: getComputedStyle(document.documentElement).getPropertyValue('--surface').trim() || '#ffffff'
 };
+// overlay colours that adapt to the theme: the plot strokes that used to be a fixed
+// white/black (isotach ring, labels, track casings, centre marker) now follow the
+// panel surface so they read in both light and dark mode.
+(function () {
+  const h = T.surface.replace('#', '');
+  const r = parseInt(h.slice(0, 2), 16), g = parseInt(h.slice(2, 4), 16), b = parseInt(h.slice(4, 6), 16);
+  T.dark = (0.299 * r + 0.587 * g + 0.114 * b) / 255 < 0.55;
+  T.contrast     = T.dark ? '#ffffff' : '#17191d';
+  T.contrastSoft = T.dark ? 'rgba(255,255,255,0.88)' : 'rgba(23,25,29,0.8)';
+  T.contrastRing = T.dark ? '#0b0d10' : '#ffffff';
+})();
 T.grid = T.border;
 
 /* ------------------------------------------------------------------ */
@@ -206,7 +217,7 @@ function hexStops() {
    wind products (e.g. NCL wind palettes, H*Wind-style displays): the 15 m/s
    isotach sits at the cyan->teal transition, so the white size ring reads
    clearly against it, and intensity differences between realizations pop. */
-const WIND     = hexStops('f5f5f5','d8eef2','b2e2eb','78ccda','40b0c4','369884','56a84a',
+const WIND     = hexStops(T.dark ? 'f5f5f5' : 'e1e6ea','d8eef2','b2e2eb','78ccda','40b0c4','369884','56a84a',
                           '8ac42a','c4d620','f0d219','f7ac18','f47c16','e8441f','c81e2c','961c34');
 const RDBU     = hexStops('2166ac','4393c3','92c5de','d1e5f0','f7f7f7','fddbc7','f4a582','d6604d','b2182b');
 function makeLUT(stops) {
@@ -590,7 +601,7 @@ function renderTrack() {
     c.stroke(); c.shadowBlur = 0;
     // current-time marker
     const cx = px(trackXU[tIdx*nens+s] * 20), cy = py(trackY[tIdx*nens+s] * 20);
-    c.fillStyle = T.surface; c.strokeStyle = '#000'; c.lineWidth = 1.4;
+    c.fillStyle = T.surface; c.strokeStyle = T.contrast; c.lineWidth = 1.4;
     c.beginPath(); c.arc(cx, cy, 5, 0, 6.2832); c.fill(); c.stroke();
     c.strokeStyle = col; c.lineWidth = 1.6;
     c.beginPath(); c.arc(cx, cy, 5, 0, 6.2832); c.stroke();
@@ -854,7 +865,7 @@ function renderWind(m, step, si) {
   const segs = marchingSquares(w, size, size, 15);   // the 15 m/s isotach = vortex size
   c.save();
   c.beginPath(); c.rect(x0, y0, plotW, plotH); c.clip();
-  c.strokeStyle = '#ffffff'; c.lineWidth = 1.6;
+  c.strokeStyle = T.contrast; c.lineWidth = 1.6;
   c.beginPath();
   for (const [ax, ay, bx, by] of segs) {
     c.moveTo(x0 + ax * cell, y0 + (ay + delta) * cell);
@@ -867,7 +878,7 @@ function renderWind(m, step, si) {
       const y = Math.min(ay, by);
       if (y < ty) { ty = y; tx = (ax + bx) / 2; }
     }
-    c.fillStyle = '#ffffff'; c.font = 'bold 9px system-ui, sans-serif'; c.textAlign = 'center';
+    c.fillStyle = T.contrast; c.font = 'bold 9px system-ui, sans-serif'; c.textAlign = 'center';
     c.fillText('15 m/s', x0 + tx * cell, Math.max(y0 + 8, y0 + (ty - 0.5 + delta) * cell));
   }
   // tracks inside the window, up to the current time (black = ensemble mean,
@@ -894,25 +905,25 @@ function renderWind(m, step, si) {
   const eAt = i => i;                            // ensemble-mean track indexing
   // ensemble mean (dashed muted line, same style as panel (a)'s mean track)
   c.setLineDash([4, 3]);
-  c.strokeStyle = 'rgba(255,255,255,0.85)'; c.lineWidth = 2.4;   // casing
+  c.strokeStyle = T.contrastSoft; c.lineWidth = 2.4;             // casing
   trace(meanTrackX, meanTrackY, eAt); c.stroke();
   c.strokeStyle = T.muted; c.lineWidth = 1.2;
   trace(meanTrackX, meanTrackY, eAt); c.stroke();
   c.setLineDash([]);
   // the selected realization (its panel-(a) colour, white casing)
-  c.strokeStyle = 'rgba(255,255,255,0.9)'; c.lineWidth = 3;
+  c.strokeStyle = T.contrastSoft; c.lineWidth = 3;
   trace(trackX, trackY, mAt); c.stroke();
   c.strokeStyle = memberColor(m); c.lineWidth = 1.6;
   trace(trackX, trackY, mAt); c.stroke();
 
   // vortex centre marker (centre cell of the window)
   const mcx = x0 + 16.5 * cell, mcy = y0 + plotH - 16.5 * cell;   // vortex centred
-  c.strokeStyle = '#000'; c.lineWidth = 1.4;
+  c.strokeStyle = T.contrast; c.lineWidth = 1.4;
   c.beginPath();
   c.moveTo(mcx - 6, mcy); c.lineTo(mcx + 6, mcy);
   c.moveTo(mcx, mcy - 6); c.lineTo(mcx, mcy + 6);
   c.stroke();
-  c.strokeStyle = '#fff'; c.lineWidth = 0.8;
+  c.strokeStyle = T.contrastRing; c.lineWidth = 0.8;
   c.beginPath(); c.arc(mcx, mcy, 4.5, 0, 6.2832); c.stroke();
   c.restore();
 }

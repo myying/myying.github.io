@@ -532,16 +532,6 @@ function renderTrack() {
   const px = v => R1.x0 + (v - TRACK_XMIN) / (TRACK_XMAX - TRACK_XMIN) * (R1.x1 - R1.x0);
   const py = v => R1.y0 - (v - TRACK_YMIN) / (TRACK_YMAX - TRACK_YMIN) * (R1.y0 - R1.y1);
 
-  // periodic-x boundary marks (vertical dashed lines at each domain multiple in range)
-  c.strokeStyle = T.grid; c.lineWidth = 1; c.setLineDash([3, 3]);
-  for (let b = Math.ceil(xmin / 2560) * 2560; b <= xmax + 1e-9; b += 2560) {
-    const bx = px(b);
-    c.beginPath(); c.moveTo(bx, R1.y1); c.lineTo(bx, R1.y0); c.stroke();
-  }
-  c.setLineDash([]);
-  c.fillStyle = T.muted; c.font = '9px system-ui, sans-serif'; c.textAlign = 'left';
-  c.fillText('periodic x boundary', px(Math.max(xmin, 0)) + 4, R1.y1 + 11);
-
   // mean track
   c.strokeStyle = T.muted; c.lineWidth = 1; c.setLineDash([4, 3]);
   c.beginPath(); c.moveTo(px(meanTrackX[0] * 20), py(meanTrackY[0] * 20));

@@ -178,6 +178,7 @@
 }
 .da-widget .plot-wrap .legend li { display: flex; align-items: flex-start; gap: 7px; line-height: 1.35; }
 .da-widget .plot-wrap .legend li.legend-note {
+  display: block;            /* text flows normally (the marks' li stays flex) */
   flex-basis: 100%;
   font-size: 0.74rem;
   line-height: 1.45;

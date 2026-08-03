@@ -21,8 +21,6 @@
   width: calc(100% - 24px);
   box-sizing: border-box;
 }
-.demo-intro { font-size: 15px; }
-.demo-intro code { background: var(--nav-hover); border: 1px solid var(--border); border-radius: 4px; padding: 0 4px; font-size: 13px; }
 #readout {
   text-align: center;
   font-size: 14px;
@@ -38,9 +36,6 @@
 .panel { flex: 1 1 0; min-width: 300px; max-width: 480px; }
 .panel canvas {
   width: 100%; height: auto; display: block;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
 }
 #timebar {
   display: flex; align-items: center; gap: 14px; justify-content: center;
@@ -61,7 +56,9 @@
 .demo-caption { font-size: 13px; color: var(--text-muted); text-align: justify; margin-top: 12px; }
 .demo-caption b { color: var(--text); }
 body.embed .header, body.embed .nav, body.embed .footer { display: none !important; }
-body.embed .container { margin-top: 0; padding-top: 8px; }
+body.embed .container { margin-top: 0; padding-top: 8px; padding-bottom: 0; }
+/* the panels sit directly in the widget box: no page bounding box in the embed */
+body.embed .page.wide { background: transparent; box-shadow: none; border-radius: 0; }
 </style>
 
 <title>Vort3D uncertainty demo — Yue (Michael) Ying</title>
@@ -75,18 +72,6 @@ body.embed .container { margin-top: 0; padding-top: 8px; }
 
   <div class="container">
     <div class="page wide" id="vort3d-demo">
-
-      <h2>Uncertainties in a model simulation of a tropical cyclone</h2>
-
-      <p class="demo-intro">
-        The <a href="https://github.com/nansencenter/NEDAS">NEDAS</a> <code>vort3d</code> toy model
-        simulates a tropical cyclone on a 2560&nbsp;km &times; 2560&nbsp;km <i>f</i>-plane domain
-        (128&nbsp;&times;&nbsp;128 grid, 20&nbsp;km resolution, 7 atmospheric levels + boundary layer;
-        Zhu, Smith &amp; Ulrich 2001, "a minimal three-dimensional tropical cyclone model").
-        Starting from 20 slightly perturbed initial states (drawn from a 200-member free-running pool),
-        the 11-day forecasts spread out: tracks diverge, and some members intensify, weaken or decay
-        while others stay coherent &mdash; the classic picture of forecast uncertainty.
-      </p>
 
       <div id="readout">loading data&hellip;</div>
 
@@ -120,20 +105,6 @@ body.embed .container { margin-top: 0; padding-top: 8px; }
         <div class="panel"><canvas id="cWind"></canvas></div>
         <div class="panel"><canvas id="cVt"></canvas></div>
       </div>
-
-      <p class="demo-caption">
-        <b>Row 1</b> &mdash; vortex track, intensity (maximum boundary-layer wind) and size
-        (radius of the 15&nbsp;m/s wind ring) for 20 of 200 free-running pool realizations
-        (Ying, Anderson &amp; Bertino 2023, MWR, Fig.&nbsp;1 layout). Shaded band: 10&ndash;90th
-        dashed line: ensemble mean. &nbsp;
-        <b>Row 2</b> &mdash; the selected realization's structure at the chosen time:
-        boundary-layer wind speed map (1280&nbsp;km window centred on the vortex: dashed track = ensemble
-        mean, coloured track = the selected realization), and a radius&ndash;height cross-section of the
-        azimuthally-averaged radial wind (shading, inflow negative) with tangential-wind contours.
-        The white ring on the wind
-        map is the 15&nbsp;m/s isotach &mdash; the same definition as the “size” timeseries of row 1. Structure fields update lazily as realizations are
-        selected; all data are precomputed hourly / 3-hourly from the model output.
-      </p>
 
       <div class="footer">Data: <code>vort3d</code> pool on Olivia (NEDAS, 200-member free run). Widget: plain HTML5 canvas, no external libraries.</div>
 

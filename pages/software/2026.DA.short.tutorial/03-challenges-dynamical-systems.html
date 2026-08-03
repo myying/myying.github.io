@@ -45,10 +45,17 @@
   .vort3d-embed iframe {
     display: block;
     width: 100%;
-    height: 1120px;
+    height: 850px;
     border: 0;
     border-radius: 12px;
   }
+  .vort3d-caption {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-align: justify;
+    margin: 2px 0 18px;
+  }
+  .vort3d-caption b { color: var(--text); }
 </style>
 </head>
 
@@ -204,31 +211,20 @@
       </p>
 
       <div class="vort3d-embed">
-        <iframe src="vort3d-demo.html?embed=1&v=2" title="vort3d uncertainty demo"
+        <iframe src="vort3d-demo.html?embed=1&v=3" title="vort3d uncertainty demo"
                 loading="lazy"></iframe>
       </div>
 
-      <!-- ================================================================== -->
-      <h3 id="sec-read">Reading the panels</h3>
-      <p>
-        <b>1 &#183; The Lorenz-96 widget</b> — panel (a) is a Hovm&ouml;ller diagram: each row is one of the
-        40 variables, each column a lead time. One contour level of the anomaly field
-        x&#772;<sub>i</sub>(t) &#8722; climatology is drawn for the truth (thick) and for every member
-        (thin, in the member's colour). The contours coincide while the forecast is deterministic and fan
-        out as the tiny initial differences, amplified at the error-doubling rate, decorrelate the
-        members: earlier the larger $\sigma$, and the wider the fan. Panel (b) turns this into the two
-        curves that define predictability: error $\sqrt{\frac1N\sum_i(\bar x_i-x_i^{tr})^2}$ and spread
-        $\sqrt{\frac1N\sum_i \mathrm{var}_m(x_i^m)}$. Their saturation level is the climatological std
-        of the truth trajectory itself.
-      </p>
-      <p>
-        <b>2 &#183; The vort3d demo</b> — row 1 is the same message as the Lorenz-96 widget, in storm
-        coordinates: track, intensity and size spaghetti from 20 realizations, with the dashed line the
-        ensemble mean. Row 2 is the structural view of whichever realization you highlight:
-        a boundary-layer wind speed map (1280 km window centred on the vortex) and a radius&#8211;height
-        cross-section of the azimuthally-averaged radial wind (shading, inflow negative) with
-        tangential-wind contours. Compare two realizations at the same time: intensity can match while
-        the vortex centre, tilt and warm-core depth differ — the structure of non-Gaussianity.
+      <p class="vort3d-caption">
+        <b>Row 1</b> &mdash; vortex track, intensity (maximum boundary-layer wind) and size
+        (radius of the 15&nbsp;m/s wind ring) for 20 of 200 free-running pool realizations
+        (Ying, Anderson &amp; Bertino 2023, MWR, Fig.&nbsp;1 layout); dashed line: ensemble mean.
+        <b>Row 2</b> &mdash; the selected realization's structure at the chosen time:
+        boundary-layer wind speed map (1280&nbsp;km window centred on the vortex: dashed track = ensemble
+        mean, coloured track = the selected realization), and a radius&ndash;height cross-section of the
+        azimuthally-averaged radial wind (shading, inflow negative) with tangential-wind contours.
+        The white ring on the wind map is the 15&nbsp;m/s isotach &mdash; the same definition as the
+        "size" timeseries of row 1.
       </p>
       <p>
         <i>Next:</i> Chapter 4 — <a href="04-kalman-filter.html">From best linear unbiased estimate to the Kalman filter</a> —

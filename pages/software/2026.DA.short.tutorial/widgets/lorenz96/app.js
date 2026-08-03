@@ -342,10 +342,6 @@
     const yt = [];
     for (let i = 1; i <= N; i += 10) yt.push([i, y0 + ((i - 1) / (N - 1)) * plotH]);
     axes(c, W, H, x0, y0, x1, y1, "lead time (days)", "variable index i", xt, yt, null, null, col);
-    // annotation
-    c.fillStyle = col.ink3; c.font = "10px system-ui, sans-serif"; c.textAlign = "left";
-    c.fillText("xᵢ − climᵢ = " + contourLvl.toFixed(0) +
-               "  ·  thick: truth  ·  thin colored: one per member", x0 + 8, y0 + 14);
   }
 
   function renderGrowth(col) {
@@ -380,20 +376,15 @@
     c.beginPath(); c.moveTo(X(0), Y(error[0]));
     for (let k = 1; k <= NSTEPS; k++) c.lineTo(X(k * DT), Y(error[k]));
     c.stroke();
-    // predictability limit marker
+    // predictability limit marker (line only; the value is in the readout)
     if (Number.isFinite(limitTu)) {
       const px = X(limitTu);
       c.strokeStyle = col.ink3; c.setLineDash([2, 3]); c.lineWidth = 1;
       c.beginPath(); c.moveTo(px, y0); c.lineTo(px, y1); c.stroke(); c.setLineDash([]);
-      c.fillStyle = col.ink3; c.font = "9px system-ui, sans-serif"; c.textAlign = "left";
-      c.fillText("predictability limit ≈ " + (limitTu * 5).toFixed(1) + " days", px + 5, y0 + 12);
     }
     const xt = [];
     for (let t = 0; t <= TMAX; t += 1) xt.push([t, X(t)]);
     axes(c, W, H, x0, y0, x1, y1, "lead time (days)", "RMSE (x units)", xt, [], null, null, col);
-    // saturation label
-    c.fillStyle = col.ink3; c.font = "9px system-ui, sans-serif"; c.textAlign = "right";
-    c.fillText("climatological std ≈ " + sat.toFixed(2), x1 - 4, Y(sat) - 4);
   }
 
   function renderReadout() {

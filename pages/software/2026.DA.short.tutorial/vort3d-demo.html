@@ -426,9 +426,10 @@ function colorbar(c, x, y, w, h, lut, lo, hi, fmt, nticks, band) {
   }
   c.strokeStyle = T.grid; c.lineWidth = 1; c.strokeRect(x, y, w, h);
   c.font = '9px system-ui, sans-serif'; c.textAlign = 'left'; c.fillStyle = T.muted;
-  const nT = band ? Math.ceil((hi - lo) / (2 * band)) + 1 : (nticks || 3);
+  const nT = band ? Math.floor((hi - lo) / (2 * band)) + 2 : (nticks || 3);
+  const vStart = band ? Math.ceil(lo / (2 * band)) * (2 * band) : lo;
   for (let k = 0; k < nT; k++) {
-    const v = band ? lo + 2 * band * k : lo + (hi - lo) * k / (nT - 1);
+    const v = band ? vStart + 2 * band * k : lo + (hi - lo) * k / (nT - 1);
     if (v > hi + 1e-9) continue;
     const py = y + h - (v - lo) / (hi - lo) * h;
     c.fillText(fmt(v), x + w + 4, py + 3);
@@ -1030,8 +1031,8 @@ function renderXsectMerged(step) {
   // shading: azimuthal-mean radial wind (m/s) — inflow negative, outflow positive
   const vr = new Float32Array(320);
   for (let k = 0; k < 320; k++) vr[k] = step.vr[k] * q.vr_scale_ms;
-  const vspan = 20;   // fixed radial-wind colour range (+/-20 m/s, ~99th percentile of the
-                      // ensemble; the rare extreme inflow/outflow up to ~53 m/s clamps at the ends)
+  const vlo = -35, vhi = 30;   // fixed radial-wind colour range (5 m/s bands); the rare
+                               // extremes (up to ~53 m/s) clamp at the colour ends
   const shade = [];
   for (let k = 0; k < 8; k++) shade.push(vr.subarray(k*40, k*40 + 40));
   // contours: azimuthal-mean tangential wind (m/s)
@@ -1040,7 +1041,7 @@ function renderXsectMerged(step) {
   for (let k = 0; k < 320; k++) { vt[k] = step.vt[k] * q.vt_scale_ms; vtmx = Math.max(vtmx, Math.abs(vt[k])); }
   const cspan = Math.max(20, Math.ceil(vtmx / 10) * 10);
   const levels = META.structure.xsect.p_hpa.map(v => v / 100);
-  renderXsect(ctx.vt, cVt, shade, vt, levels, vspan, cspan, LUT_RDBU, -vspan, vspan,
+  renderXsect(ctx.vt, cVt, shade, vt, levels, vhi - vlo, cspan, LUT_RDBU, vlo, vhi,
     [5, 10, 15, 20, 30, 40, 50], v => v.toFixed(0),
     '(e) Radial wind (m/s) — shading\ntangential wind (m/s) — contours',
     'radius (km)');

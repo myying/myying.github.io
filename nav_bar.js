@@ -11,5 +11,6 @@ document.write('\
     </div>\
 ');
 var page_id = window.location.pathname.split("/").pop().split(".").slice(0, 1);
-document.getElementById(page_id).classList.add("active");
+var nav_el = document.getElementById(page_id);
+if (nav_el) { nav_el.classList.add("active"); }
 

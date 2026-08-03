@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="Vort3D tropical cyclone toy model — interactive demo of forecast uncertainties (Yue Ying)">
+<meta name="keywords" content="data assimilation, predictability, tropical cyclone, ensemble, uncertainty, vort3d, NEDAS">
+<meta name="author" content="Yue Ying">
+
+<link rel="apple-touch-icon" sizes="180x180" href="../../../site_img/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../../../site_img/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../../../site_img/favicon-16x16.png">
+<link rel="manifest" href="../../../site_img/site.webmanifest">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../../style.css">
+
+<style>
+.page.wide {
+  max-width: 1560px;
+  width: calc(100% - 24px);
+  box-sizing: border-box;
+}
+.demo-intro { font-size: 15px; }
+.demo-intro code { background: var(--nav-hover); border: 1px solid var(--border); border-radius: 4px; padding: 0 4px; font-size: 13px; }
+#readout {
+  text-align: center;
+  font-size: 14px;
+  background: var(--nav-hover);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 10px 0 6px;
+  font-variant-numeric: tabular-nums;
+  min-height: 20px;
+}
+.row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 8px 0; }
+.panel { flex: 1 1 0; min-width: 300px; max-width: 480px; }
+.panel canvas {
+  width: 100%; height: auto; display: block;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+#timebar {
+  display: flex; align-items: center; gap: 14px; justify-content: center;
+  margin: 10px 0 4px; flex-wrap: wrap;
+}
+#playBtn {
+  font-size: 15px; line-height: 1; padding: 8px 14px;
+  border: 1px solid var(--border); border-radius: 8px;
+  background: var(--surface); color: var(--text); cursor: pointer;
+}
+#playBtn:hover { background: var(--nav-hover); }
+#timeSlider { flex: 1 1 360px; max-width: 760px; accent-color: var(--accent); cursor: pointer; }
+#timeLabel {
+  font-size: 14px; font-variant-numeric: tabular-nums; color: var(--text);
+  min-width: 76px; text-align: center;
+}
+.hint { text-align: center; font-size: 12px; color: var(--text-muted); margin: 4px 0 10px; }
+.demo-caption { font-size: 13px; color: var(--text-muted); text-align: justify; margin-top: 12px; }
+.demo-caption b { color: var(--text); }
+body.embed .header, body.embed .nav, body.embed .footer { display: none !important; }
+body.embed .container { margin-top: 0; padding-top: 8px; }
+</style>
+
+<title>Vort3D uncertainty demo — Yue (Michael) Ying</title>
+</head>
+
+<body>
+  <script>try { if (new URLSearchParams(location.search).get('embed') !== null) document.body.classList.add('embed'); } catch (e) {}</script>
+  <div class="header">
+    <h1>Yue (Michael) Ying</h1>
+  </div>
+
+  <div class="container">
+    <div class="page wide" id="vort3d-demo">
+
+      <h2>Uncertainties in a model simulation of a tropical cyclone</h2>
+
+      <p class="demo-intro">
+        The <a href="https://github.com/nansencenter/NEDAS">NEDAS</a> <code>vort3d</code> toy model
+        simulates a tropical cyclone on a 2560&nbsp;km &times; 2560&nbsp;km <i>f</i>-plane domain
+        (128&nbsp;&times;&nbsp;128 grid, 20&nbsp;km resolution, 7 atmospheric levels + boundary layer;
+        Zhu, Smith &amp; Ulrich 2001, "a minimal three-dimensional tropical cyclone model").
+        Starting from 20 slightly perturbed initial states (drawn from a 200-member free-running pool),
+        the 11-day forecasts spread out: tracks diverge, and some members intensify, weaken or decay
+        while others stay coherent &mdash; the classic picture of forecast uncertainty.
+      </p>
+
+      <div id="readout">loading data&hellip;</div>
+
+      <div id="fileNotice" style="display:none; text-align:center; font-size:13px; color:var(--text-muted);
+        background:var(--nav-hover); border:1px solid var(--border); border-radius:8px; padding:8px 12px; margin:8px 0;">
+        This page was opened directly from disk (<code>file://</code>), where browsers block data loading.
+        The time series below work; for the vortex maps &amp; cross-sections, serve the site folder over HTTP
+        (e.g. <code>python3 -m http.server</code> in the site root, then open
+        <code>http://localhost:8000/pages/software/2026.DA.short.tutorial/vort3d-demo.html</code>).
+      </div>
+
+      <div class="row">
+        <div class="panel"><canvas id="cTrack"></canvas></div>
+        <div class="panel"><canvas id="cInt"></canvas></div>
+        <div class="panel"><canvas id="cSize"></canvas></div>
+      </div>
+
+      <div class="hint">
+        Move the mouse over any time series to light up one realization (its vortex structure appears below).
+        Press and drag on a panel &mdash; or use the slider / play button &mdash; to move through time for the
+        highlighted realization (drag along the track to follow its path). Click to pin a realization.
+      </div>
+
+      <div id="timebar">
+        <button id="playBtn" title="play / pause">&#9654;</button>
+        <input type="range" id="timeSlider" min="0" max="264" step="1" value="120">
+        <span id="timeLabel">day 5.00</span>
+      </div>
+
+      <div class="row">
+        <div class="panel"><canvas id="cWind"></canvas></div>
+        <div class="panel"><canvas id="cVt"></canvas></div>
+      </div>
+
+      <p class="demo-caption">
+        <b>Row 1</b> &mdash; vortex track, intensity (maximum boundary-layer wind) and size
+        (radius of the 15&nbsp;m/s wind ring) for 20 of 200 free-running pool realizations
+        (Ying, Anderson &amp; Bertino 2023, MWR, Fig.&nbsp;1 layout). Shaded band: 10&ndash;90th
+        percentile envelope, dashed line: ensemble mean. &nbsp;
+        <b>Row 2</b> &mdash; the selected realization's structure at the chosen time:
+        boundary-layer wind speed map (1280&nbsp;km window centred on the vortex: dashed track = ensemble
+        mean, coloured track = the selected realization), and a radius&ndash;height cross-section of the
+        azimuthally-averaged radial wind (shading, inflow negative) with tangential-wind contours.
+        The white ring on the wind
+        map is the 15&nbsp;m/s isotach &mdash; the same definition as the “size” timeseries of row 1. Structure fields update lazily as realizations are
+        selected; all data are precomputed hourly / 3-hourly from the model output.
+      </p>
+
+      <div class="footer">Data: <code>vort3d</code> pool on Olivia (NEDAS, 200-member free run). Widget: plain HTML5 canvas, no external libraries.</div>
+
+    </div>
+  </div>
+
+  <script src="../../../footer.js"></script>
+
+  <script src="widgets/vort3d-data/bundle.js"></script>
+
+<script>
+(function () {
+'use strict';
+
+/* ------------------------------------------------------------------ */
+/* globals                                                             */
+/* ------------------------------------------------------------------ */
+const DATA = 'widgets/vort3d-data/';
+let META, days, trackX, trackY, vmax, size, sizeClamped;
+let nt, nens, poolMembers;
+let tIdx = 120, hovered = -1, pinned = -1, playing = false, renderSeq = 0;
+const structCache = new Map();      // memberIdx -> array of steps
+
+const $ = id => document.getElementById(id);
+const cTrack = $('cTrack'), cInt = $('cInt'), cSize = $('cSize');
+const cWind = $('cWind'), cVt = $('cVt');
+const slider = $('timeSlider'), timeLabel = $('timeLabel'),
+      playBtn = $('playBtn'), readout = $('readout');
+
+/* ------------------------------------------------------------------ */
+/* theme colours                                                       */
+/* ------------------------------------------------------------------ */
+const T = {
+  text:    getComputedStyle(document.documentElement).getPropertyValue('--text').trim() || '#262a30',
+  muted:   getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || '#6b7280',
+  border:  getComputedStyle(document.documentElement).getPropertyValue('--border').trim() || '#e6e8ec',
+  surface: getComputedStyle(document.documentElement).getPropertyValue('--surface').trim() || '#ffffff'
+};
+T.grid = T.border;
+
+/* ------------------------------------------------------------------ */
+/* canvas setup                                                        */
+/* ------------------------------------------------------------------ */
+const sizes = { cTrack:[450,300], cInt:[450,300], cSize:[450,300],
+                cWind:[450,330], cVt:[450,330] };   // row-1 width, no bottom void
+function setupCtx(cv) {
+  const [w, h] = sizes[cv.id];
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  cv.width = w * dpr; cv.height = h * dpr;
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  cv._w = w; cv._h = h;
+  return ctx;
+}
+const ctx = {
+  track: setupCtx(cTrack), int: setupCtx(cInt), size: setupCtx(cSize),
+  wind: setupCtx(cWind), vt: setupCtx(cVt)
+};
+
+/* ------------------------------------------------------------------ */
+/* colormaps                                                           */
+/* ------------------------------------------------------------------ */
+function hexStops() {
+  return Array.prototype.map.call(arguments, h => [
+    parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)
+  ]);
+}
+/* meteorological wind-speed palette (calm -> white, then cyan -> green ->
+   yellow -> orange -> red -> maroon), the convention used for tropical-cyclone
+   wind products (e.g. NCL wind palettes, H*Wind-style displays): the 15 m/s
+   isotach sits at the cyan->teal transition, so the white size ring reads
+   clearly against it, and intensity differences between realizations pop. */
+const WIND     = hexStops('f5f5f5','d8eef2','b2e2eb','78ccda','40b0c4','369884','56a84a',
+                          '8ac42a','c4d620','f0d219','f7ac18','f47c16','e8441f','c81e2c','961c34');
+const RDBU     = hexStops('2166ac','4393c3','92c5de','d1e5f0','f7f7f7','fddbc7','f4a582','d6604d','b2182b');
+function makeLUT(stops) {
+  const lut = new Uint8Array(256 * 3);
+  for (let i = 0; i < 256; i++) {
+    const t = (i / 255) * (stops.length - 1);
+    const i0 = Math.floor(t), i1 = Math.min(i0 + 1, stops.length - 1), f = t - i0;
+    lut[i*3]   = stops[i0][0] + (stops[i1][0] - stops[i0][0]) * f;
+    lut[i*3+1] = stops[i0][1] + (stops[i1][1] - stops[i0][1]) * f;
+    lut[i*3+2] = stops[i0][2] + (stops[i1][2] - stops[i0][2]) * f;
+  }
+  return lut;
+}
+const LUT_WIND = makeLUT(WIND), LUT_RDBU = makeLUT(RDBU);
+
+/* ------------------------------------------------------------------ */
+/* member colours (tab20 cycled)                                       */
+/* ------------------------------------------------------------------ */
+const TAB20 = ['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#e377c2','#7f7f7f',
+  '#bcbd22','#17becf','#aec7e8','#ffbb78','#98df8a','#ff9896','#c5b0d5','#c49baa',
+  '#f7b6d2','#c7c7c7','#dbdb8d','#9edae5'];
+const memberColor = m => TAB20[m % TAB20.length];
+
+/* ------------------------------------------------------------------ */
+/* data loading                                                        */
+/* ------------------------------------------------------------------ */
+function b64ToArrayBuffer(b64) {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes.buffer;
+}
+
+async function loadData() {
+  try {
+    let meta, tsBuf;
+    if (window.VORT3D_BUNDLE && window.VORT3D_BUNDLE.meta) {
+      meta = window.VORT3D_BUNDLE.meta;
+      tsBuf = b64ToArrayBuffer(window.VORT3D_BUNDLE.tsB64);
+    } else {
+      const metaR = await fetch(DATA + 'metadata.json');
+      if (!metaR.ok) throw new Error('metadata.json not found (' + metaR.status + ') — keep the data/ folder next to this page');
+      meta = await metaR.json();
+      const tsR = await fetch(DATA + 'timeseries.bin');
+      if (!tsR.ok) throw new Error('timeseries.bin not found (' + tsR.status + ')');
+      tsBuf = await tsR.arrayBuffer();
+    }
+    META = meta;
+    const F = new Float32Array(tsBuf);
+    nt = META.timeseries.nt;
+    nens = META.selection.nens;
+    poolMembers = META.selection.members;
+    const stride = nt * nens;
+    days     = F.subarray(0, nt);
+    trackX   = F.subarray(nt, nt + stride);
+    trackY   = F.subarray(nt + stride, nt + 2*stride);
+    vmax     = F.subarray(nt + 2*stride, nt + 3*stride);
+    size     = F.subarray(nt + 3*stride, nt + 4*stride);
+    sizeClamped = new Float32Array(stride);
+    for (let i = 0; i < stride; i++) sizeClamped[i] = Math.max(0, size[i]);
+    envInt  = precomputeEnv(vmax);
+    envSize = precomputeEnv(sizeClamped);
+    // unwrap the periodic x coordinate (128 cells): each step is adjusted by the
+    // multiple of 128 that keeps the step <= 64 cells, so boundary crossings are
+    // drawn as a continuous line (see the track panel).
+    trackXU = new Float32Array(stride);
+    for (let m = 0; m < nens; m++) {
+      trackXU[m] = trackX[m];
+      for (let i = 1; i < nt; i++) {
+        const d = trackX[i*nens+m] - trackXU[(i-1)*nens+m];
+        trackXU[i*nens+m] = trackXU[(i-1)*nens+m] + (((d + 64) % 128 + 128) % 128) - 64;
+      }
+    }
+    // track-axis ranges: auto-fit the unwrapped tracks with EQUAL km/px on both axes
+    // (aspect 1) so the empty south of the domain is not drawn; x always covers the
+    // periodic domain [0, 2560] km so the boundary marks stay meaningful.
+    let xdmn = Infinity, xdmx = -Infinity, ydmn = Infinity, ydmx = -Infinity;
+    for (let k = 0; k < stride; k++) {
+      const vx = trackXU[k] * 20, vy = trackY[k] * 20;
+      if (vx < xdmn) xdmn = vx;
+      if (vx > xdmx) xdmx = vx;
+      if (vy < ydmn) ydmn = vy;
+      if (vy > ydmx) ydmx = vy;
+    }
+    const TRK_MARGIN = 100;                                  // km padding
+    let xmin0 = Math.min(0, xdmn) - TRK_MARGIN, xmax0 = Math.max(2560, xdmx);
+    let ymin0 = ydmn - TRK_MARGIN, ymax0 = ydmx + TRK_MARGIN;
+    const A = (R1.x1 - R1.x0) / (R1.y0 - R1.y1);             // plot px aspect (w/h)
+    if ((xmax0 - xmin0) / (ymax0 - ymin0) > A) {
+      const mid = (ymin0 + ymax0) / 2, sy = (xmax0 - xmin0) / A;
+      ymin0 = mid - sy / 2; ymax0 = mid + sy / 2;
+    } else {
+      const mid = (xmin0 + xmax0) / 2, sx = (ymax0 - ymin0) * A;
+      xmin0 = mid - sx / 2; xmax0 = mid + sx / 2;
+    }
+    TRACK_XMIN = xmin0; TRACK_XMAX = xmax0;
+    TRACK_YMIN = ymin0; TRACK_YMAX = ymax0;
+    // mean track (from the unwrapped members)
+    meanTrackX = new Float32Array(nt); meanTrackY = new Float32Array(nt);
+    for (let i = 0; i < nt; i++) {
+      let sx = 0, sy = 0;
+      for (let m = 0; m < nens; m++) { sx += trackXU[i*nens+m]; sy += trackY[i*nens+m]; }
+      meanTrackX[i] = sx / nens; meanTrackY[i] = sy / nens;
+    }
+    // ensemble-mean intensity / size (clamped size, matching what is plotted)
+    meanInt = new Float32Array(nt); meanSize = new Float32Array(nt);
+    for (let i = 0; i < nt; i++) {
+      let si = 0, ss = 0;
+      for (let m = 0; m < nens; m++) { si += vmax[i*nens+m]; ss += sizeClamped[i*nens+m]; }
+      meanInt[i] = si / nens; meanSize[i] = ss / nens;
+    }
+    slider.max = nt - 1;
+    slider.value = tIdx;
+    setTime(tIdx, true);
+    bindEvents();
+
+    // optional deep-link: ?mem=N (1-based realization) &t=day
+    try {
+      const q = new URLSearchParams(location.search);
+      const memP = parseInt(q.get('mem'), 10);
+      if (Number.isInteger(memP) && memP >= 1 && memP <= nens) pinned = memP - 1;
+      const tP = parseFloat(q.get('t'));
+      if (Number.isFinite(tP) && tP >= 0 && tP <= META.timeseries.day_end) {
+        tIdx = Math.min(nt - 1, Math.round(tP * 24));
+        slider.value = tIdx;
+        timeLabel.textContent = 'day ' + days[tIdx].toFixed(2);
+      }
+    } catch (e) { /* non-http contexts (file://) lack URLSearchParams/location */ }
+    render();
+  } catch (err) {
+    console.error(err);
+    readout.innerHTML = '&#9888; failed to load data: ' +
+      String(err && err.message ? err.message : err) +
+      '. Serve this folder over HTTP (e.g. <code>python3 -m http.server</code> in the site root) ' +
+      'or open the page on GitHub Pages.';
+  }
+}
+
+let envInt, envSize, meanTrackX, meanTrackY, meanInt, meanSize;
+let trackXU;                       // unwrapped track x (cells), periodic-x made continuous
+let TRACK_XMIN = 0, TRACK_XMAX = 2560, TRACK_YMIN = 0, TRACK_YMAX = 2560;   // km
+function precomputeEnv(field) {
+  const res = new Float32Array(nt * 3);
+  const tmp = new Float32Array(nens);
+  for (let i = 0; i < nt; i++) {
+    for (let m = 0; m < nens; m++) tmp[m] = field[i*nens + m];
+    tmp.sort();
+    res[i*3]   = tmp[Math.floor(nens * 0.10)];
+    res[i*3+1] = tmp[Math.floor(nens * 0.50)];
+    res[i*3+2] = tmp[Math.floor(nens * 0.90)];
+  }
+  return res;
+}
+
+/* ------------------------------------------------------------------ */
+/* plotting helpers                                                    */
+/* ------------------------------------------------------------------ */
+function clearPanel(c, w, h) {
+  c.clearRect(0, 0, w, h);
+  c.fillStyle = T.surface;
+  c.fillRect(0, 0, w, h);
+}
+function title(c, w, txt) {
+  c.fillStyle = T.text; c.font = '600 12px system-ui, sans-serif'; c.textAlign = 'center';
+  const lines = txt.split('\n');
+  const y0 = 16 - (lines.length - 1) * 6;          // two-line titles start a bit higher
+  lines.forEach((ln, i) => c.fillText(ln, w / 2, y0 + i * 12));
+}
+function frame(c, x0, y0, x1, y1) {
+  c.strokeStyle = T.grid; c.lineWidth = 1; c.strokeRect(x0, y0, x1 - x0, y1 - y0);
+}
+function ticks(c, x0, yTop, x1, yBot, xmin, xmax, xtick, ymin, ymax, ytick) {
+  c.font = '10px system-ui, sans-serif'; c.fillStyle = T.muted;
+  c.textAlign = 'center';
+  for (let v = xtick * Math.ceil(xmin / xtick); v <= xmax + 1e-9; v += xtick) {
+    const px = x0 + (v - xmin) / (xmax - xmin) * (x1 - x0);
+    c.fillText(String(v), px, yBot + 13);
+    c.strokeStyle = T.grid; c.beginPath(); c.moveTo(px, yBot); c.lineTo(px, yBot + 4); c.stroke();
+  }
+  c.textAlign = 'right';
+  for (let v = ytick * Math.ceil(ymin / ytick); v <= ymax + 1e-9; v += ytick) {
+    const py = yBot - (v - ymin) / (ymax - ymin) * (yBot - yTop);
+    c.fillText(String(v), x0 - 5, py + 3);
+    c.strokeStyle = T.grid; c.beginPath(); c.moveTo(x0, py); c.lineTo(x0 - 4, py); c.stroke();
+  }
+  c.textAlign = 'left';
+}
+function colorbar(c, x, y, w, h, lut, lo, hi, fmt, nticks, band) {
+  if (band) {
+    // discrete bands matching the contourf shading; ticks at every other band
+    for (let v = lo; v < hi; v += band) {
+      const idx = Math.round((v - lo) / (hi - lo) * 255);
+      const yBot = y + h - (v - lo) / (hi - lo) * h;
+      const yTop = y + h - (v + band - lo) / (hi - lo) * h;
+      c.fillStyle = `rgb(${lut[idx*3]},${lut[idx*3+1]},${lut[idx*3+2]})`;
+      c.fillRect(x, yTop, w, yBot - yTop);
+    }
+  } else {
+    const grad = c.createLinearGradient(0, y + h, 0, y);   // lo at bottom
+    const n = 64;
+    for (let k = 0; k < n; k++) {
+      const idx = Math.round(k / (n - 1) * 255);
+      grad.addColorStop(k / (n - 1), `rgb(${lut[idx*3]},${lut[idx*3+1]},${lut[idx*3+2]})`);
+    }
+    c.fillStyle = grad; c.fillRect(x, y, w, h);
+  }
+  c.strokeStyle = T.grid; c.lineWidth = 1; c.strokeRect(x, y, w, h);
+  c.font = '9px system-ui, sans-serif'; c.textAlign = 'left'; c.fillStyle = T.muted;
+  const nT = band ? Math.ceil((hi - lo) / (2 * band)) + 1 : (nticks || 3);
+  for (let k = 0; k < nT; k++) {
+    const v = band ? lo + 2 * band * k : lo + (hi - lo) * k / (nT - 1);
+    if (v > hi + 1e-9) continue;
+    const py = y + h - (v - lo) / (hi - lo) * h;
+    c.fillText(fmt(v), x + w + 4, py + 3);
+    c.strokeStyle = T.grid; c.beginPath(); c.moveTo(x, py); c.lineTo(x + w, py); c.stroke();
+  }
+}
+
+/* in-place vertical flip of a row-major array — the model's y index increases
+   northward, and the map panels draw north-up (matching the track panel and the
+   +km axis labels), so grid row 0 (south) must end up at the bottom. */
+function flipY(a, w, h) {
+  for (let r = 0; r < (h >> 1); r++) {
+    const top = r * w, bot = (h - 1 - r) * w;
+    for (let c = 0; c < w; c++) {
+      const t = a[top + c]; a[top + c] = a[bot + c]; a[bot + c] = t;
+    }
+  }
+  return a;
+}
+
+/* field -> ImageData with LUT; v in [lo, hi] */
+/* bilinear upsampling of a w x h cell-centred field to (w*f) x (h*f); used for
+   smooth contourf-style band shading of the wind map and the cross-section */
+function upsampleBilinear(src, w, h, f) {
+  const mw = w * f, mh = h * f, out = new Float32Array(mw * mh);
+  for (let j = 0; j < mh; j++) {
+    const y = (j + 0.5) / f - 0.5;
+    const y0 = y < 0 ? 0 : (y > h - 1 ? h - 1 : y | 0);
+    const y1 = y0 + 1 <= h - 1 ? y0 + 1 : y0;
+    const fy = y - y0;
+    for (let i = 0; i < mw; i++) {
+      const x = (i + 0.5) / f - 0.5;
+      const x0 = x < 0 ? 0 : (x > w - 1 ? w - 1 : x | 0);
+      const x1 = x0 + 1 <= w - 1 ? x0 + 1 : x0;
+      const fx = x - x0;
+      const a = src[y0*w + x0], b = src[y0*w + x1];
+      const d = src[y1*w + x0], e = src[y1*w + x1];
+      out[j*mw + i] = a + (b - a) * fx + (d - a) * fy + (a - b - d + e) * fx * fy;
+    }
+  }
+  return out;
+}
+
+function fieldImage(data, w, h, lut, lo, hi) {
+  const img = new ImageData(w, h);
+  const s = 255 / (hi - lo);
+  for (let k = 0; k < w * h; k++) {
+    let c = Math.round((data[k] - lo) * s);
+    c = c < 0 ? 0 : (c > 255 ? 255 : c);
+    img.data[k*4] = lut[c*3]; img.data[k*4+1] = lut[c*3+1];
+    img.data[k*4+2] = lut[c*3+2]; img.data[k*4+3] = 255;
+  }
+  return img;
+}
+
+/* marching squares on a cell-centred grid; returns segments in grid coords */
+const MS_EDGE_PTS = [[[0,0],[1,0]], [[1,0],[1,1]], [[1,1],[0,1]], [[0,1],[0,0]]];
+const MS_CASE = [
+  [], [[0,3]], [[0,1]], [[1,3]], [[1,2]], [[3,0],[1,2]], [[0,2]], [[2,3]],
+  [[2,3]], [[0,2]], [[0,1],[2,3]], [[1,2]], [[1,3]], [[0,1]], [[0,3]], []
+];
+function marchingSquares(vals, w, h, level) {
+  const cw = w + 1, ch = h + 1;
+  const corners = new Float32Array(cw * ch);
+  for (let j = 0; j < ch; j++) for (let i = 0; i < cw; i++) {
+    let s = 0, n = 0;
+    for (const [di, dj] of [[-1,-1],[0,-1],[-1,0],[0,0]]) {
+      const cx = i + di, cy = j + dj;
+      if (cx >= 0 && cx < w && cy >= 0 && cy < h) { s += vals[cy*w + cx]; n++; }
+    }
+    corners[j*cw + i] = s / n;
+  }
+  const segs = [];
+  for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) {
+    const v00 = corners[j*cw+i], v10 = corners[j*cw+i+1],
+          v11 = corners[(j+1)*cw+i+1], v01 = corners[(j+1)*cw+i];
+    let bits = 0;
+    if (v00 >= level) bits |= 1;   // TL
+    if (v10 >= level) bits |= 2;   // TR
+    if (v11 >= level) bits |= 4;   // BR
+    if (v01 >= level) bits |= 8;   // BL
+    const pairs = MS_CASE[bits];
+    for (const [e0, e1] of pairs) {
+      const interp = (e) => {
+        const p = MS_EDGE_PTS[e];
+        const va = corners[(j+p[0][1])*cw + (i+p[0][0])], vb = corners[(j+p[1][1])*cw + (i+p[1][0])];
+        const t = (vb === va) ? 0 : (level - va) / (vb - va);
+        return [i + p[0][0] + (p[1][0]-p[0][0]) * t, j + p[0][1] + (p[1][1]-p[0][1]) * t];
+      };
+      const a = interp(e0), b = interp(e1);
+      segs.push([a[0], a[1], b[0], b[1]]);
+    }
+  }
+  return segs;
+}
+
+/* ------------------------------------------------------------------ */
+/* row 1 : track / intensity / size                                    */
+/* ------------------------------------------------------------------ */
+const R1 = { x0: 52, x1: 444, y0: 258, y1: 26 };   // plot rect for the 450x300 panels
+const KM2PX_X = (R1.x1 - R1.x0) / 2560, KM2PX_Y = (R1.y0 - R1.y1) / 2560;
+const DAY2PX   = (R1.x1 - R1.x0) / 11;
+const INT2PX   = (R1.y0 - R1.y1) / 90;
+const SZ2PX    = (R1.y0 - R1.y1) / 600;
+// preview on hover; stick to the pinned member when the mouse leaves
+const sel = () => (hovered >= 0 ? hovered : pinned);
+
+function polyline(c, n, get, xf, yf) {
+  c.beginPath();
+  c.moveTo(xf(0, 0), yf(0, 0));
+  for (let i = 1; i < n; i++) c.lineTo(xf(i, 0), yf(i, 0));
+  c.stroke();
+}
+function renderTrack() {
+  const c = ctx.track, W = cTrack._w, H = cTrack._h;
+  clearPanel(c, W, H);
+  title(c, W, '(a) Vortex track — 20 realizations, 11 days');
+  frame(c, R1.x0, R1.y1, R1.x1, R1.y0);
+  const xmin = TRACK_XMIN, xmax = TRACK_XMAX;
+  ticks(c, R1.x0, R1.y1, R1.x1, R1.y0, xmin, xmax, 400, TRACK_YMIN, TRACK_YMAX, 400);
+  c.textAlign = 'center'; c.fillStyle = T.muted; c.font = '10px system-ui, sans-serif';
+  c.fillText('x (km)', W/2, H - 4);
+  // y label rotated
+  c.save(); c.translate(12, (R1.y1 + R1.y0)/2); c.rotate(-Math.PI/2);
+  c.fillText('y (km)', 0, 0); c.restore();
+
+  const s = sel();
+  // v is in km; equal km/px on both axes (aspect 1), auto-fit to the unwrapped tracks
+  const px = v => R1.x0 + (v - TRACK_XMIN) / (TRACK_XMAX - TRACK_XMIN) * (R1.x1 - R1.x0);
+  const py = v => R1.y0 - (v - TRACK_YMIN) / (TRACK_YMAX - TRACK_YMIN) * (R1.y0 - R1.y1);
+
+  // periodic-x boundary marks (vertical dashed lines at each domain multiple in range)
+  c.strokeStyle = T.grid; c.lineWidth = 1; c.setLineDash([3, 3]);
+  for (let b = Math.ceil(xmin / 2560) * 2560; b <= xmax + 1e-9; b += 2560) {
+    const bx = px(b);
+    c.beginPath(); c.moveTo(bx, R1.y1); c.lineTo(bx, R1.y0); c.stroke();
+  }
+  c.setLineDash([]);
+  c.fillStyle = T.muted; c.font = '9px system-ui, sans-serif'; c.textAlign = 'left';
+  c.fillText('periodic x boundary', px(Math.max(xmin, 0)) + 4, R1.y1 + 11);
+
+  // mean track
+  c.strokeStyle = T.muted; c.lineWidth = 1; c.setLineDash([4, 3]);
+  c.beginPath(); c.moveTo(px(meanTrackX[0] * 20), py(meanTrackY[0] * 20));
+  for (let i = 1; i < nt; i++) c.lineTo(px(meanTrackX[i] * 20), py(meanTrackY[i] * 20));
+  c.stroke(); c.setLineDash([]);
+
+  // all members (faint, unwrapped), skipping the selected one (drawn on top)
+  for (let m = 0; m < nens; m++) {
+    if (m === s) continue;
+    c.strokeStyle = memberColor(m); c.globalAlpha = 0.16; c.lineWidth = 1;
+    c.beginPath();
+    c.moveTo(px(trackXU[m] * 20), py(trackY[m] * 20));
+    for (let i = 1; i < nt; i++) c.lineTo(px(trackXU[i*nens+m] * 20), py(trackY[i*nens+m] * 20));
+    c.stroke();
+  }
+  c.globalAlpha = 1;
+
+  if (s >= 0) {
+    const col = memberColor(s);
+    // start / end markers
+    c.fillStyle = col;
+    c.beginPath(); c.arc(px(trackXU[s] * 20), py(trackY[s] * 20), 3, 0, 6.2832); c.fill();
+    c.beginPath(); c.arc(px(trackXU[(nt-1)*nens+s] * 20), py(trackY[(nt-1)*nens+s] * 20), 3, 0, 6.2832); c.fill();
+    // bright track
+    c.strokeStyle = col; c.lineWidth = 2.6; c.shadowColor = col; c.shadowBlur = 6;
+    c.beginPath();
+    c.moveTo(px(trackXU[s] * 20), py(trackY[s] * 20));
+    for (let i = 1; i < nt; i++) c.lineTo(px(trackXU[i*nens+s] * 20), py(trackY[i*nens+s] * 20));
+    c.stroke(); c.shadowBlur = 0;
+    // current-time marker
+    const cx = px(trackXU[tIdx*nens+s] * 20), cy = py(trackY[tIdx*nens+s] * 20);
+    c.fillStyle = T.surface; c.strokeStyle = '#000'; c.lineWidth = 1.4;
+    c.beginPath(); c.arc(cx, cy, 5, 0, 6.2832); c.fill(); c.stroke();
+    c.strokeStyle = col; c.lineWidth = 1.6;
+    c.beginPath(); c.arc(cx, cy, 5, 0, 6.2832); c.stroke();
+  }
+}
+
+function renderTimePanel(c, cv, kind) {
+  const W = cv._w, H = cv._h;
+  const f = kind === 'int' ? vmax : sizeClamped;
+  const env = kind === 'int' ? envInt : envSize;
+  const ypx = kind === 'int' ? v => R1.y0 - v * INT2PX : v => R1.y0 - v * SZ2PX;
+  const ymax = kind === 'int' ? 90 : 600;
+  clearPanel(c, W, H);
+  title(c, W, kind === 'int'
+    ? '(b) Vortex intensity — max boundary-layer wind (m/s)'
+    : '(c) Vortex size — radius of the 15 m/s ring (km)');
+  frame(c, R1.x0, R1.y1, R1.x1, R1.y0);
+  ticks(c, R1.x0, R1.y1, R1.x1, R1.y0, 0, 11, 1, 0, kind === 'int' ? 90 : 600, kind === 'int' ? 30 : 150);
+  c.textAlign = 'center'; c.fillStyle = T.muted; c.font = '10px system-ui, sans-serif';
+  c.fillText('time (days)', W/2, H - 4);
+
+  const s = sel();
+  const xp = d => R1.x0 + d * DAY2PX;
+
+  // envelope
+  c.fillStyle = T.muted; c.globalAlpha = 0.22;
+  c.beginPath();
+  c.moveTo(xp(days[0]), ypx(env[0]));
+  for (let i = 1; i < nt; i++) c.lineTo(xp(days[i]), ypx(env[i*3]));
+  for (let i = nt - 1; i >= 0; i--) c.lineTo(xp(days[i]), ypx(env[i*3+2]));
+  c.closePath(); c.fill();
+  c.globalAlpha = 1;
+
+  // ensemble mean (dashed muted line, same style as the track panel's mean)
+  const meanArr = kind === 'int' ? meanInt : meanSize;
+  c.strokeStyle = T.muted; c.lineWidth = 1.2; c.setLineDash([4, 3]);
+  c.beginPath();
+  c.moveTo(xp(days[0]), ypx(meanArr[0]));
+  for (let i = 1; i < nt; i++) c.lineTo(xp(days[i]), ypx(meanArr[i]));
+  c.stroke();
+  c.setLineDash([]);
+
+  // spaghetti
+  for (let m = 0; m < nens; m++) {
+    if (m === s) continue;
+    c.strokeStyle = memberColor(m); c.globalAlpha = 0.15; c.lineWidth = 1;
+    c.beginPath();
+    c.moveTo(xp(days[0]), ypx(f[m]));
+    for (let i = 1; i < nt; i++) c.lineTo(xp(days[i]), ypx(f[i*nens+m]));
+    c.stroke();
+  }
+  c.globalAlpha = 1;
+
+  if (s >= 0) {
+    const col = memberColor(s);
+    c.strokeStyle = col; c.lineWidth = 2.4; c.shadowColor = col; c.shadowBlur = 5;
+    c.beginPath();
+    c.moveTo(xp(days[0]), ypx(f[s]));
+    for (let i = 1; i < nt; i++) c.lineTo(xp(days[i]), ypx(f[i*nens+s]));
+    c.stroke(); c.shadowBlur = 0;
+    // hover dot at current time
+    const vv = f[tIdx*nens + s];
+    c.fillStyle = col; c.strokeStyle = T.surface; c.lineWidth = 1.4;
+    c.beginPath(); c.arc(xp(days[tIdx]), ypx(vv), 4.4, 0, 6.2832); c.fill(); c.stroke();
+  }
+
+  // time marker line
+  c.strokeStyle = T.muted; c.lineWidth = 1; c.setLineDash([3, 3]);
+  c.beginPath(); c.moveTo(xp(days[tIdx]), R1.y1); c.lineTo(xp(days[tIdx]), R1.y0); c.stroke();
+  c.setLineDash([]);
+
+  // hovered info tooltip
+  if (hovered >= 0) {
+    const m = hovered;
+    const txt = `mem ${String(m+1).padStart(3,'0')} · day ${days[tIdx].toFixed(2)} · ${
+      kind === 'int' ? vmax[tIdx*nens+m].toFixed(1) + ' m/s'
+                    : (size[tIdx*nens+m] > 0 ? size[tIdx*nens+m].toFixed(0) + ' km' : 'no ring')}`;
+    c.font = '10px system-ui, sans-serif'; c.textAlign = 'left';
+    const tw = c.measureText(txt).width;
+    c.fillStyle = T.surface; c.strokeStyle = T.border;
+    const tx = Math.min(R1.x1 - tw - 10, xp(days[tIdx]) + 8), ty = R1.y1 + 18;
+    c.fillRect(tx - 4, ty - 11, tw + 8, 15);
+    c.strokeRect(tx - 4, ty - 11, tw + 8, 15);
+    c.fillStyle = T.text; c.fillText(txt, tx, ty);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* row 2 : structure panels                                            */
+/* ------------------------------------------------------------------ */
+function drawHint(c, W, H, txt) {
+  clearPanel(c, W, H);
+  c.fillStyle = T.muted; c.font = '13px system-ui, sans-serif'; c.textAlign = 'center';
+  c.fillText(txt, W/2, H/2);
+}
+
+async function ensureStruct(m) {
+  if (structCache.has(m)) return structCache.get(m);
+  const pm = poolMembers[m];
+  const name = 'mem' + String(pm + 1).padStart(3, '0') + '.bin.gz';
+  readout.textContent = 'loading realization ' + name + ' …';
+  const r = await fetch(DATA + 'structure/' + name);
+  if (!r.ok) throw new Error('failed to load ' + name);
+  const buf = await r.arrayBuffer();
+  let out;
+  if (typeof DecompressionStream !== 'undefined') {
+    const stream = new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'));
+    out = await new Response(stream).arrayBuffer();
+  } else {
+    throw new Error('gzip not supported in this browser');
+  }
+  const steps = decodeStruct(out);
+  structCache.set(m, steps);
+  return steps;
+}
+function decodeStruct(buf) {
+  const q = META.structure.quant;
+  const ns = META.structure.n_steps;
+  const stepBytes = 1024 + 2048 + 320 + 320 + 640;   // wind, pstar, vt, vr, theta
+  const steps = new Array(ns);
+  for (let s = 0; s < ns; s++) {
+    const o = s * stepBytes;
+    steps[s] = {
+      wind:  new Int8Array(buf, o, 1024),
+      pstar: new Int16Array(buf, o + 1024, 1024),
+      vt:    new Int8Array(buf, o + 3072, 320),
+      vr:    new Int8Array(buf, o + 3392, 320),
+      theta: new Int16Array(buf, o + 3712, 320)
+    };
+  }
+  return steps;
+}
+/* crop window is always centred on the vortex: i0=(ci-32)%128, j0=clamp(cj-32,0,64);
+   structure step s corresponds to hourly track index 3*s */
+function j0of(m, s) {
+  const cj = trackY[Math.min(nt - 1, 3 * s) * nens + m];
+  return Math.max(0, Math.min(cj - 32, 64));
+}
+
+function renderRow2() {
+  const m = sel();
+  if (m < 0) {
+    const msg = 'hover over a time series to inspect a realization';
+    drawHint(ctx.wind, cWind._w, cWind._h, msg);
+    drawHint(ctx.vt, cVt._w, cVt._h, msg);
+    return;
+  }
+  const seq = ++renderSeq;
+  ensureStruct(m).then(steps => {
+    if (seq !== renderSeq || sel() !== m) return;
+    const si = Math.min(META.structure.n_steps - 1, Math.round(tIdx / 3));
+    renderWind(m, steps[si], si);
+    renderXsectMerged(steps[si]);
+  }).catch(err => {
+    const msg = 'structure data unavailable: ' + (err && err.message ? err.message : err) +
+      (location.protocol === 'file:' ? ' — serve this folder over HTTP to see the maps' : '');
+    drawHint(ctx.wind, cWind._w, cWind._h, msg);
+    drawHint(ctx.vt, cVt._w, cVt._h, msg);
+    readout.innerHTML = '&#9888; ' + msg;
+  });
+}
+
+/* ---------- wind map ---------- */
+function renderWind(m, step, si) {
+  const c = ctx.wind, W = cWind._w, H = cWind._h;
+  const q = META.structure.quant;
+  const MAP = META.structure.map;
+  const size = MAP.size;                 // 32
+  const cells = MAP.cells;               // 64 grid cells window
+  const cap = 65;                        // m/s, fixed color scale
+  clearPanel(c, W, H);
+  title(c, W, '(d) Boundary-layer wind speed (m/s)');
+  const x0 = 66, y0 = 24, plotW = 280, plotH = 280;
+  const cbx = x0 + plotW + 14, cby = y0, cbw = 10, cbh = plotH;
+  const cell = plotW / size;
+
+  // window origin in grid cells (x periodic -> always centred; y clamped at the walls)
+  const sIdx = Math.min(nt - 1, si * 3);
+  const ci = trackX[sIdx*nens + m], cj = trackY[sIdx*nens + m];
+  const i0 = (ci - 32) % 128;
+  const j0 = j0of(m, si);
+
+  const w = new Float32Array(size * size);
+  for (let k = 0; k < size*size; k++) w[k] = step.wind[k] * q.wind_scale_ms;
+  flipY(w, size, size);                       // north up
+
+  // re-centre on the vortex: the data window may be clamped against a wall (j0), so
+  // shift the (already flipped) image by `delta` cells so the vortex always sits at the
+  // plot centre; the parts of the centred window that fall beyond the domain are void.
+  const delta = (cj - j0) / 2 - 16;
+
+  // smooth filled-contour shading (matplotlib contourf style): bilinearly upsample
+  // the field, quantise into 5 m/s bands, then draw crisply so the band edges are
+  // smooth curves rather than the raw 32x32 cells
+  const F = 8, band = 5, m2 = size * F;
+  const wS = upsampleBilinear(w, size, size, F);
+  for (let k = 0; k < m2*m2; k++) wS[k] = Math.min(cap, Math.floor(wS[k] / band) * band);
+  const off = document.createElement('canvas');
+  off.width = m2; off.height = m2;
+  const octx = off.getContext('2d');
+  octx.putImageData(fieldImage(wS, m2, m2, LUT_WIND, 0, cap), 0, 0);
+  c.imageSmoothingEnabled = false;
+  // out-of-domain strips (void): hatched fill + dashed line at the domain edge
+  const drawVoid = (yy, hh) => {
+    if (hh <= 0) return;
+    c.fillStyle = 'rgba(160,160,160,0.12)';
+    c.fillRect(x0, yy, plotW, hh);
+    c.strokeStyle = 'rgba(140,140,140,0.45)'; c.lineWidth = 1;
+    c.save();
+    c.beginPath(); c.rect(x0, yy, plotW, hh); c.clip();
+    c.beginPath();
+    for (let py2 = yy - plotW; py2 < yy + hh + plotW; py2 += 8) {
+      c.moveTo(x0, py2); c.lineTo(x0 + plotW, py2 + plotW);
+    }
+    c.stroke();
+    c.restore();
+  };
+  let edgeY = null;
+  if (delta > 0) { drawVoid(y0, delta * cell); edgeY = y0 + delta * cell; }
+  else if (delta < 0) { const yy = y0 + (size + delta) * cell; drawVoid(yy, -delta * cell); edgeY = yy; }
+  if (edgeY !== null) {
+    c.strokeStyle = 'rgba(120,120,120,0.8)'; c.setLineDash([4, 3]); c.lineWidth = 1;
+    c.beginPath(); c.moveTo(x0, edgeY); c.lineTo(x0 + plotW, edgeY); c.stroke();
+    c.setLineDash([]);
+    c.fillStyle = T.muted; c.font = '9px system-ui, sans-serif'; c.textAlign = 'center';
+    c.fillText('domain edge', x0 + plotW / 2, edgeY - 5);
+  }
+  // clip the shifted image to the plot rect so nothing spills over the axes
+  c.save();
+  c.beginPath(); c.rect(x0, y0, plotW, plotH); c.clip();
+  c.drawImage(off, x0, y0 + delta * cell, plotW, plotH);
+  c.restore();
+
+  frame(c, x0, y0, x0 + plotW, y0 + plotH);
+  colorbar(c, cbx, cby, cbw, cbh, LUT_WIND, 0, cap, v => v.toFixed(0) + ' m/s', 3, 5);
+  // axes: km relative to the vortex centre; the window samples grid offsets -32..+30
+  // cells in x, and in y it is clamped at the walls (so the y range is asymmetric there)
+  c.font = '10px system-ui, sans-serif'; c.textAlign = 'center'; c.fillStyle = T.muted;
+  const xkmMin = -(MAP.cells / 2) * MAP.dx_km;
+  const xkmMax = (MAP.cells / 2 - 2) * MAP.dx_km;
+  const ykmMin = xkmMin, ykmMax = xkmMax;   // centred window -> same km range as x
+  const xTicks = [], yTicks = [];
+  for (let v = Math.ceil(xkmMin / 200) * 200; v <= xkmMax + 1e-9; v += 200) xTicks.push(v);
+  for (let v = Math.ceil(ykmMin / 200) * 200; v <= ykmMax + 1e-9; v += 200) yTicks.push(v);
+  for (const v of xTicks) {
+    const px = x0 + (v - xkmMin) / (xkmMax - xkmMin) * plotW;
+    c.fillText(String(v), px, y0 + plotH + 13);
+    c.strokeStyle = T.grid; c.beginPath(); c.moveTo(px, y0 + plotH); c.lineTo(px, y0 + plotH + 4); c.stroke();
+  }
+  for (const v of yTicks) {
+    const py = y0 + plotH - (v - ykmMin) / (ykmMax - ykmMin) * plotH;
+    c.textAlign = 'right';
+    c.fillText(String(v), x0 - 5, py + 3);
+    c.strokeStyle = T.grid; c.beginPath(); c.moveTo(x0, py); c.lineTo(x0 - 4, py); c.stroke();
+  }
+  c.textAlign = 'center'; c.fillText('x − x_c (km)', x0 + plotW/2, H - 4);
+  c.save(); c.translate(11, y0 + plotH/2); c.rotate(-Math.PI/2);
+  c.fillText('y − y_c (km)', 0, 0); c.restore();
+
+  // 15 m/s ring (contour)
+  const segs = marchingSquares(w, size, size, 15);   // the 15 m/s isotach = vortex size
+  c.save();
+  c.beginPath(); c.rect(x0, y0, plotW, plotH); c.clip();
+  c.strokeStyle = '#ffffff'; c.lineWidth = 1.6;
+  c.beginPath();
+  for (const [ax, ay, bx, by] of segs) {
+    c.moveTo(x0 + ax * cell, y0 + (ay + delta) * cell);
+    c.lineTo(x0 + bx * cell, y0 + (by + delta) * cell);
+  }
+  c.stroke();
+  if (segs.length) {
+    let ty = Infinity, tx = 0;
+    for (const [ax, ay, bx, by] of segs) {
+      const y = Math.min(ay, by);
+      if (y < ty) { ty = y; tx = (ax + bx) / 2; }
+    }
+    c.fillStyle = '#ffffff'; c.font = 'bold 9px system-ui, sans-serif'; c.textAlign = 'center';
+    c.fillText('15 m/s', x0 + tx * cell, Math.max(y0 + 8, y0 + (ty - 0.5 + delta) * cell));
+  }
+  // tracks inside the window, up to the current time (black = ensemble mean,
+  // coloured = the selected realization, matching its panel-(a) colour). Grid cells are
+  // mapped through the ACTUAL window origin (x periodic via i0, y clamped via j0) then
+  // flipped north-up, so a track terminates exactly at the + marker even when the window
+  // is clamped against a wall (the old centre-relative mapping drifted ~7.5 cells south
+  // of the + for wall-hugging vortices, 2026-08-03).
+  const trace = (X, Y, at) => {
+    c.beginPath();
+    let started = false;
+    for (let i = 0; i <= tIdx; i++) {
+      const tx = X[at(i)], ty = Y[at(i)];
+      const mx = ((tx - i0 + 128) % 128) / 2;    // map column (0..32)
+      const my = (ty - j0) / 2;                  // unflipped map row (0..32)
+      if (mx < 0 || mx >= size || my < 0 || my >= size) { started = false; continue; }
+      const px = x0 + (mx + 0.5) * cell;
+      const py = y0 + plotH - (my + 0.5) * cell + delta * cell; // flip y: north up + recentre
+      if (!started) { c.moveTo(px, py); started = true; }
+      else c.lineTo(px, py);
+    }
+  };
+  const mAt = i => i * nens + m;                 // member track indexing
+  const eAt = i => i;                            // ensemble-mean track indexing
+  // ensemble mean (dashed muted line, same style as panel (a)'s mean track)
+  c.setLineDash([4, 3]);
+  c.strokeStyle = 'rgba(255,255,255,0.85)'; c.lineWidth = 2.4;   // casing
+  trace(meanTrackX, meanTrackY, eAt); c.stroke();
+  c.strokeStyle = T.muted; c.lineWidth = 1.2;
+  trace(meanTrackX, meanTrackY, eAt); c.stroke();
+  c.setLineDash([]);
+  // the selected realization (its panel-(a) colour, white casing)
+  c.strokeStyle = 'rgba(255,255,255,0.9)'; c.lineWidth = 3;
+  trace(trackX, trackY, mAt); c.stroke();
+  c.strokeStyle = memberColor(m); c.lineWidth = 1.6;
+  trace(trackX, trackY, mAt); c.stroke();
+
+  // vortex centre marker (centre cell of the window)
+  const mcx = x0 + 16.5 * cell, mcy = y0 + plotH - 16.5 * cell;   // vortex centred
+  c.strokeStyle = '#000'; c.lineWidth = 1.4;
+  c.beginPath();
+  c.moveTo(mcx - 6, mcy); c.lineTo(mcx + 6, mcy);
+  c.moveTo(mcx, mcy - 6); c.lineTo(mcx, mcy + 6);
+  c.stroke();
+  c.strokeStyle = '#fff'; c.lineWidth = 0.8;
+  c.beginPath(); c.arc(mcx, mcy, 4.5, 0, 6.2832); c.stroke();
+  c.restore();
+}
+
+/* ---------- radius-height cross-sections ---------- */
+function renderXsect(c, cv, shade, contour, levels, span, cspan, lut, lo, hi,
+                 contourLevels, fmt, titleTxt, radiusLabel) {
+  const W = cv._w, H = cv._h;
+  const nr = shade[0].length, nl = shade.length;
+  clearPanel(c, W, H);
+  title(c, W, titleTxt);
+  // same plot geometry as the wind map panel (44, 30, 250, 250 + colourbar at +14),
+  // so the two panels' content lines up
+  const x0 = 66, y0 = 24, plotW = 280, plotH = 280;
+
+  // clean contourf-style band steps (matching the wind map panel): bilinearly
+  // upsample the shading field, quantise into bands (2.5 m/s for a +/-10 span,
+  // 5 m/s otherwise), then draw crisply so the band edges are smooth curves
+  const band = (hi - lo) <= 20 ? 2.5 : 5;
+  const F = 16, mw = nr * F, mh = nl * F;
+  const flat = new Float32Array(nr * nl);
+  for (let k = 0; k < nl; k++) for (let r = 0; r < nr; r++) flat[k*nr + r] = shade[k][r];
+  const flatS = upsampleBilinear(flat, nr, nl, F);
+  for (let k = 0; k < mw*mh; k++) {
+    const q = Math.floor(flatS[k] / band) * band;
+    flatS[k] = q < lo ? lo : (q > hi ? hi : q);
+  }
+  const off = document.createElement('canvas');
+  off.width = mw; off.height = mh;
+  const octx = off.getContext('2d');
+  octx.putImageData(fieldImage(flatS, mw, mh, lut, lo, hi), 0, 0);
+  c.imageSmoothingEnabled = false;
+  c.drawImage(off, x0, y0, plotW, plotH);
+  frame(c, x0, y0, x0 + plotW, y0 + plotH);
+  colorbar(c, x0 + plotW + 14, y0, 10, plotH, lut, lo, hi, fmt, 3, band);
+
+  // x axis: radius km
+  c.font = '10px system-ui, sans-serif'; c.textAlign = 'center'; c.fillStyle = T.muted;
+  const rmax = nr * META.structure.xsect.dr_km;
+  for (let v = 0; v <= rmax; v += 200) {
+    const px = x0 + v / rmax * plotW;
+    c.fillText(String(v), px, y0 + plotH + 13);
+    c.strokeStyle = T.grid; c.beginPath(); c.moveTo(px, y0 + plotH); c.lineTo(px, y0 + plotH + 4); c.stroke();
+  }
+  c.fillText(radiusLabel || 'radius (km)', x0 + plotW/2, H - 4);
+
+  // y axis: pressure levels (level 0 at top)
+  c.textAlign = 'right';
+  for (let k = 0; k < nl; k++) {
+    const py = y0 + (k + 0.5) / nl * plotH;
+    if (k % 2 === 0) {
+      c.fillText(levels[k].toFixed(0), x0 - 5, py + 3);
+    }
+    c.strokeStyle = T.grid; c.beginPath(); c.moveTo(x0, py); c.lineTo(x0 - 3, py); c.stroke();
+  }
+  c.save(); c.translate(11, y0 + plotH/2); c.rotate(-Math.PI/2);
+  c.fillText('pressure (hPa)', 0, 0); c.restore();
+
+  // contours (drawn from the contour field, filtered by its own span)
+  const cellW = plotW / nr, cellH = plotH / nl;
+  c.lineWidth = 1;
+  for (const lv of contourLevels) {
+    if (lv < -cspan || lv > cspan) continue;
+    const segs = marchingSquares(contour, nr, nl, lv);
+    c.strokeStyle = lv >= 0 ? 'rgba(40,40,40,0.85)' : 'rgba(255,255,255,0.9)';
+    c.beginPath();
+    for (const [ax, ay, bx, by] of segs) {
+      c.moveTo(x0 + ax * cellW, y0 + ay * cellH);
+      c.lineTo(x0 + bx * cellW, y0 + by * cellH);
+    }
+    c.stroke();
+  }
+  // label a few major tangential-wind contours (10 / 20 / 30 m/s) ON the line:
+  // vertical text along the (mostly vertical) contours, on a light chip so the
+  // label stays readable over the shading
+  for (const lv of [10, 20, 30]) {
+    if (lv < -cspan || lv > cspan) continue;
+    const segs = marchingSquares(contour, nr, nl, lv);
+    if (!segs.length) continue;
+    // anchor: midpoint of the outermost (rightmost) segment of this level
+    let bx = -1, by = 0;
+    for (const sg of segs) {
+      const mx = (sg[0] + sg[2]) / 2, my = (sg[1] + sg[3]) / 2;
+      if (mx > bx) { bx = mx; by = my; }
+    }
+    const text = lv + ' m/s';
+    c.font = 'bold 9px system-ui, sans-serif';
+    const tw = c.measureText(text).width;
+    c.save();
+    c.translate(x0 + bx * cellW, y0 + by * cellH);
+    c.rotate(-Math.PI / 2);
+    c.fillStyle = 'rgba(255,255,255,0.92)';        // label chip (no outline)
+    c.fillRect(-tw / 2 - 2, 3 - 10, tw + 4, 11);
+    c.fillStyle = '#1a1a1a';
+    c.textAlign = 'center';
+    c.fillText(text, 0, 3);
+    c.restore();
+  }
+
+}
+
+function renderXsectMerged(step) {
+  const q = META.structure.quant;
+  // shading: azimuthal-mean radial wind (m/s) — inflow negative, outflow positive
+  const vr = new Float32Array(320);
+  let vrmx = 0;
+  for (let k = 0; k < 320; k++) { vr[k] = step.vr[k] * q.vr_scale_ms; vrmx = Math.max(vrmx, Math.abs(vr[k])); }
+  const vspan = Math.max(10, Math.ceil(vrmx / 5) * 5);
+  const shade = [];
+  for (let k = 0; k < 8; k++) shade.push(vr.subarray(k*40, k*40 + 40));
+  // contours: azimuthal-mean tangential wind (m/s)
+  const vt = new Float32Array(320);
+  let vtmx = 0;
+  for (let k = 0; k < 320; k++) { vt[k] = step.vt[k] * q.vt_scale_ms; vtmx = Math.max(vtmx, Math.abs(vt[k])); }
+  const cspan = Math.max(20, Math.ceil(vtmx / 10) * 10);
+  const levels = META.structure.xsect.p_hpa.map(v => v / 100);
+  renderXsect(ctx.vt, cVt, shade, vt, levels, vspan, cspan, LUT_RDBU, -vspan, vspan,
+    [5, 10, 15, 20, 30, 40, 50], v => v.toFixed(0),
+    '(e) Radial wind (m/s) — shading\ntangential wind (m/s) — contours',
+    'radius (km)');
+}
+
+/* ------------------------------------------------------------------ */
+/* interaction                                                         */
+/* ------------------------------------------------------------------ */
+function setTime(i, silent) {
+  tIdx = Math.max(0, Math.min(nt - 1, i));
+  if (!silent) { slider.value = tIdx; timeLabel.textContent = 'day ' + days[tIdx].toFixed(2); }
+  render();
+}
+
+function pick(panel, px, py) {
+  let best = Infinity, bm = -1, bi = -1;
+  if (panel === 'track') {
+    for (let m = 0; m < nens; m++) {
+      for (let i = 0; i < nt; i += 1) {
+        const X = R1.x0 + (trackXU[i*nens+m] * 20 - TRACK_XMIN) / (TRACK_XMAX - TRACK_XMIN) * (R1.x1 - R1.x0);
+        const Y = R1.y0 - (trackY[i*nens+m] * 20 - TRACK_YMIN) / (TRACK_YMAX - TRACK_YMIN) * (R1.y0 - R1.y1);
+        const d = (X - px) ** 2 + (Y - py) ** 2;
+        if (d < best) { best = d; bm = m; bi = i; }
+      }
+    }
+  } else {
+    const f = panel === 'int' ? vmax : sizeClamped;
+    const ypx = panel === 'int' ? INT2PX : SZ2PX;
+    for (let m = 0; m < nens; m++) {
+      for (let i = 0; i < nt; i += 1) {
+        const X = R1.x0 + days[i] * DAY2PX;
+        const Y = R1.y0 - f[i*nens+m] * ypx;
+        const d = (X - px) ** 2 + (Y - py) ** 2;
+        if (d < best) { best = d; bm = m; bi = i; }
+      }
+    }
+  }
+  if (Math.sqrt(best) > 22) return { m: -1, i: -1 };
+  return { m: bm, i: bi };
+}
+
+function bindEvents() {
+  // Drag state: hovering picks a realization; pressing and dragging scrubs time
+  // (so you can move in time for a pinned realization without the mouse changing
+  // which realization is shown). Clicking (without dragging) pins / unpins.
+  const drag = { active: false, moved: false, panel: null, startX: 0, startY: 0 };
+  const evtPos = (cv, ev) => {
+    const r = cv.getBoundingClientRect();
+    return [ (ev.clientX - r.left) * (cv._w / r.width),
+             (ev.clientY - r.top) * (cv._h / r.height) ];
+  };
+  const scrubTo = (panel, px, py) => {
+    if (panel === 'track') {
+      // follow the selected realization's track path (nearest point -> time)
+      if (sel() < 0) {
+        const hit = pick('track', px, py);
+        if (hit.m >= 0) hovered = hit.m;
+      }
+      const m = sel();
+      if (m < 0) return;
+      let best = Infinity, bi = -1;
+      for (let i = 0; i < nt; i++) {
+        const X = R1.x0 + (trackXU[i*nens+m] * 20 - TRACK_XMIN) / (TRACK_XMAX - TRACK_XMIN) * (R1.x1 - R1.x0);
+        const Y = R1.y0 - (trackY[i*nens+m] * 20 - TRACK_YMIN) / (TRACK_YMAX - TRACK_YMIN) * (R1.y0 - R1.y1);
+        const d = (X - px) ** 2 + (Y - py) ** 2;
+        if (d < best) { best = d; bi = i; }
+      }
+      if (bi >= 0) setTime(bi);
+    } else {
+      // x position -> day -> hourly index (DAY2PX is px per day)
+      setTime(Math.round((px - R1.x0) / DAY2PX * 24));
+    }
+  };
+  const attach = (cv, panel) => {
+    cv.addEventListener('mousemove', ev => {
+      if (drag.active) return;            // dragging — the window handler scrubs
+      const [px, py] = evtPos(cv, ev);
+      const hit = pick(panel, px, py);
+      hovered = hit.m;
+      render();
+    });
+    cv.addEventListener('mousedown', ev => {
+      drag.active = true; drag.moved = false; drag.panel = panel;
+      drag.startX = ev.clientX; drag.startY = ev.clientY;
+    });
+    cv.addEventListener('mouseleave', () => {
+      if (!drag.active) { hovered = -1; render(); }
+    });
+    cv.addEventListener('click', ev => {
+      if (drag.moved) return;             // it was a drag, not a click
+      const [px, py] = evtPos(cv, ev);
+      const hit = pick(panel, px, py);
+      if (hit.m >= 0) pinned = pinned === hit.m ? -1 : hit.m;
+      else pinned = -1;
+      render();
+    });
+  };
+  attach(cTrack, 'track');
+  attach(cInt, 'int');
+  attach(cSize, 'size');
+
+  window.addEventListener('mousemove', ev => {
+    if (!drag.active) return;
+    if (Math.hypot(ev.clientX - drag.startX, ev.clientY - drag.startY) > 4) drag.moved = true;
+    if (!drag.moved) return;
+    const cv = drag.panel === 'track' ? cTrack : drag.panel === 'int' ? cInt : cSize;
+    const r = cv.getBoundingClientRect();
+    const px = (ev.clientX - r.left) * (cv._w / r.width);
+    const py = (ev.clientY - r.top) * (cv._h / r.height);
+    scrubTo(drag.panel, px, py);
+  });
+  window.addEventListener('mouseup', () => { drag.active = false; });
+
+  slider.addEventListener('input', () => setTime(+slider.value));
+  playBtn.addEventListener('click', () => {
+    playing = !playing;
+    playBtn.textContent = playing ? '\u23F8' : '\u25B6';
+    if (playing) playLoop();
+  });
+  document.addEventListener('keydown', ev => {
+    if (ev.key === 'Escape') { pinned = -1; render(); }
+  });
+}
+function playLoop() {
+  if (!playing) return;
+  setTime((tIdx + 2) % nt);
+  setTimeout(playLoop, 120);
+}
+
+function updateReadout() {
+  const m = sel();
+  if (m < 0) {
+    readout.innerHTML = 'move the mouse to highlight a realization &amp; see its structure below · ' +
+      '<b>day ' + days[tIdx].toFixed(2) + '</b> · drag a panel (or use the slider / play) to move in time · click to pin, Esc to unpin';
+    return;
+  }
+  const i = tIdx;
+  const x = trackX[i*nens+m], y = trackY[i*nens+m];
+  const v = vmax[i*nens+m], sz = size[i*nens+m];
+  readout.innerHTML =
+    'member <b>' + String(m+1).padStart(3,'0') + '</b> (pool member ' + (poolMembers[m]+1) + ' of 200) · ' +
+    'day <b>' + days[i].toFixed(2) + '</b> · track (' + (x*20).toFixed(0) + ', ' + (y*20).toFixed(0) + ') km · ' +
+    'V<sub>max</sub> <b>' + v.toFixed(1) + '</b> m/s · ' +
+    'size ' + (sz > 0 ? '<b>' + sz.toFixed(0) + '</b> km (15 m/s ring)' : '<b>n/a</b> (no 15 m/s ring)');
+}
+
+function render() {
+  renderTrack();
+  renderTimePanel(ctx.int, cInt, 'int');
+  renderTimePanel(ctx.size, cSize, 'size');
+  renderRow2();
+  updateReadout();
+}
+
+/* ------------------------------------------------------------------ */
+/* file:// notice + global error surfacing (never silently stuck)      */
+/* ------------------------------------------------------------------ */
+if (location.protocol === 'file:') {
+  const fn = document.getElementById('fileNotice');
+  if (fn) fn.style.display = 'block';
+}
+window.addEventListener('unhandledrejection', ev => {
+  const el = document.getElementById('readout');
+  if (el && el.textContent.indexOf('loading data') >= 0) {
+    el.innerHTML = '&#9888; loading failed: ' +
+      ((ev.reason && ev.reason.message) || String(ev.reason)) +
+      ' — see the browser console (F12).';
+  }
+  console.error('unhandled rejection:', ev.reason);
+});
+window.addEventListener('error', ev => {
+  const el = document.getElementById('readout');
+  if (el && el.textContent.indexOf('loading data') >= 0) {
+    el.innerHTML = '&#9888; page error: ' + (ev.message || 'unknown') +
+      ' — see the browser console (F12).';
+  }
+});
+
+loadData();
+})();
+</script>
+
+</body>
+</html>

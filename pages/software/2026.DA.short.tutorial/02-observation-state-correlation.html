@@ -8,6 +8,8 @@
 <meta name="author" content="Yue Ying">
 
 <link rel="stylesheet" href="../../../style.css">
+<link rel="stylesheet" href="chapters.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="widgets/corr-explorer/style.css">
 
 <!-- Global site tag (gtag.js) - Google Analytics -->
@@ -26,74 +28,6 @@
 
 <title>Data Assimilation Interactive Tutorials · Yue (Michael) Ying</title>
 
-<style>
-  /* This article hosts an interactive widget, so the standard 800 px page
-     column is widened; everything else reuses the site stylesheet.
-     display:block (instead of the site's inline-block shrink-to-fit) so the
-     page cannot be forced wider than the viewport by its content on phones. */
-  #widget-page { display: block; max-width: 1180px; margin: 0 auto; }
-  #widget-page h3 { font-size: 17px; margin: 28px 0 8px; }
-  #widget-page code { overflow-wrap: break-word; }
-  .widget-nav {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 6px 0 18px;
-    font-size: 0.85rem;
-  }
-  /* "Courses" home tab, far left */
-  .widget-nav .nav-home {
-    flex: 0 0 auto;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 5px 12px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--surface);
-    color: var(--accent-link);
-    text-decoration: none;
-    font-weight: 500;
-    white-space: nowrap;
-  }
-  .widget-nav .nav-home:hover { border-color: var(--accent); }
-  /* prev/next arrows grouped around the highlighted current-part title */
-  .widget-nav .nav-page {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    min-width: 0;
-    margin: 0 auto;
-  }
-  .widget-nav .nav-arrow {
-    color: var(--accent-link);
-    text-decoration: none;
-    border-bottom: none;
-    font-size: 1rem;
-    line-height: 1;
-    padding: 2px 4px;
-  }
-  .widget-nav .nav-disabled { color: var(--text-muted); pointer-events: none; }
-  /* current part shown as an active (red) tab; truncates on narrow phones */
-  .widget-nav .nav-current {
-    white-space: nowrap;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    background: var(--accent);
-    color: #fff;
-    border-radius: 6px;
-    padding: 5px 12px;
-    font-weight: 600;
-  }
-  .hint { font-size: 0.85rem; color: var(--text-muted); margin: 6px 0 0; }
-  @media (max-width: 560px) {
-    #widget-page { padding-left: 14px; padding-right: 14px; }
-  }
-  /* prevent slight horizontal overflow from vertical scrollbar width on
-     some mobile engines (html-only — not body, to avoid iOS scroll break) */
-  html { overflow-x: hidden; }
-</style>
 </head>
 
 <body>
@@ -105,11 +39,11 @@
     <div class="page" id="widget-page">
 
       <nav class="widget-nav">
-        <a href="../../../courses.html" class="nav-home">&#8592; Courses</a>
+        <a href="toc.html" class="nav-home"><i class="fa fa-arrow-up" aria-hidden="true"></i> Table of Contents</a>
         <span class="nav-page">
-          <span class="nav-arrow nav-disabled" aria-hidden="true">&#8592;</span>
-          <span class="nav-current">Part 1 &#183; Observation–State Correlation Explorer</span>
-          <span class="nav-arrow nav-disabled" aria-hidden="true">&#8594;</span>
+          <a class="nav-arrow" href="01-bayes-gaussians.html" aria-label="Previous chapter"><i class="fa fa-arrow-left" aria-hidden="true"></i><span class="nav-label">Previous</span></a>
+          <span class="nav-current"><span class="nav-short"><i class="fa fa-book" aria-hidden="true"></i> Ch 2</span><span class="nav-long">Ch 2 &#183; Observation&#8211;State Correlation Explorer</span></span>
+          <a class="nav-arrow" href="03-challenges-dynamical-systems.html" aria-label="Next chapter"><span class="nav-label">Next</span><i class="fa fa-arrow-right" aria-hidden="true"></i></a>
         </span>
       </nav>
 

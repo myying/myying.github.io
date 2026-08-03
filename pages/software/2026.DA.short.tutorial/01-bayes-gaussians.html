@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="Yue (Michael) Ying — Data Assimilation Interactive Tutorials, Ch 1: Bayes' rule for Gaussians — 1-D and 2-D widgets">
+<meta name="keywords" content="data assimilation, Bayes, Gaussian, bivariate, covariance, posterior, prior, likelihood, tutorial, NEDAS">
+<meta name="author" content="Yue Ying">
+
+<link rel="stylesheet" href="../../../style.css">
+<link rel="stylesheet" href="chapters.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="widgets/bayes-gaussian/style.css">
+<link rel="stylesheet" href="widgets/bivariate-gaussian/style.css">
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-148955805-2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'UA-148955805-2');
+</script>
+
+<!-- MathJax -->
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+<title>Data Assimilation Interactive Tutorials · Yue (Michael) Ying</title>
+
+</head>
+
+<body>
+  <div class="header">
+    <h1>Yue (Michael) Ying</h1>
+  </div>
+
+  <div class="container">
+    <div class="page" id="widget-page">
+
+      <nav class="widget-nav">
+        <a href="toc.html" class="nav-home"><i class="fa fa-arrow-up" aria-hidden="true"></i> Table of Contents</a>
+        <span class="nav-page">
+          <span class="nav-current"><span class="nav-short"><i class="fa fa-book" aria-hidden="true"></i> Ch 1</span><span class="nav-long">Ch 1 &#183; Bayes&#8217; rule for Gaussians</span></span>
+          <a class="nav-arrow" href="02-observation-state-correlation.html" aria-label="Next chapter"><span class="nav-label">Next</span><i class="fa fa-arrow-right" aria-hidden="true"></i></a>
+        </span>
+      </nav>
+
+      <p>
+        Data assimilation combines a <strong>model forecast</strong> (the prior) with an
+        <strong>observation</strong> to produce the <strong>analysis</strong> (the posterior) — the best
+        estimate of the state and its uncertainty. When the inputs are Gaussian, Bayes' rule
+        has a closed form: the posterior is the pointwise product of the pdfs, rescaled so it
+        integrates to one. This page shows that rule in one and two variables. Everything else
+        (matrices, grid points, ensemble members) is stripped away; the two figures below are
+        the whole of linear-Gaussian analysis.
+      </p>
+
+      <!-- ================================================================== -->
+      <h3 id="sec-1d">1-D: one variable — the analysis as a weighted average</h3>
+      <p>
+        The simplest version of the problem: one variable, one observation of it. The prior is
+        the forecast pdf $N(\mu_b, \sigma_b^2)$; the observation likelihood is
+        $N(y, \sigma_o^2)$; Bayes' rule returns the posterior $N(\mu_a, \sigma_a^2)$, whose mean
+        is a precision-weighted average of prior mean and observation.
+      </p>
+      <p class="hint">
+        <strong>Try it:</strong> drag the sliders to set the prior (mean and std) and the observation
+        likelihood (mean and std) — the posterior updates live, always sitting between its two
+        inputs and pulled toward the more certain one.
+      </p>
+
+      <!-- ================= Bayes' rule for Gaussians (1-D) =============== -->
+      <div class="da-widget" id="bayes-gaussian">
+
+        <main class="viz-root">
+
+          <div class="workspace">
+
+            <div class="plot-wrap">
+              <canvas id="bg-plot"></canvas>
+            </div>
+
+            <div class="controls">
+              <div class="ctl-group" data-color="prior">
+                <h4 class="ctl-title">Prior <span class="ctl-note">model forecast</span></h4>
+                <label class="ctl-row">
+                  <span class="ctl-label">mean</span>
+                  <input type="range" id="bg-mu-b" min="-4" max="4" step="0.1" value="0">
+                  <span class="ctl-val" id="bg-mu-b-val"></span>
+                </label>
+                <label class="ctl-row">
+                  <span class="ctl-label">std</span>
+                  <input type="range" id="bg-sigma-b" min="0.2" max="2.5" step="0.05" value="1">
+                  <span class="ctl-val" id="bg-sigma-b-val"></span>
+                </label>
+              </div>
+              <div class="ctl-group" data-color="obs">
+                <h4 class="ctl-title">Observation <span class="ctl-note">likelihood</span></h4>
+                <label class="ctl-row">
+                  <span class="ctl-label">mean</span>
+                  <input type="range" id="bg-obs-mu" min="-4" max="4" step="0.1" value="1.2">
+                  <span class="ctl-val" id="bg-obs-mu-val"></span>
+                </label>
+                <label class="ctl-row">
+                  <span class="ctl-label">std</span>
+                  <input type="range" id="bg-obs-sigma" min="0.2" max="2.5" step="0.05" value="0.5">
+                  <span class="ctl-val" id="bg-obs-sigma-val"></span>
+                </label>
+              </div>
+              <label class="ctl-toggle">
+                <input type="checkbox" id="bg-show-product" checked>
+                <span>show prior &times; likelihood</span>
+              </label>
+            </div>
+
+          </div>
+
+          <div class="readout" id="bg-readout" role="status"></div>
+
+          <ul class="legend">
+            <li><span class="mark prior"></span> prior pdf (forecast)</li>
+            <li><span class="mark obs"></span> observation likelihood</li>
+            <li><span class="mark post"></span> posterior pdf</li>
+            <li><span class="mark product"></span> prior &times; likelihood (unnormalized)</li>
+          </ul>
+
+        </main>
+
+      </div>
+      <!-- ================= end 1-D widget ================================ -->
+
+      <h3>Reading the panels — 1-D</h3>
+      <p>
+        <b>1 &#183; The prior</b> — the model forecast as a probability density $N(\mu_b, \sigma_b^2)$:
+        the best guess sits at the centre, and $\sigma_b$ measures forecast uncertainty. A wider
+        pdf is a more uncertain forecast. Slide $\sigma_b$ and watch both the shape and the
+        posterior respond.
+      </p>
+      <p>
+        <b>2 &#183; The observation likelihood</b> — the likelihood of observing the value $y$ given
+        that the true state is $x$. It is centred on the observation, with width $\sigma_o$ set by
+        the observation error: a precise instrument gives a narrow, tall likelihood; an imprecise
+        one a wide, flat one.
+      </p>
+      <p>
+        <b>3 &#183; The posterior</b> — the analysis. Bayes' rule
+        $p(x \mid y) \propto p(x) \cdot \ell(y \mid x)$; for two Gaussians it is the Gaussian
+        $N(\mu_a, \sigma_a^2)$ with precision-weighted mean
+        $\mu_a = (\mu_b/\sigma_b^2 + y/\sigma_o^2) / (1/\sigma_b^2 + 1/\sigma_o^2)$ and
+        $\sigma_a = 1/\sqrt{1/\sigma_b^2 + 1/\sigma_o^2}$. The posterior is always <em>narrower</em>
+        than both inputs — combining information reduces uncertainty — and its mean is pulled toward
+        the more certain one. With the default settings, the precise observation (small $\sigma_o$)
+        drags the posterior mean to 0.96, far from the prior's 0.
+      </p>
+      <p>
+        <b>4 &#183; The product curve</b> — with the toggle on, the dashed violet curve is the raw
+        pointwise product $p(x) \cdot \ell(y \mid x)$, before normalization. The red posterior is
+        exactly this curve divided by its integral. This is the whole of linear-Gaussian data
+        assimilation in one figure: the Kalman filter, the ensemble Kalman filter, and 3D-Var all
+        compute this same posterior, in different coordinates and at higher dimension.
+      </p>
+
+      <hr class="part-divider" />
+
+      <!-- ================================================================== -->
+      <h3 id="sec-2d">2-D: two variables, one observed</h3>
+      <p>
+        The 1-D example was a single variable; data assimilation operates on whole states, and the
+        bridge from one variable to many is the <strong>covariance</strong> — how errors at
+        different variables relate to each other. This is the two-variable version of the same
+        Bayes' rule: a bivariate Gaussian prior, an observation of <em>y only</em> — and yet
+        <em>x</em>'s posterior tightens as well, purely through the correlation. The main panel
+        shows the joint pdf as covariance ellipses; the side panels show what each variable looks
+        like on its own: its <strong>marginal</strong> pdf.
+      </p>
+      <p class="hint">
+        <strong>Try it:</strong> drag the correlation slider &rho; to zero — the observation of
+        <em>y</em> stops affecting <em>x</em>; raise it, and information leaks from the observed
+        variable into the unobserved one. Watch the marginals and the ellipses tilt and shrink.
+      </p>
+
+      <!-- ================= Bivariate Gaussian (2-D) ====================== -->
+      <div class="da-widget" id="bivariate-gaussian">
+
+        <main class="viz-root">
+
+          <div class="workspace">
+
+            <div class="plot-wrap">
+              <div class="corner">
+                <canvas id="b2-margx"></canvas>
+                <div class="corner-legend">
+                  <div class="cl-title">joint pdf</div>
+                  <div><span class="swatch prior"></span> prior</div>
+                  <div><span class="swatch post"></span> posterior</div>
+                  <div><span class="swatch obs"></span> observation of y</div>
+                </div>
+                <canvas id="b2-joint"></canvas>
+                <canvas id="b2-margy"></canvas>
+              </div>
+            </div>
+
+            <div class="controls">
+              <div class="ctl-group" data-color="prior">
+                <h4 class="ctl-title">Prior <span class="ctl-note">joint pdf</span></h4>
+                <label class="ctl-row">
+                  <span class="ctl-label">mean x</span>
+                  <input type="range" id="b2-mu-x" min="-4" max="4" step="0.1" value="0">
+                  <span class="ctl-val" id="b2-mu-x-val"></span>
+                </label>
+                <label class="ctl-row">
+                  <span class="ctl-label">mean y</span>
+                  <input type="range" id="b2-mu-y" min="-4" max="4" step="0.1" value="0">
+                  <span class="ctl-val" id="b2-mu-y-val"></span>
+                </label>
+                <label class="ctl-row">
+                  <span class="ctl-label">std x</span>
+                  <input type="range" id="b2-sig-x" min="0.2" max="2" step="0.05" value="1.2">
+                  <span class="ctl-val" id="b2-sig-x-val"></span>
+                </label>
+                <label class="ctl-row">
+                  <span class="ctl-label">std y</span>
+                  <input type="range" id="b2-sig-y" min="0.2" max="2" step="0.05" value="1.2">
+                  <span class="ctl-val" id="b2-sig-y-val"></span>
+                </label>
+                <label class="ctl-row">
+                  <span class="ctl-label">corr &rho;</span>
+                  <input type="range" id="b2-rho" min="-0.95" max="0.95" step="0.05" value="0.6">
+                  <span class="ctl-val" id="b2-rho-val"></span>
+                </label>
+              </div>
+              <div class="ctl-group" data-color="obs">
+                <h4 class="ctl-title">Observation <span class="ctl-note">of y</span></h4>
+                <label class="ctl-row">
+                  <span class="ctl-label">value</span>
+                  <input type="range" id="b2-obs-y" min="-4" max="4" step="0.1" value="0.8">
+                  <span class="ctl-val" id="b2-obs-y-val"></span>
+                </label>
+                <label class="ctl-row">
+                  <span class="ctl-label">error &sigma;</span>
+                  <input type="range" id="b2-obs-sigma" min="0.2" max="2" step="0.05" value="0.4">
+                  <span class="ctl-val" id="b2-obs-sigma-val"></span>
+                </label>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="readout" id="b2-readout" role="status"></div>
+
+          <ul class="legend">
+            <li><span class="mark prior"></span> prior joint pdf (ellipses at 1&sigma;, 2&sigma;, 3&sigma;)</li>
+            <li><span class="mark post"></span> posterior joint pdf</li>
+            <li><span class="mark obs"></span> observation of y (&plusmn;&sigma;<sub>o</sub> band)</li>
+            <li><span class="mark marg"></span> side panels: marginal pdfs (prior, posterior)</li>
+          </ul>
+
+        </main>
+
+      </div>
+      <!-- ================= end 2-D widget ================================ -->
+
+      <h3>Reading the panels — 2-D</h3>
+      <p>
+        <b>1 &#183; The joint pdf</b> — the prior $p(x,y) = \mathcal{N}\!\left(
+        \begin{bmatrix}\mu_x\\ \mu_y\end{bmatrix},
+        \begin{bmatrix}\sigma_x^2 & \rho\,\sigma_x\sigma_y\\ \rho\,\sigma_x\sigma_y & \sigma_y^2\end{bmatrix}
+        \right)$ drawn as its covariance ellipses at 1, 2 and 3&sigma;. The ellipse axes are the
+        standard deviations; the <em>tilt</em> is the correlation $\rho$. Rotate $\rho$ and watch
+        the ellipses lean — that tilt is the whole mechanism of this section.
+      </p>
+      <p>
+        <b>2 &#183; The observation</b> — the amber band at $y \pm \sigma_o$: the observation
+        constrains $y$ only and carries no information about $x$ directly. Its likelihood
+        $N(y, \sigma_o^2)$ is a one-dimensional curve, shown in the right-hand marginal.
+      </p>
+      <p>
+        <b>3 &#183; The posterior</b> — the same Bayes' rule as in the 1-D section, in two
+        dimensions. With the default settings the red ellipses shrink dramatically in $y$
+        ($\sigma_y$: 1.20 &rarr; 0.38) and modestly in $x$ ($\sigma_x$: 1.20 &rarr; 0.99) — the
+        correlation $\rho = 0.6$ lets the observation of $y$ sharpen $x$ too. The posterior mean is
+        pulled toward the observation, and even the correlation itself changes ($\rho$: 0.60 &rarr;
+        0.23). In information form, $\Lambda_a = \Lambda_b + H^\top R^{-1} H$ with
+        $H = [0\ 1]$: the observation simply adds precision to $y$, and the covariance couples
+        the rest.
+      </p>
+      <p>
+        <b>4 &#183; The marginals</b> — the side panels integrate out the other variable,
+        $p(x) = \int p(x,y)\,dy$: what each variable alone looks like, before (blue, dashed)
+        and after (red) assimilation. This is the key point: <em>observing $y$ sharpens the
+        marginal of $x$ even though $x$ is unobserved</em>, with the effect proportional to
+        $\rho$. Slide $\rho$ to 0 and the red and blue $x$-curves become identical.
+      </p>
+      <p>
+        <i>Next:</i> Chapter 2 — the <a href="02-observation-state-correlation.html">Observation&#8211;State Correlation Explorer</a> —
+        scales this same picture up to a 2-D temperature field: the correlation between one
+        observation and every grid point, seen through an ensemble.
+      </p>
+
+    </div>
+  </div>
+
+  <script src="../../../footer.js"></script>
+  <script src="widgets/bayes-gaussian/app.js"></script>
+  <script src="widgets/bivariate-gaussian/app.js"></script>
+</body>
+</html>

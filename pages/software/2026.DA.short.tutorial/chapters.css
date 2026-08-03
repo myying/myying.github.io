@@ -1,0 +1,132 @@
+/* Shared styles for the Data Assimilation Tutorials chapter pages
+   (pages/software/2026.DA.short.tutorial/). Linked by every chapter page and the
+   outline page; keeps the chapter navigation and layout consistent across
+   the series. Site-wide styles come from ../../../style.css.
+*/
+
+/* wide page column for the widget-hosted chapter pages */
+#widget-page { display: block; max-width: 1180px; margin: 0 auto; }
+#widget-page h3 { font-size: 17px; margin: 28px 0 8px; }
+#widget-page code { overflow-wrap: break-word; }
+
+.hint { font-size: 0.85rem; color: var(--text-muted); margin: 6px 0 0; }
+
+/* ----------------------------------------------------- chapter navigation
+   one button language for everything: “← Outline”, “← Previous” and
+   “Next →” are identical bordered pills (same height, same corner radius),
+   grouped around the highlighted current chapter title. */
+.widget-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0 18px;
+  font-size: 0.85rem;
+}
+.widget-nav .nav-home,
+.widget-nav .nav-arrow {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--accent-link);
+  text-decoration: none;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+.widget-nav .nav-home { gap: 6px; padding: 0 14px; white-space: nowrap; }
+.widget-nav .nav-arrow { gap: 7px; padding: 0 13px; white-space: nowrap; }
+.widget-nav .nav-arrow .nav-label { font-size: 0.82rem; }
+.widget-nav .nav-arrow i,
+.widget-nav .nav-home i { font-size: 0.95rem; line-height: 1; }
+.widget-nav .nav-home:hover,
+.widget-nav .nav-arrow:hover {
+  border-color: var(--accent);
+  background: var(--nav-hover);
+  color: var(--text);
+}
+/* current chapter title: highlighted accent pill, centred between buttons */
+.widget-nav .nav-page {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  margin: 0 auto;
+}
+.widget-nav .nav-current {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  white-space: nowrap;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 9px;
+  padding: 0 18px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+}
+/* full chapter title inside the pill; ellipsizes when squeezed, and on
+   narrow screens is replaced entirely by a compact “icon + Ch n” form */
+.widget-nav .nav-current .nav-long {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.widget-nav .nav-current .nav-short { display: none; }
+
+/* ------------------------------------------------ planned-chapter panel */
+.planned {
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  padding: 26px 30px;
+  margin-top: 8px;
+}
+.planned .planned-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 3px 12px;
+  margin: 0 0 14px;
+}
+.planned h3 { margin-top: 0; }
+.planned .planned-desc { font-size: 0.95rem; line-height: 1.6; margin: 10px 0 0; }
+.planned .planned-ref { font-size: 0.8rem; color: var(--text-muted); margin-top: 16px; }
+
+/* section divider used on multi-section chapter pages */
+.part-divider { border: none; border-top: 1px solid var(--border); margin: 36px 0 8px; }
+
+@media (max-width: 560px) {
+  #widget-page { padding-left: 14px; padding-right: 14px; }
+  .widget-nav { gap: 7px; }
+  .widget-nav .nav-arrow { width: 38px; min-width: 38px; padding: 0; }
+  .widget-nav .nav-arrow .nav-label { display: none; }
+  .widget-nav .nav-current { padding: 0 12px; }
+  .widget-nav .nav-current .nav-long { display: none; }
+  .widget-nav .nav-current .nav-short {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+  }
+}
+/* prevent slight horizontal overflow from vertical scrollbar width on
+   some mobile engines (html-only — not body, to avoid iOS scroll break) */
+html { overflow-x: hidden; }

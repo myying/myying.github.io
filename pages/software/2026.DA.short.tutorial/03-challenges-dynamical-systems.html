@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="Yue (Michael) Ying — Data Assimilation Interactive Tutorials, Ch 3: challenges from dynamical systems — chaos, rapid intensification, non-Gaussianity">
+<meta name="keywords" content="data assimilation, chaos, predictability, Lorenz96, tropical cyclone, non-Gaussian, tutorial, NEDAS">
+<meta name="author" content="Yue Ying">
+
+<link rel="apple-touch-icon" sizes="180x180" href="../../../site_img/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../../../site_img/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../../../site_img/favicon-16x16.png">
+<link rel="manifest" href="../../../site_img/site.webmanifest">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../../style.css">
+<link rel="stylesheet" href="chapters.css">
+<link rel="stylesheet" href="widgets/lorenz96/style.css">
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-148955805-2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'UA-148955805-2');
+</script>
+
+<!-- MathJax -->
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+<title>Ch 3 · Challenges from dynamical systems — DA Interactive Tutorials</title>
+
+<style>
+  .vort3d-embed {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    margin: 10px 0 4px;
+  }
+  .vort3d-embed iframe {
+    display: block;
+    width: 100%;
+    height: 1120px;
+    border: 0;
+    border-radius: 12px;
+  }
+</style>
+</head>
+
+<body>
+  <div class="header">
+    <h1>Yue (Michael) Ying</h1>
+  </div>
+
+  <div class="container">
+    <div class="page" id="widget-page">
+
+      <nav class="widget-nav">
+        <a href="toc.html" class="nav-home"><i class="fa fa-arrow-up" aria-hidden="true"></i> Table of Contents</a>
+        <span class="nav-page">
+          <a class="nav-arrow" href="02-observation-state-correlation.html" aria-label="Previous chapter"><i class="fa fa-arrow-left" aria-hidden="true"></i><span class="nav-label">Previous</span></a>
+          <span class="nav-current"><span class="nav-short"><i class="fa fa-book" aria-hidden="true"></i> Ch 3</span><span class="nav-long">Ch 3 &#183; Challenges from dynamical systems</span></span>
+          <a class="nav-arrow" href="04-kalman-filter.html" aria-label="Next chapter"><span class="nav-label">Next</span><i class="fa fa-arrow-right" aria-hidden="true"></i></a>
+        </span>
+      </nav>
+
+      <p>
+        The last two chapters treated the analysis as a static problem: a Gaussian prior, a Gaussian
+        observation, one posterior. Real data assimilation lives in a harder setting — the model is a
+        <strong>chaotic dynamical system</strong>, the forecast <em>spreads</em>, and after long enough
+        the error distribution is not Gaussian at all. This chapter looks at where those difficulties
+        come from, using two toy dynamical systems: the 40-variable <strong>Lorenz-96</strong> model for
+        chaos and predictability, and the <strong>vort3d</strong> tropical-cyclone model for an
+        unpredictable process (rapid intensification) and for the non-Gaussianity that position error
+        produces. The analysis schemes in the next part are, at bottom, answers to exactly these
+        challenges.
+      </p>
+
+      <!-- ================================================================== -->
+      <h3 id="sec-chaos">1 &#183; Chaos: the forecast spreads</h3>
+      <p>
+        Lorenz-96 is the standard toy for predictability studies: 40 variables on a ring,
+        $\dot x_i = (x_{i+1}-x_{i-2})x_{i-1} - x_i + F$ with $F=8$. It is deterministic and
+        chaotic: two states that differ by <em>anything</em> — even $10^{-12}$ — separate
+        exponentially, until the difference saturates at the system's natural variability.
+        A weather model does the same thing with its own initial-condition errors, which is
+        <em>why data assimilation exists</em>: the analysis exists to shrink those errors before
+        they have time to grow.
+      </p>
+      <p class="hint">
+        <strong>Try it:</strong> slide the initial perturbation $\sigma$ down and the fan in panel (a)
+        tightens while the growth curves in panel (b) shift right; slide it up and the ensemble starts
+        already-spread.
+      </p>
+
+      <!-- ======================= Lorenz-96 chaos widget ================== -->
+      <div class="da-widget" id="lorenz96">
+
+        <main class="viz-root">
+
+          <div class="workspace">
+
+            <div class="side">
+
+              <div class="controls">
+                <div class="ctl-group" data-color="member">
+                  <h4 class="ctl-title">Ensemble <span class="ctl-note">perturbed forecasts</span></h4>
+                  <label class="ctl-row">
+                    <span class="ctl-label">size</span>
+                    <input type="range" id="lz-nens" min="5" max="50" step="1" value="20">
+                    <span class="ctl-val" id="lz-nens-val"></span>
+                  </label>
+                  <label class="ctl-row">
+                    <span class="ctl-label">init &#963;</span>
+                    <input type="range" id="lz-sigma" min="-4" max="0" step="0.1" value="-2">
+                    <span class="ctl-val" id="lz-sigma-val"></span>
+                  </label>
+                  <button class="ctl-btn" id="lz-rerun" title="draw a new truth and ensemble">&#8635; new truth + ensemble</button>
+                  <label class="ctl-toggle">
+                    <input type="checkbox" id="lz-show-members" checked>
+                    <span>show member contours</span>
+                  </label>
+                </div>
+              </div>
+
+              <ul class="legend">
+                <li class="legend-title">panel (a) &mdash; Hovm&ouml;ller</li>
+                <li><span class="mark truth"></span> truth (thick contour)</li>
+                <li><span class="mark member"></span> thin colored contour per member (the fan = divergence)</li>
+              </ul>
+
+              <div class="readout" id="lz-readout" role="status"></div>
+
+              <ul class="legend">
+                <li class="legend-title">panel (b) &mdash; error vs spread</li>
+                <li><span class="mark error"></span> ensemble-mean error vs truth</li>
+                <li><span class="mark spread"></span> ensemble spread</li>
+                <li><span class="mark sat"></span> climatological std (saturation)</li>
+              </ul>
+
+            </div>
+
+            <div class="plots">
+              <div class="plot-wrap">
+                <p class="plot-title">(a) Hovm&ouml;ller — ensemble divergence: 40 variables &times; lead time</p>
+                <canvas id="lz-plot-a"></canvas>
+              </div>
+              <div class="plot-wrap">
+                <p class="plot-title">(b) error vs spread growth</p>
+                <canvas id="lz-plot-b"></canvas>
+              </div>
+            </div>
+
+          </div>
+
+        </main>
+
+      </div>
+
+      <p>
+        Three features of panel (b) carry the whole lesson. First, the <strong>exponential phase</strong>:
+        at short lead times the error doubles on a characteristic timescale (here &asymp; 2 days — the
+        famous Lorenz-96 value), so the readout's <em>error-doubling time</em> is the model's intrinsic
+        error-doubling time. Second, the <strong>saturation</strong>: error and spread both level off at
+        the climatological std &asymp; 3.5, the limit of what is predictable about this system from initial
+        conditions alone. Third, <strong>spread tracks error</strong> — the ensemble is built from the
+        same perturbation statistics that generated the truth error, so its spread is a faithful forecast
+        of the error. The vertical marker is the <em>predictability limit</em>: past it, the forecast
+        carries no more information than a random draw from the climatology.
+      </p>
+
+      <!-- ================================================================== -->
+      <h3 id="sec-vort3d">2 &#183; A real process: rapid intensification in the vort3d hurricane model</h3>
+      <p>
+        The vort3d model is a minimal 3-D tropical-cyclone model (Zhu, Smith &amp; Ulrich 2001, in
+        <a href="https://github.com/nansencenter/NEDAS">NEDAS</a>). The demo below launches 20 forecasts
+        of the same storm from slightly perturbed initial states, and tracks each one for 11 days.
+        Two challenges stand out that the Gaussian picture of Chapters 1&#8211;2 cannot capture:
+      </p>
+      <p>
+        <b>Rapid intensification is a regime change.</b> Some members intensify quickly to
+        V<sub>max</sub> &gt; 60 m/s while others stall or decay — watch the intensity panel in row 1:
+        the 20 realizations separate into distinct stories. The storm's <em>tendency</em> is what is
+        uncertain, not just a small additive error, and the ensemble mean of a bimodal set of intensities
+        is not a storm anyone would see. This is the practical form of the "less predictable process"
+        problem: predictability depends on the flow, and a fast-developing regime is where it drops most.
+      </p>
+      <p>
+        <b>Position error is non-Gaussian.</b> Hover over a realization and look at the wind-speed maps in
+        row 2: members that agree on intensity can disagree wildly on <em>where</em> the vortex is. An
+        ensemble whose members carry position uncertainty produces, at any fixed grid point, a wind error
+        distribution that is bimodal (storm here or there), skew, and generally far from Gaussian — the
+        raw material that the linear-Gaussian analysis of the next chapters cannot represent. You met the
+        germ of this idea in Chapter 2 (position uncertainty produces strong negative correlations);
+        here it is in a real model. This is what motivates the nonlinear filters of Chapter 7.
+      </p>
+
+      <div class="vort3d-embed">
+        <iframe src="vort3d-demo.html?embed=1&v=2" title="vort3d uncertainty demo"
+                loading="lazy"></iframe>
+      </div>
+
+      <!-- ================================================================== -->
+      <h3 id="sec-read">Reading the panels</h3>
+      <p>
+        <b>1 &#183; The Lorenz-96 widget</b> — panel (a) is a Hovm&ouml;ller diagram: each row is one of the
+        40 variables, each column a lead time. One contour level of the anomaly field
+        x&#772;<sub>i</sub>(t) &#8722; climatology is drawn for the truth (thick) and for every member
+        (thin, in the member's colour). The contours coincide while the forecast is deterministic and fan
+        out as the tiny initial differences, amplified at the error-doubling rate, decorrelate the
+        members: earlier the larger $\sigma$, and the wider the fan. Panel (b) turns this into the two
+        curves that define predictability: error $\sqrt{\frac1N\sum_i(\bar x_i-x_i^{tr})^2}$ and spread
+        $\sqrt{\frac1N\sum_i \mathrm{var}_m(x_i^m)}$. Their saturation level is the climatological std
+        of the truth trajectory itself.
+      </p>
+      <p>
+        <b>2 &#183; The vort3d demo</b> — row 1 is the same message as the Lorenz-96 widget, in storm
+        coordinates: track, intensity and size spaghetti from 20 realizations, with the 10&#8211;90th
+        percentile envelope. Row 2 is the structural view of whichever realization you highlight:
+        a boundary-layer wind speed map (1280 km window centred on the vortex) and a radius&#8211;height
+        cross-section of the azimuthally-averaged radial wind (shading, inflow negative) with
+        tangential-wind contours. Compare two realizations at the same time: intensity can match while
+        the vortex centre, tilt and warm-core depth differ — the structure of non-Gaussianity.
+      </p>
+      <p>
+        <i>Next:</i> Chapter 4 — <a href="04-kalman-filter.html">From best linear unbiased estimate to the Kalman filter</a> —
+        the first analysis scheme, built on exactly the Gaussian assumptions these examples will stress.
+      </p>
+
+    </div>
+  </div>
+
+  <script src="../../../footer.js"></script>
+  <script src="widgets/lorenz96/app.js?v=4"></script>
+  <script>
+    (function () {
+      var f = document.querySelector('.vort3d-embed iframe');
+      if (!f) return;
+      var fit = function () {
+        try {
+          var h = f.contentDocument.documentElement.scrollHeight;
+          if (h > 400) f.style.height = h + 'px';
+        } catch (e) {}
+      };
+      f.addEventListener('load', function () { setTimeout(fit, 80); });
+      window.addEventListener('resize', function () { setTimeout(fit, 150); });
+      if (f.contentDocument && f.contentDocument.readyState === 'complete') fit();
+    })();
+  </script>
+</body>
+</html>

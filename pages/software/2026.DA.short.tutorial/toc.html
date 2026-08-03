@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="Yue (Michael) Ying — Data Assimilation Interactive Tutorials, course outline">
+<meta name="keywords" content="data assimilation, ensemble, correlation, tutorial, NEDAS, course">
+<meta name="author" content="Yue Ying">
+
+<link rel="apple-touch-icon" sizes="180x180" href="../../../site_img/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../../../site_img/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../../../site_img/favicon-16x16.png">
+<link rel="manifest" href="../../../site_img/site.webmanifest">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../../style.css">
+<link rel="stylesheet" href="chapters.css">
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-148955805-2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'UA-148955805-2');
+</script>
+
+<!-- MathJax -->
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+<title>Data Assimilation Interactive Tutorials · Yue (Michael) Ying</title>
+
+<style>
+  /* chapter TOC styles, scoped to the page column */
+  #toc-page { display: block; max-width: 800px; margin: 0 auto; }
+  #toc-page .toc-overline {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--text-muted); margin: 0 0 4px;
+  }
+  #toc-page .toc-progress { font-size: 14px; color: var(--text-muted); }
+  #toc-page .toc-part {
+    font-size: 13px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--accent-link);
+    margin: 30px 0 4px; padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  #toc-page ul.toc-chapters { list-style: none; margin: 0 0 6px; padding: 0; }
+  #toc-page .toc-chapters li {
+    display: flex; align-items: baseline; gap: 14px;
+    padding: 12px 2px; border-bottom: 1px dashed var(--border);
+  }
+  #toc-page .toc-num {
+    flex: 0 0 auto; font-size: 12px; font-weight: 700; color: var(--text-muted);
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 3px 8px; min-width: 36px; text-align: center;
+  }
+  #toc-page .toc-body { flex: 1 1 auto; min-width: 0; }
+  #toc-page .toc-title { font-size: 16px; font-weight: 600; line-height: 1.4; }
+  #toc-page .toc-desc { font-size: 14px; color: var(--text-muted); line-height: 1.5; margin-top: 3px; }
+  #toc-page .badge {
+    flex: 0 0 auto; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    border-radius: 999px; padding: 3px 10px; white-space: nowrap;
+  }
+  #toc-page .badge-live {
+    background: color-mix(in srgb, #2e9e5b 16%, transparent);
+    color: #2e9e5b;
+    border: 1px solid color-mix(in srgb, #2e9e5b 40%, transparent);
+  }
+  #toc-page .badge-planned {
+    background: transparent; color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+  @media (max-width: 560px) {
+    #toc-page { padding-left: 16px; padding-right: 16px; }
+    #toc-page .toc-chapters li { gap: 10px; }
+  }
+</style>
+</head>
+
+<body>
+  <div class="header">
+    <h1>Yue (Michael) Ying</h1>
+  </div>
+
+  <div class="container">
+    <div class="page" id="toc-page">
+
+      <nav class="widget-nav">
+        <a href="../../../software.html" class="nav-home"><i class="fa fa-arrow-up" aria-hidden="true"></i> Software &amp; Tutorials</a>
+      </nav>
+
+      <p class="toc-overline">Data Assimilation Interactive Tutorials</p>
+      <h2>Course outline</h2>
+      <p>
+        A short course on the core ideas of data assimilation, taught through small
+        interactive widgets — web ports of sections of the
+        <a href="https://github.com/myying/NEDAS_tutorials">NEDAS tutorial notebooks</a>.
+        One concept per chapter, one widget per concept: drag, click, and watch the
+        analysis respond. The arc follows Evensen, Vossepoel &amp; van Leeuwen,
+        <i>Data Assimilation Fundamentals</i> (Springer, 2022): Bayesian foundations
+        first, then the analysis schemes built on them, then what lies beyond
+        linear-Gaussian.
+      </p>
+      <p class="toc-progress">3 of 8 chapters live — the rest are planned.</p>
+
+      <h3 class="toc-part">Part 1 &#183; Bayesian foundations</h3>
+      <ul class="toc-chapters">
+        <li>
+          <span class="toc-num">01</span>
+          <div class="toc-body">
+            <div class="toc-title"><a href="01-bayes-gaussians.html">Bayes' rule for Gaussians</a></div>
+            <div class="toc-desc">The analysis as posterior &#8733; prior &times; likelihood, in one variable then two: covariance, correlation, marginals. <i>(book Ch 2&#8211;3, 6)</i></div>
+          </div>
+          <span class="badge badge-live">Live</span>
+        </li>
+        <li>
+          <span class="toc-num">02</span>
+          <div class="toc-body">
+            <div class="toc-title"><a href="02-observation-state-correlation.html">Observation&#8211;state correlation</a></div>
+            <div class="toc-desc">One observation informs a whole neighbourhood: correlation maps and ensemble scatter from a 2-D field. <i>(book Ch 8)</i></div>
+          </div>
+          <span class="badge badge-live">Live</span>
+        </li>
+      </ul>
+
+            <ul class="toc-chapters">
+        <li>
+          <span class="toc-num">03</span>
+          <div class="toc-body">
+            <div class="toc-title"><a href="03-challenges-dynamical-systems.html">Challenges from dynamical systems</a></div>
+            <div class="toc-desc">Chaos, predictability and non-Gaussianity from two toy models: Lorenz-96 error growth, and the vort3d hurricane — rapid intensification and the non-Gaussian error distributions that position uncertainty produces. <i>(book Ch 1)</i></div>
+          </div>
+          <span class="badge badge-live">Live</span>
+        </li>
+        <li>
+          <span class="toc-num">04</span>
+          <div class="toc-body">
+            <div class="toc-title"><a href="04-kalman-filter.html">From best linear unbiased estimate to the Kalman filter</a></div>
+            <div class="toc-desc">The analysis as a precision-weighted average, scalar to vector. <i>(book Ch 6)</i></div>
+          </div>
+          <span class="badge badge-planned">Planned</span>
+        </li>
+        <li>
+          <span class="toc-num">05</span>
+          <div class="toc-body">
+            <div class="toc-title"><a href="05-ensemble-kalman-filter.html">The ensemble Kalman filter</a></div>
+            <div class="toc-desc">The analysis as a linear combination of ensemble perturbations. <i>(book Ch 8)</i></div>
+          </div>
+          <span class="badge badge-planned">Planned</span>
+        </li>
+        <li>
+          <span class="toc-num">06</span>
+          <div class="toc-body">
+            <div class="toc-title"><a href="06-localization-inflation.html">Localization and inflation</a></div>
+            <div class="toc-desc">The two knobs that make ensemble DA work in high dimensions. <i>(book Ch 10)</i></div>
+          </div>
+          <span class="badge badge-planned">Planned</span>
+        </li>
+      </ul>
+
+      <h3 class="toc-part">Part 3 &#183; Beyond linear-Gaussian</h3>
+      <ul class="toc-chapters">
+        <li>
+          <span class="toc-num">07</span>
+          <div class="toc-body">
+            <div class="toc-title"><a href="07-nonlinear-filters.html">Nonlinear filters</a></div>
+            <div class="toc-desc">Particle filters, and when they beat the EnKF. <i>(book Ch 9)</i></div>
+          </div>
+          <span class="badge badge-planned">Planned</span>
+        </li>
+        <li>
+          <span class="toc-num">08</span>
+          <div class="toc-body">
+            <div class="toc-title"><a href="08-parameters-applications.html">Parameters and applications</a></div>
+            <div class="toc-desc">Parameter estimation, multiscale systems. <i>(book Ch 19&#8211;23)</i></div>
+          </div>
+          <span class="badge badge-planned">Planned</span>
+        </li>
+      </ul>
+
+    </div>
+  </div>
+
+  <script src="../../../footer.js"></script>
+</body>
+</html>

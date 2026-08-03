@@ -125,7 +125,7 @@ body.embed .container { margin-top: 0; padding-top: 8px; }
         <b>Row 1</b> &mdash; vortex track, intensity (maximum boundary-layer wind) and size
         (radius of the 15&nbsp;m/s wind ring) for 20 of 200 free-running pool realizations
         (Ying, Anderson &amp; Bertino 2023, MWR, Fig.&nbsp;1 layout). Shaded band: 10&ndash;90th
-        percentile envelope, dashed line: ensemble mean. &nbsp;
+        dashed line: ensemble mean. &nbsp;
         <b>Row 2</b> &mdash; the selected realization's structure at the chosen time:
         boundary-layer wind speed map (1280&nbsp;km window centred on the vortex: dashed track = ensemble
         mean, coloured track = the selected realization), and a radius&ndash;height cross-section of the
@@ -612,7 +612,6 @@ function renderTrack() {
 function renderTimePanel(c, cv, kind) {
   const W = cv._w, H = cv._h;
   const f = kind === 'int' ? vmax : sizeClamped;
-  const env = kind === 'int' ? envInt : envSize;
   const ypx = kind === 'int' ? v => R1.y0 - v * INT2PX : v => R1.y0 - v * SZ2PX;
   const ymax = kind === 'int' ? 90 : 600;
   clearPanel(c, W, H);
@@ -626,15 +625,6 @@ function renderTimePanel(c, cv, kind) {
 
   const s = sel();
   const xp = d => R1.x0 + d * DAY2PX;
-
-  // envelope
-  c.fillStyle = T.muted; c.globalAlpha = 0.22;
-  c.beginPath();
-  c.moveTo(xp(days[0]), ypx(env[0]));
-  for (let i = 1; i < nt; i++) c.lineTo(xp(days[i]), ypx(env[i*3]));
-  for (let i = nt - 1; i >= 0; i--) c.lineTo(xp(days[i]), ypx(env[i*3+2]));
-  c.closePath(); c.fill();
-  c.globalAlpha = 1;
 
   // ensemble mean (dashed muted line, same style as the track panel's mean)
   const meanArr = kind === 'int' ? meanInt : meanSize;

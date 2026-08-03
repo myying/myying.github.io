@@ -4,11 +4,12 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="description" content="Yue (Michael) Ying — Data Assimilation Interactive Tutorials, Nonlinear filters (planned)">
-<meta name="keywords" content="data assimilation, tutorial, 06-nonlinear-filters">
+<meta name="keywords" content="data assimilation, tutorial, 07-nonlinear-filters">
 <meta name="author" content="Yue Ying">
 
 <link rel="stylesheet" href="../../../style.css">
 <link rel="stylesheet" href="chapters.css">
+<link rel="stylesheet" href="widgets/rankine/style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <!-- Global site tag (gtag.js) - Google Analytics -->
@@ -45,9 +46,136 @@
         </span>
       </nav>
 
+      <h3>Nonlinear filters</h3>
+      <p>
+        Chapters 1&#8211;6 built every analysis scheme on two linear-Gaussian assumptions: the
+        observation operator is (locally) linear and the prior error is Gaussian. Both fail for
+        coherent structures like tropical cyclones. This chapter starts with the most common failure
+        mode &#8212; <em>position error</em> &#8212; and will build up to particle filters, which
+        replace the Gaussian assumption altogether.
+      </p>
+
+      <!-- ======================= Rankine vortex widget ================= -->
+      <h4 id="sec-rankine">1 &#183; Position errors break the Gaussian assumption</h4>
+      <p>
+        A Rankine vortex &#8212; solid-body rotation inside the radius of maximum wind, a
+        (R<sub>mw</sub>/r)<sup>1.5</sup> decay outside, the profile used in
+        <a href="../../../pages/research/2019.multiscale.DA/article.html">Ying 2019</a> &#8212; is a
+        minimal model of a coherent vortex. The ensemble below has 400 members that differ
+        <em>only</em> in where the vortex sits: each centre is drawn from a Gaussian with standard
+        deviation L<sub>sprd</sub> around the truth location. The observation point P (marked +) is
+        the truth centre, where the displacement error shows up most clearly: members whose vortex has
+        passed P produce winds of either sign, so the wind error there is the classic
+        &#8220;storm-here-or-there&#8221; distribution. Slide L<sub>sprd</sub> up and down: at small
+        spread the error at P is Gaussian; once the spread reaches the vortex size it flattens and
+        fattens, and no Gaussian prior can represent it.
+      </p>
+
+      <div class="da-widget" id="rankine">
+
+        <main class="viz-root">
+
+          <div class="workspace">
+
+            <div class="side">
+
+              <div class="controls">
+                <div class="ctl-group" data-color="member">
+                  <h4 class="ctl-title">Location spread <span class="ctl-note">centre position error</span></h4>
+                  <label class="ctl-row">
+                    <span class="ctl-label">L<sub>sprd</sub></span>
+                    <input type="range" id="rk-sprd" min="0.2" max="10" step="0.1" value="3">
+                    <span class="ctl-val" id="rk-sprd-val"></span>
+                  </label>
+                  <button class="ctl-btn" id="rk-rerun" title="draw a new 400-member ensemble">&#8635; new ensemble</button>
+                </div>
+              </div>
+
+              <div class="controls">
+                <div class="ctl-group">
+                  <h4 class="ctl-title">Model <span class="ctl-note">fixed</span></h4>
+                  <p class="ctl-note" style="margin:8px 0 2px;line-height:1.5;">
+                    Modified Rankine vortex: V<sub>max</sub> = 35 m/s, radius of maximum wind
+                    R<sub>mw</sub> = 45 km, 400 members, only the centre position varies
+                    (truth &#8801; ensemble mean location).
+                  </p>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="plots">
+
+              <div class="plot-row">
+                <div class="plot-wrap">
+                  <p class="plot-title">(a) vortex ensemble</p>
+                  <ul class="legend">
+                    <li><span class="mark truth"></span> truth (20 m/s ring)</li>
+                    <li><span class="mark member"></span> 400 members (20 m/s rings)</li>
+                    <li><span class="mark obs">+</span> observation point P</li>
+                  </ul>
+                  <canvas id="rk-plot-a"></canvas>
+                </div>
+                <div class="plot-wrap">
+                  <p class="plot-title">(b) error distribution at P</p>
+                  <ul class="legend">
+                    <li><span class="mark err"></span> member error histogram</li>
+                    <li><span class="mark fit"></span> Gaussian fit (same mean &amp; std)</li>
+                    <li class="legend-note">mean <span id="rk-mean">&#8212;</span> m/s &#183; std <span id="rk-std">&#8212;</span> m/s
+                        &#183; skew <span id="rk-skew">&#8212;</span> &#183; excess kurtosis <span id="rk-kurt">&#8212;</span>
+                        &#8594; <span id="rk-verdict">&#8212;</span></li>
+                  </ul>
+                  <canvas id="rk-plot-b"></canvas>
+                </div>
+              </div>
+
+              <div class="plot-wrap">
+                <p class="plot-title">(c) why: wind at P vs the centre displacement along P</p>
+                <ul class="legend">
+                  <li><span class="mark member"></span> member samples</li>
+                  <li><span class="mark truth"></span> truth wind at P</li>
+                  <li><span class="mark sprd"></span> centre pdf (std = L<sub>sprd</sub>)</li>
+                  <li class="legend-note">The shaded hump is the Gaussian centre pdf
+                      (std = L<sub>sprd</sub>). Near the centre the wind at P grows linearly with the
+                      displacement, so a small spread keeps the error Gaussian; once members' centres
+                      reach the core edge (r = R<sub>mw</sub>, dashed) &#8212; or stray off the
+                      P-axis &#8212; the response bends and the error distribution of panel (b)
+                      leaves Gaussian.</li>
+                </ul>
+                <canvas id="rk-plot-c"></canvas>
+              </div>
+
+            </div>
+
+          </div>
+
+        </main>
+
+      </div>
+
+      <p>
+        <strong>Why the S-curve.</strong> At a fixed point, the wind is the tangential profile
+        evaluated at the member centre's distance from that point. Near the truth centre that map is
+        linear &#8212; so small position spreads keep the error Gaussian. But once members' centres
+        wander past the radius of maximum wind, or off the axis to the point, the response bends (panel
+        (c)): the histogram in panel (b) flattens into the &#8220;storm here or there&#8221; shape and
+        the readout's excess kurtosis leaves 0. An ensemble that is Gaussian in <em>where</em> the
+        storm is is emphatically non-Gaussian in <em>what the wind is at any fixed point</em>.
+      </p>
+      <p>
+        This widget is the interactive version of the figure in
+        <a href="../../../pages/research/2019.multiscale.DA/article.html#multiscale_alignment">Ying 2019,
+        &#8220;multiscale alignment&#8221;</a> &#8212; the same Rankine vortex ensemble, the same
+        conclusion: as the location spread increases, the prior error distribution deviates more from a
+        Gaussian, and the linear-Gaussian EnKF analysis becomes suboptimal. The displacement-error
+        routine used here is the one from the accompanying
+        <a href="https://github.com/mying/rankine">rankine code</a>.
+      </p>
+
+      <!-- ====================== particle filters (planned) ============ -->
       <div class="planned">
         <p class="planned-tag">Planned</p>
-        <h3>Nonlinear filters</h3>
+        <h4>2 &#183; Particle filters</h4>
         <p class="planned-desc">When the Gaussian assumptions fail, Bayes' rule is solved directly on a set of weighted samples &#8212; particle filters. A planned widget will show weight collapse: the particles pile onto a single trajectory as the filter struggles with a strongly nonlinear observation, and why resampling fights it.</p>
         <p class="planned-ref">&#8594; Evensen et al., <i>Data Assimilation Fundamentals</i> (2022), Ch 9 &#8212; nonlinear filters.</p>
       </div>
@@ -56,5 +184,6 @@
   </div>
 
   <script src="../../../footer.js"></script>
+  <script src="widgets/rankine/app.js?v=1"></script>
 </body>
 </html>

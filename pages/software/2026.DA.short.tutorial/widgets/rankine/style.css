@@ -1,0 +1,192 @@
+/* Rankine vortex — position errors break the Gaussian assumption.
+   Embedding stylesheet, scoped to .da-widget (same convention as the other
+   tutorial widgets).  Custom properties live on the .da-widget wrapper.
+*/
+.da-widget {
+  --surface-1:      #fcfcfb;
+  --surface-2:      #f9f9f7;
+  --surface-hair:   #f3f2ef;
+  --ink-1:          #0b0b0b;
+  --ink-2:          #52514e;
+  --ink-3:          #898781;
+  --line:           #e1e0d9;
+  --axis:           #c3c2b7;
+  --border:         rgba(11,11,11,0.10);
+  --series-amber:   #eda100;
+  --series-red:     #e34948;
+  --series-ink:     #0b0b0b;
+  --shadow:         0 1px 2px rgba(11,11,11,0.06), 0 4px 16px rgba(11,11,11,0.05);
+}
+
+.da-widget[data-theme="dark"] {
+  --surface-1:      #1a1a19;
+  --surface-2:      #0d0d0d;
+  --surface-hair:   #232321;
+  --ink-1:          #ffffff;
+  --ink-2:          #c3c2b7;
+  --ink-3:          #898781;
+  --line:           #3f3f3c;
+  --axis:           #4d4d49;
+  --border:         rgba(255,255,255,0.10);
+  --series-amber:   #e0a61d;
+  --series-red:     #e66767;
+  --series-ink:     #ffffff;
+  --shadow:         0 1px 2px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.35);
+}
+
+.da-widget, .da-widget * { box-sizing: border-box; }
+
+.da-widget {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--surface-2);
+  color: var(--ink-1);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  margin: 20px 0 8px;
+}
+
+.da-widget .viz-root {
+  max-width: 1180px;
+  padding: 18px;
+  margin: 0 auto;
+}
+
+.da-widget .workspace {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.da-widget .plots {
+  flex: 1 1 540px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.da-widget .plot-row {
+  display: flex;
+  gap: 16px;
+  min-width: 0;
+}
+.da-widget .plot-row .plot-wrap { flex: 1 1 0; min-width: 0; }
+
+.da-widget .plot-wrap { min-width: 0; }
+.da-widget .plot-wrap canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+}
+.da-widget .plot-title {
+  font-size: 0.8rem;
+  font-weight: 650;
+  color: var(--ink-2);
+  margin: 0 0 6px;
+}
+
+/* ------------------------------------------------------------- controls */
+.da-widget .side {
+  flex: 1 1 240px;
+  min-width: 230px;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.da-widget .controls {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.da-widget .ctl-group {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px 10px;
+  box-shadow: var(--shadow);
+}
+.da-widget .ctl-group[data-color="member"] { --ctl-accent: var(--series-amber); }
+.da-widget .ctl-title {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: var(--ink-1);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.da-widget .ctl-note { font-size: 0.7rem; font-weight: 500; color: var(--ink-3); }
+.da-widget .ctl-row {
+  display: grid;
+  grid-template-columns: 44px 1fr 52px;
+  align-items: center;
+  gap: 8px;
+  margin-top: 9px;
+  font-size: 0.75rem;
+  color: var(--ink-2);
+}
+.da-widget .ctl-row input[type="range"] {
+  width: 100%;
+  margin: 0;
+  accent-color: var(--ctl-accent);
+  cursor: pointer;
+}
+.da-widget .ctl-val {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-1);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.da-widget .ctl-btn {
+  width: 100%;
+  padding: 9px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink-1);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+.da-widget .ctl-btn:hover { border-color: var(--series-amber); color: var(--series-amber); }
+
+/* --------------------------------------------------------------- legend */
+.da-widget .plot-wrap .legend {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  font-size: 0.75rem;
+  color: var(--ink-2);
+}
+.da-widget .plot-wrap .legend li { display: flex; align-items: flex-start; gap: 7px; line-height: 1.35; }
+.da-widget .plot-wrap .legend li.legend-note {
+  display: block;            /* text flows normally (the marks' li stays flex) */
+  flex-basis: 100%;
+  font-size: 0.74rem;
+  line-height: 1.45;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+.da-widget .plot-wrap .legend li.legend-note strong { color: var(--ink-1); font-weight: 650; }
+.da-widget .mark { display: inline-block; flex: 0 0 auto; margin-top: 3px; }
+.da-widget .mark.member { height: 2px; width: 18px;
+  background: linear-gradient(90deg, #1f77b4, #ff7f0e, #2ca02c, #d62728, #9467bd, #17becf);
+  border-radius: 2px; }
+.da-widget .mark.truth  { height: 3px; width: 16px; background: var(--series-ink); border-radius: 2px; }
+.da-widget .mark.obs    { color: var(--series-red); font-weight: 700; font-size: 0.85rem; line-height: 0.9; }
+.da-widget .mark.err    { height: 3px; width: 16px; background: var(--series-ink); border-radius: 2px; }
+.da-widget .mark.fit    { height: 0; width: 16px; border-top: 2px dashed var(--ink-3); }
+.da-widget .mark.sprd   { height: 0; width: 16px; border-top: 2px solid var(--series-amber); }
+
+@media (max-width: 720px) {
+  .da-widget .plot-row { flex-direction: column; }
+}

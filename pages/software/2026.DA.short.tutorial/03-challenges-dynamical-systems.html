@@ -128,7 +128,20 @@
                 </div>
               </div>
 
+              <ul class="legend">
+                <li class="legend-title">panel (a)</li>
+                <li><span class="mark truth"></span> truth (thick)</li>
+                <li><span class="mark member"></span> one contour per member (thin)</li>
+              </ul>
+
               <div class="readout" id="lz-readout" role="status"></div>
+
+              <ul class="legend">
+                <li class="legend-title">panel (b)</li>
+                <li><span class="mark error"></span> error vs truth</li>
+                <li><span class="mark spread"></span> spread</li>
+                <li><span class="mark sat"></span> saturation (clim. std)</li>
+              </ul>
 
             </div>
 
@@ -223,7 +236,7 @@
   </div>
 
   <script src="../../../footer.js"></script>
-  <script src="widgets/lorenz96/app.js?v=5"></script>
+  <script src="widgets/lorenz96/app.js?v=6"></script>
   <script>
     (function () {
       var f = document.querySelector('.vort3d-embed iframe');

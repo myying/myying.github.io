@@ -1030,7 +1030,8 @@ function renderXsectMerged(step) {
   // shading: azimuthal-mean radial wind (m/s) — inflow negative, outflow positive
   const vr = new Float32Array(320);
   for (let k = 0; k < 320; k++) vr[k] = step.vr[k] * q.vr_scale_ms;
-  const vspan = 10;   // fixed radial-wind colour range (+/-10 m/s), independent of the member/time
+  const vspan = 20;   // fixed radial-wind colour range (+/-20 m/s, ~99th percentile of the
+                      // ensemble; the rare extreme inflow/outflow up to ~53 m/s clamps at the ends)
   const shade = [];
   for (let k = 0; k < 8; k++) shade.push(vr.subarray(k*40, k*40 + 40));
   // contours: azimuthal-mean tangential wind (m/s)

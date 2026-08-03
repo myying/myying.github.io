@@ -185,6 +185,7 @@
   font-variant-numeric: tabular-nums;
 }
 .da-widget .plot-wrap .legend li.legend-note strong { color: var(--ink-1); font-weight: 650; }
+.da-widget .plot-wrap .legend .lz-f { white-space: nowrap; }
 .da-widget .mark { display: inline-block; flex: 0 0 auto; margin-top: 3px; }
 .da-widget .mark.member  { height: 2px; width: 18px;
   background: linear-gradient(90deg, #1f77b4, #ff7f0e, #2ca02c, #d62728, #9467bd, #17becf);

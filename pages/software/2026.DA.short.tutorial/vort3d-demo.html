@@ -28,8 +28,7 @@
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 8px 12px;
-  margin: 10px auto 6px;
-  max-width: 480px;
+  margin: 10px 0 6px;
   font-variant-numeric: tabular-nums;
   min-height: 20px;
 }
@@ -1135,8 +1134,9 @@ function playLoop() {
 function updateReadout() {
   const m = sel();
   if (m < 0) {
-    readout.innerHTML = 'move the mouse to highlight a realization &amp; see its structure below · ' +
-      '<b>day ' + days[tIdx].toFixed(2) + '</b> · drag a panel (or use the slider / play) to move in time · click to pin, Esc to unpin';
+    readout.innerHTML =
+      'member <b>--</b> · day <b>--</b> · track (--, --) km · ' +
+      'V<sub>max</sub> <b>--</b> m/s · size <b>--</b> km (15 m/s ring)';
     return;
   }
   const i = tIdx;

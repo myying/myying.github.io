@@ -304,7 +304,8 @@ async function loadData() {
     setTime(tIdx, true);
     bindEvents();
 
-    // optional deep-link: ?mem=N (1-based realization) &t=day
+    // highlight member 1 by default; the optional deep-link ?mem=N (1-based) overrides it
+    pinned = 0;
     try {
       const q = new URLSearchParams(location.search);
       const memP = parseInt(q.get('mem'), 10);

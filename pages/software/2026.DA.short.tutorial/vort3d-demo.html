@@ -28,7 +28,8 @@
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 8px 12px;
-  margin: 10px 0 6px;
+  margin: 10px auto 6px;
+  max-width: 480px;
   font-variant-numeric: tabular-nums;
   min-height: 20px;
 }
@@ -38,8 +39,8 @@
   width: 100%; height: auto; display: block;
 }
 #timebar {
-  display: flex; align-items: center; gap: 14px; justify-content: center;
-  margin: 10px 0 4px; flex-wrap: wrap;
+  display: flex; align-items: center; gap: 10px; justify-content: center;
+  margin: 10px 0 4px;
 }
 #playBtn {
   font-size: 15px; line-height: 1; padding: 8px 14px;
@@ -47,7 +48,7 @@
   background: var(--surface); color: var(--text); cursor: pointer;
 }
 #playBtn:hover { background: var(--nav-hover); }
-#timeSlider { flex: 1 1 360px; max-width: 760px; accent-color: var(--accent); cursor: pointer; }
+#timeSlider { flex: 1 1 0; min-width: 0; max-width: 760px; accent-color: var(--accent); cursor: pointer; }
 #timeLabel {
   font-size: 14px; font-variant-numeric: tabular-nums; color: var(--text);
   min-width: 76px; text-align: center;
@@ -90,9 +91,8 @@ body.embed .page.wide { background: transparent; box-shadow: none; border-radius
       </div>
 
       <div class="hint">
-        Move the mouse over any time series to light up one realization (its vortex structure appears below).
-        Press and drag on a panel &mdash; or use the slider / play button &mdash; to move through time for the
-        highlighted realization (drag along the track to follow its path). Click to pin a realization.
+        Hover a time series to light up a realization; drag a panel (or use the slider / play) to step
+        through time; click to pin.
       </div>
 
       <div id="timebar">
@@ -1143,8 +1143,7 @@ function updateReadout() {
   const x = trackX[i*nens+m], y = trackY[i*nens+m];
   const v = vmax[i*nens+m], sz = size[i*nens+m];
   readout.innerHTML =
-    'member <b>' + String(m+1).padStart(3,'0') + '</b> (pool member ' + (poolMembers[m]+1) + ' of 200) · ' +
-    'day <b>' + days[i].toFixed(2) + '</b> · track (' + (x*20).toFixed(0) + ', ' + (y*20).toFixed(0) + ') km · ' +
+    'member <b>' + String(m+1).padStart(3,'0') + '</b> · day <b>' + days[i].toFixed(2) + '</b> · track (' + (x*20).toFixed(0) + ', ' + (y*20).toFixed(0) + ') km · ' +
     'V<sub>max</sub> <b>' + v.toFixed(1) + '</b> m/s · ' +
     'size ' + (sz > 0 ? '<b>' + sz.toFixed(0) + '</b> km (15 m/s ring)' : '<b>n/a</b> (no 15 m/s ring)');
 }

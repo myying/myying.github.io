@@ -232,4 +232,8 @@
   .da-widget .rk-col .plot-wrap { grid-area: auto; margin-left: 0; width: auto; }
   .da-widget .controls { width: 100%; margin-left: 0; }
   .da-widget .plot-wrap { margin-bottom: 16px; }
+  /* (b)/(c): too squat at 8:5 when they stretch full-width on a phone — give them
+     1.5x the height (8:5 -> 16:15 at the same width). Panel (a) keeps its own
+     square-ish map aspect (its #rk-plot-a rule out-specifies this). */
+  .da-widget .plot-body canvas:not(#rk-plot-a) { aspect-ratio: 16 / 15; }
 }

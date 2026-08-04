@@ -260,7 +260,9 @@
   /* ------------------------------------------------------------- canvas */
   function setupCv(cv) {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const w = cv.clientWidth, h = Math.round(w * 9 / 16);
+    // use the CSS box height when it is taller than 16:9 (the narrow-screen min-height
+    // on #lz-plot-a); fall back to 16:9 of the width otherwise
+    const w = cv.clientWidth, h = cv.clientHeight || Math.round(w * 9 / 16);
     cv.width = w * dpr; cv.height = h * dpr;
     const c = cv.getContext("2d");
     c.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -335,7 +337,7 @@
       }
       c.globalAlpha = 1;
     }
-    drawPolys(polysOf(anomalyField(truth, 0)), col.ink, 2.6);
+    drawPolys(polysOf(anomalyField(truth, 0)), col.ink, 2.2);
     // axes: x = lead time (days), y = variable index 1..40 (variable 1 at top)
     const xt = [];
     for (let t = 0; t <= TMAX; t += 1) xt.push([t, x0 + (t / TMAX) * plotW]);

@@ -59,6 +59,13 @@ body.embed .header, body.embed .nav, body.embed .footer { display: none !importa
 body.embed .container { margin-top: 0; padding-top: 8px; padding-bottom: 0; }
 /* the panels sit directly in the widget box: no page bounding box in the embed */
 body.embed .page.wide { background: transparent; box-shadow: none; border-radius: 0; }
+/* narrow screens: reclaim the side margins so the readout, panel rows, hint and
+   timebar all span the same full width (the panels' 300px min-width used to overflow
+   the box, leaving the readout/hint/timebar visibly narrower than the panels) */
+@media (max-width: 560px) {
+  .page.wide { width: 100%; }
+  .panel { flex: 1 1 100%; min-width: 0; max-width: none; }
+}
 </style>
 
 <title>Vort3D uncertainty demo — Yue (Michael) Ying</title>
@@ -90,8 +97,7 @@ body.embed .page.wide { background: transparent; box-shadow: none; border-radius
       </div>
 
       <div class="hint">
-        Hover a time series to light up a realization; drag a panel (or use the slider / play) to step
-        through time; click to pin.
+        Hover a series to light it up; drag, slide or play to step in time; click to pin.
       </div>
 
       <div id="timebar">

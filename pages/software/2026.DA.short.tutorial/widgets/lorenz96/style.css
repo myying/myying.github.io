@@ -79,6 +79,12 @@
   width: 100%;
   aspect-ratio: 16 / 9;
 }
+
+/* very narrow screens (phones): panel (a)'s 16:9 Hovmöller gets too short in the
+   vertical — give it a taller floor (setupCv in app.js honours the CSS box height) */
+@media (max-width: 560px) {
+  .da-widget #lz-plot-a { min-height: 280px; }
+}
 .da-widget .plot-title {
   font-size: 0.8rem;
   font-weight: 650;

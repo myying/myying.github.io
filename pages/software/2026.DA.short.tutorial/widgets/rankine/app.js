@@ -8,21 +8,22 @@
 
    The ensemble members differ ONLY in the location of the vortex centre:
    centre = truth centre + N(0, L_sprd) in each direction.  The observation
-   point P sits east of the truth centre, on the radius of maximum wind,
-   where the wind profile has its sharpest gradient.
+   point P sits southeast of the truth centre (compass 135 deg), just
+   outside the radius of maximum wind, where the tangential flow is still
+   nearly maximal.  The state watched at P is the zonal wind u.
 
    Panels:
      (a) the vortex ensemble — truth wind-speed field (shading) and the
          20 m/s ring of every member (thin, coloured) vs of the truth
          (thick); the observation point P is marked '+'.
-     (b) the error distribution at P — histogram of the members' meridional
-         wind minus the truth value, with a Gaussian fit (dashed) through
+     (b) the error distribution at P — histogram of the members' zonal
+         wind u minus the truth value, with a Gaussian fit (dashed) through
          the same mean and std.  At small L_sprd the error is Gaussian;
          once L_sprd reaches ~Rmw the histogram skews and fattens.
-     (c) the mechanism — meridional wind at P as a function of the centre
-         displacement along P (the S-curve).  A Gaussian centre pdf (shaded
-         hump, std = L_sprd) passes through the reversal at the radius of
-         maximum wind, which is why the error distribution leaves Gaussian.
+     (c) the mechanism — zonal wind u at P as a function of the centre
+         displacement toward P.  The map peaks as a member's core edge
+         reaches P and reverses as its centre passes P: non-monotone, so a
+         Gaussian cloud of centres does not map to a Gaussian wind at P.
 
    Embedding-ready: root is the element with id="rankine" (falls back to
    .da-widget / document root), theme follows prefers-color-scheme via the
@@ -43,20 +44,23 @@
   const NENS = 400;                    // ensemble size
   const DX = 9.0;                      // km per grid point
   const C_I = 64, C_J = 64;            // truth centre (0.5 * 128)
-  const P_I = C_I, P_J = C_J;          // observation point: the truth centre
-  const V_T = 0;                       // truth meridional wind at P (vortex centre)
+  const P_ANG = 135 * Math.PI / 180;   // observation point: compass 135° = southeast
+  const P_DIR = { i: Math.sin(P_ANG), j: -Math.cos(P_ANG) };   // (0.7071, 0.7071)
+  const R0 = RMW + 0.3;                // slightly outside the radius of maximum wind
+  const P_I = C_I + R0 * P_DIR.i, P_J = C_J + R0 * P_DIR.j;
 
   // tangential wind speed of the modified Rankine vortex
   function vtheta(r) {
     r = Math.max(r, 1e-6);
     return r <= RMW ? VMAX * r / RMW : VMAX * Math.pow(RMW / r, 1.5);
   }
-  // meridional wind at (x, y) from a vortex centred at (ci, cj)
-  function vWind(ci, cj, x, y) {
+  // zonal wind u at (x, y) from a vortex centred at (ci, cj)
+  function uWind(ci, cj, x, y) {
     const di = x - ci, dj = y - cj;
     const r = Math.hypot(di, dj) || 1e-6;
-    return vtheta(r) * di / r;
+    return -vtheta(r) * dj / r;
   }
+  const V_T = uWind(C_I, C_J, P_I, P_J);   // truth zonal wind at P
   // radii of the RING m/s contour around a centre (analytic)
   function ringRadii() {
     return [RING * RMW / VMAX, RMW * Math.pow(VMAX / RING, 2 / 3)];
@@ -188,15 +192,23 @@
       ctx.stroke();
     }
 
-    // observation point P
+    // observation point P — white cross with a dark halo (reads in both themes)
     const px = x0 + (P_I - (C_I - WIN)) * s, py = y0 + (P_J - (C_J - WIN)) * s;
     const ms = 7;
-    ctx.strokeStyle = T.red;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "#101010";
+    ctx.lineWidth = 4.6;
+    ctx.beginPath();
+    ctx.moveTo(px - ms, py); ctx.lineTo(px + ms, py);
+    ctx.moveTo(px, py - ms); ctx.lineTo(px, py + ms);
+    ctx.stroke();
+    ctx.strokeStyle = "#ffffff";
     ctx.lineWidth = 2.2;
     ctx.beginPath();
     ctx.moveTo(px - ms, py); ctx.lineTo(px + ms, py);
     ctx.moveTo(px, py - ms); ctx.lineTo(px, py + ms);
     ctx.stroke();
+    ctx.lineCap = "butt";
 
     // axes
     ctx.strokeStyle = T.axis;
@@ -225,7 +237,7 @@
     // member errors at P
     const e = new Float64Array(NENS);
     let sum = 0;
-    for (let m = 0; m < NENS; m++) { e[m] = vWind(ci[m], cj[m], P_I, P_J) - V_T; sum += e[m]; }
+    for (let m = 0; m < NENS; m++) { e[m] = uWind(ci[m], cj[m], P_I, P_J) - V_T; sum += e[m]; }
     const mu = sum / NENS;
     let v2 = 0, v3 = 0, v4 = 0;
     for (let m = 0; m < NENS; m++) {
@@ -262,7 +274,7 @@
       const bx = margin.l + b * binW / (hi - lo) * pw;
       const bw = Math.max(1, binW / (hi - lo) * pw - 1);
       const bh = (counts[b] / cmax) * ph;
-      ctx.fillStyle = T.hair;
+      ctx.fillStyle = theme === "dark" ? hexA(T.amber, 0.5) : T.hair;
       ctx.fillRect(bx, margin.t + ph - bh, bw, bh);
     }
 
@@ -366,22 +378,24 @@
     ctx.closePath();
     ctx.fill();
 
-    // the S-curve: meridional wind at P vs centre displacement along P
+    // the map: zonal wind u at P vs centre displacement toward P
+    // (peaks as the core edge passes P, reverses as the centre passes P)
     ctx.strokeStyle = T.ink1;
     ctx.lineWidth = 2;
     ctx.beginPath();
     for (let i = 0; i <= 300; i++) {
       const d = D_MIN + (D_MAX - D_MIN) * i / 300;
-      const v = -vtheta(Math.abs(d)) * Math.sign(d);
+      const v = uWind(C_I + d * P_DIR.i, C_J + d * P_DIR.j, P_I, P_J);
       if (i === 0) ctx.moveTo(xOf(d), yOf(v));
       else ctx.lineTo(xOf(d), yOf(v));
     }
     ctx.stroke();
 
-    // member samples: (centre displacement along P, wind at P)
+    // member samples: (centre displacement toward P, zonal wind u at P)
     for (let m = 0; m < NENS; m++) {
+      const d = (ci[m] - C_I) * P_DIR.i + (cj[m] - C_J) * P_DIR.j;
       ctx.fillStyle = hexA(memColor(m), 0.5);
-      ctx.fillRect(xOf(ci[m] - C_I) - 1.2, yOf(vWind(ci[m], cj[m], P_I, P_J)) - 1.2, 2.4, 2.4);
+      ctx.fillRect(xOf(d) - 1.2, yOf(uWind(ci[m], cj[m], P_I, P_J)) - 1.2, 2.4, 2.4);
     }
 
     // truth point
@@ -390,18 +404,16 @@
     ctx.strokeStyle = T.surface1; ctx.lineWidth = 1.4;
     ctx.stroke();
 
-    // reference lines: the core edge (r = Rmw) on both sides
+    // reference line: the centre passes P (u reverses sign there)
     ctx.strokeStyle = hexA(T.ink3, 0.8);
     ctx.lineWidth = 1;
     ctx.setLineDash([4, 4]);
-    for (const d of [RMW, -RMW]) {
-      ctx.beginPath(); ctx.moveTo(xOf(d), margin.t); ctx.lineTo(xOf(d), margin.t + ph); ctx.stroke();
-    }
+    ctx.beginPath(); ctx.moveTo(xOf(R0), margin.t); ctx.lineTo(xOf(R0), margin.t + ph); ctx.stroke();
     ctx.setLineDash([]);
     ctx.fillStyle = T.ink3;
     ctx.font = "10px system-ui, sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("core edge (r = Rmw)", xOf(-RMW), margin.t + 2);
+    ctx.fillText("centre passes P", xOf(R0), margin.t + 2);
 
     // axes
     ctx.strokeStyle = T.axis; ctx.lineWidth = 1;
@@ -421,7 +433,7 @@
     ctx.translate(12, margin.t + ph / 2);
     ctx.rotate(-Math.PI / 2);
     ctx.textAlign = "center";
-    ctx.fillText("meridional wind at P (m/s)", 0, 0);
+    ctx.fillText("zonal wind u at P (m/s)", 0, 0);
     ctx.restore();
   }
 

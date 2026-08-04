@@ -63,12 +63,12 @@
         <a href="../../../pages/research/2019.multiscale.DA/article.html">Ying 2019</a> &#8212; is a
         minimal model of a coherent vortex. The ensemble below has 400 members that differ
         <em>only</em> in where the vortex sits: each centre is drawn from a Gaussian with standard
-        deviation L<sub>sprd</sub> around the truth location. The observation point P (marked +) is
-        the truth centre, where the displacement error shows up most clearly: members whose vortex has
-        passed P produce winds of either sign, so the wind error there is the classic
-        &#8220;storm-here-or-there&#8221; distribution. Slide L<sub>sprd</sub> up and down: at small
-        spread the error at P is Gaussian; once the spread reaches the vortex size it flattens and
-        fattens, and no Gaussian prior can represent it.
+        deviation L<sub>sprd</sub> around the truth location. The observation point P (marked +)
+        sits southeast of the truth centre (compass 135&#176;), just outside the radius of maximum
+        wind, and the state we watch is the zonal wind u at P (a strong westerly there, about 23 m/s
+        short of calm). Slide L<sub>sprd</sub> up and down: at small spread the error u &#8722; u<sub>truth</sub>
+        at P is Gaussian; once the spread reaches the vortex size the histogram skews and fattens, and
+        no Gaussian prior can represent it.
       </p>
 
       <div class="da-widget" id="rankine">
@@ -117,7 +117,7 @@
                   <canvas id="rk-plot-a"></canvas>
                 </div>
                 <div class="plot-wrap">
-                  <p class="plot-title">(b) error distribution at P</p>
+                  <p class="plot-title">(b) error at P: u minus truth</p>
                   <ul class="legend">
                     <li><span class="mark err"></span> member error histogram</li>
                     <li><span class="mark fit"></span> Gaussian fit (same mean &amp; std)</li>
@@ -130,17 +130,16 @@
               </div>
 
               <div class="plot-wrap">
-                <p class="plot-title">(c) why: wind at P vs the centre displacement along P</p>
+                <p class="plot-title">(c) why: zonal wind u at P vs the centre displacement toward P</p>
                 <ul class="legend">
                   <li><span class="mark member"></span> member samples</li>
                   <li><span class="mark truth"></span> truth wind at P</li>
                   <li><span class="mark sprd"></span> centre pdf (std = L<sub>sprd</sub>)</li>
                   <li class="legend-note">The shaded hump is the Gaussian centre pdf
-                      (std = L<sub>sprd</sub>). Near the centre the wind at P grows linearly with the
-                      displacement, so a small spread keeps the error Gaussian; once members' centres
-                      reach the core edge (r = R<sub>mw</sub>, dashed) &#8212; or stray off the
-                      P-axis &#8212; the response bends and the error distribution of panel (b)
-                      leaves Gaussian.</li>
+                      (std = L<sub>sprd</sub>). Through P the map peaks as a member's core edge
+                      reaches P and reverses sign as its centre passes P (dashed). A small spread
+                      rides the local slope and keeps the error Gaussian; a wide spread straddles
+                      the bend, and the error distribution of panel (b) skews and fattens.</li>
                 </ul>
                 <canvas id="rk-plot-c"></canvas>
               </div>
@@ -154,13 +153,14 @@
       </div>
 
       <p>
-        <strong>Why the S-curve.</strong> At a fixed point, the wind is the tangential profile
-        evaluated at the member centre's distance from that point. Near the truth centre that map is
-        linear &#8212; so small position spreads keep the error Gaussian. But once members' centres
-        wander past the radius of maximum wind, or off the axis to the point, the response bends (panel
-        (c)): the histogram in panel (b) flattens into the &#8220;storm here or there&#8221; shape and
-        the readout's excess kurtosis leaves 0. An ensemble that is Gaussian in <em>where</em> the
-        storm is is emphatically non-Gaussian in <em>what the wind is at any fixed point</em>.
+        <strong>Why the bend.</strong> The wind at a fixed point is the tangential profile evaluated
+        at the member centre's distance from that point. Near P that map is locally linear, so a small
+        position spread keeps the error at P Gaussian. As the spread grows, members' centres pass P:
+        the wind there peaks as a member's core edge reaches P and then reverses sign as the centre
+        passes P (panel (c)) &#8212; a non-monotone map pushed through a Gaussian cloud of centres.
+        The histogram in panel (b) skews and fattens, and the readout's excess kurtosis leaves 0. An
+        ensemble that is Gaussian in <em>where</em> the storm is is emphatically non-Gaussian in
+        <em>what the wind is at any fixed point</em>.
       </p>
       <p>
         This widget is the interactive version of the figure in

@@ -416,6 +416,19 @@
     }
     ctx.stroke();
 
+    // "truth" tag next to the curve, at its left end (the legend entry was removed)
+    ctx.font = "10px system-ui, sans-serif";
+    ctx.textAlign = "left"; ctx.textBaseline = "top";
+    const truthTag = "truth";
+    const ttw = ctx.measureText(truthTag).width;
+    const vL = uWind(C_I + D_MIN * P_DIR.i, C_J + D_MIN * P_DIR.j, P_I, P_J);
+    const ty = yOf(vL) - 18;
+    ctx.fillStyle = hexA(T.surface1, 0.85);
+    ctx.fillRect(margin.l + 4, ty, ttw + 6, 13);
+    ctx.fillStyle = T.ink1;
+    ctx.fillText(truthTag, margin.l + 7, ty + 2);
+    ctx.textBaseline = "top";
+
     // member samples: (centre displacement toward P, zonal wind u at P)
     // points outside the axes range are skipped
     for (let m = 0; m < NENS; m++) {

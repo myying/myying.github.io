@@ -7,10 +7,11 @@
    128 x 128 grid points (1152 km at dx = 9 km).
 
    The ensemble members differ ONLY in the location of the vortex centre:
-   centre = truth centre + N(0, L_sprd) in each direction.  The observation
-   point P sits southeast of the truth centre (compass 135 deg), just
-   outside the radius of maximum wind, where the tangential flow is still
-   nearly maximal.  The state watched at P is the zonal wind u.
+   centre = truth centre + N(0, L_sprd) in each direction.  L_sprd is given
+   in units of the radius of maximum wind Rmw (slider range 0.1-3).  The
+   observation point P sits southeast of the truth centre (compass 135 deg),
+   just outside the radius of maximum wind, where the tangential flow is
+   still nearly maximal.  The state watched at P is the zonal wind u.
 
    Panels:
      (a) the vortex ensemble — truth wind-speed field (shading) and the
@@ -36,18 +37,22 @@
   const root = document.getElementById("rankine") || document.querySelector(".da-widget") || document.documentElement;
   const cvA = $("rk-plot-a"), cvB = $("rk-plot-b"), cvC = $("rk-plot-c");
   const sprdSlider = $("rk-sprd"), sprdVal = $("rk-sprd-val");
+  const nensSlider = $("rk-nens"), nensVal = $("rk-nens-val");
   const rerunBtn = $("rk-rerun");
 
   /* ------------------------------------------------------------- model */
   const VMAX = 35, RMW = 5;            // m/s, grid points
   const RING = 20;                     // m/s contour shown in panel (a)
-  const NENS = 400;                    // ensemble size
+  const NENS_MIN = 20, NENS_MAX = 400;
+  let NENS = 100;                    // ensemble size (tunable)
   const DX = 9.0;                      // km per grid point
   const C_I = 64, C_J = 64;            // truth centre (0.5 * 128)
-  const P_ANG = 135 * Math.PI / 180;   // observation point: compass 135° = southeast
-  const P_DIR = { i: Math.sin(P_ANG), j: -Math.cos(P_ANG) };   // (0.7071, 0.7071)
-  const R0 = RMW + 0.3;                // slightly outside the radius of maximum wind
-  const P_I = C_I + R0 * P_DIR.i, P_J = C_J + R0 * P_DIR.j;
+  const P_ANG0 = 135 * Math.PI / 180;  // default obs point: compass 135° = southeast
+  const P_DIR0 = { i: Math.sin(P_ANG0), j: -Math.cos(P_ANG0) };   // (0.7071, 0.7071)
+  const R0_0 = RMW + 0.2;              // default: slightly outside the radius of max wind
+  let P_I = C_I + R0_0 * P_DIR0.i, P_J = C_J + R0_0 * P_DIR0.j;   // obs point (clickable)
+  let P_DIR = P_DIR0;                  // unit vector from the truth centre toward P
+  let R0 = R0_0;                       // distance truth centre -> P (grid points)
 
   // tangential wind speed of the modified Rankine vortex
   function vtheta(r) {
@@ -60,7 +65,7 @@
     const r = Math.hypot(di, dj) || 1e-6;
     return -vtheta(r) * dj / r;
   }
-  const V_T = uWind(C_I, C_J, P_I, P_J);   // truth zonal wind at P
+  let V_T = uWind(C_I, C_J, P_I, P_J);   // truth zonal wind at P
   // radii of the RING m/s contour around a centre (analytic)
   function ringRadii() {
     return [RING * RMW / VMAX, RMW * Math.pow(VMAX / RING, 2 / 3)];
@@ -130,51 +135,40 @@
       b = parseInt(hex.slice(5, 7), 16);
     return "rgba(" + r + "," + g + "," + b + "," + a + ")";
   }
-  function lerp(a, b, t) {
-    return [Math.round(a[0] + (b[0] - a[0]) * t), Math.round(a[1] + (b[1] - a[1]) * t),
-      Math.round(a[2] + (b[2] - a[2]) * t)];
-  }
-  function rgbStr(c) { return "rgb(" + c[0] + "," + c[1] + "," + c[2] + ")"; }
 
   /* ------------------------------------------------------- panel (a) */
-  const WIN = 15;                       // half-window in grid points
-  const TICKS_KM = [-135, -90, -45, 0, 45, 90, 135];
+  const WIN = 30;                       // half-window in grid points
+  const TICKS_KM = [-270, -180, -90, 0, 90, 180, 270];
+
+  // geometry of the (a) map square inside the canvas (shared by renderA and the click handler).
+  // Same margins as panels (b)/(c) so the plotting areas line up; the square fills the plot area
+  // (the canvas aspect 321/309 makes its height just fit).
+  function aGeom(W, H) {
+    const margin = { l: 46, r: 12, t: 14, b: 32 };
+    const pw = W - margin.l - margin.r;
+    const ph = H - margin.t - margin.b;
+    const side = Math.min(pw, ph);
+    const x0 = margin.l + (pw - side) / 2;
+    return { margin, side, x0, y0: margin.t, s: side / (2 * WIN) };
+  }
 
   function renderA() {
     const [ctx, W, H] = sizeCanvas(cvA);
-    const margin = { l: 44, r: 14, t: 14, b: 34 };
-    const side = Math.min(W - margin.l - margin.r, H - margin.t - margin.b);
-    const x0 = margin.l + (W - margin.l - margin.r - side) / 2;
-    const y0 = margin.t;
-    const s = side / (2 * WIN);         // px per grid point
+    const { margin, side, x0, y0, s } = aGeom(W, H);
 
-    // truth wind-speed shading (banded, every 5 m/s) at 1 gp resolution
-    const gw = 2 * WIN + 1;
-    const img = ctx.createImageData(gw, gw);
-    const lo = theme === "dark" ? [26, 26, 25] : [246, 246, 244];
-    const hi = theme === "dark" ? [200, 200, 198] : [58, 58, 56];
-    for (let j = 0; j < gw; j++) {
-      for (let i = 0; i < gw; i++) {
-        const gi = C_I - WIN + i, gj = C_J - WIN + j;
-        const w = vtheta(Math.hypot(gi - C_I, gj - C_J));
-        const level = Math.min(10, Math.floor(w / 5));
-        const col = lerp(lo, hi, level / 10);
-        const o = (j * gw + i) * 4;
-        img.data[o] = col[0]; img.data[o + 1] = col[1];
-        img.data[o + 2] = col[2]; img.data[o + 3] = 255;
-      }
-    }
-    const tmp = document.createElement("canvas");
-    tmp.width = gw; tmp.height = gw;
-    tmp.getContext("2d").putImageData(img, 0, 0);
-    ctx.imageSmoothingEnabled = true;
-    ctx.drawImage(tmp, x0, y0, side, side);
+    // wind-field shading is intentionally omitted: the panel shows only the
+    // 20 m/s contour rings of the truth (thick, white) and of every member
+    // (thin, coloured) on the plain surface
 
-    // 20 m/s rings of the members (thin, coloured)
+    // 20 m/s rings of the members (thin, coloured), clipped to the axes
     const [rIn, rOut] = ringRadii();
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x0, y0, side, side);
+    ctx.clip();
     ctx.lineWidth = 1;
     for (let m = 0; m < NENS; m++) {
-      ctx.strokeStyle = hexA(memColor(m), 0.45);
+      ctx.strokeStyle = hexA(memColor(m), 0.32);
       ctx.beginPath();
       ctx.arc(x0 + (ci[m] - (C_I - WIN)) * s, y0 + (cj[m] - (C_J - WIN)) * s, rIn * s, 0, 6.2832);
       ctx.stroke();
@@ -191,6 +185,7 @@
       ctx.arc(x0 + WIN * s, y0 + WIN * s, r * s, 0, 6.2832);
       ctx.stroke();
     }
+    ctx.restore();
 
     // observation point P — white cross with a dark halo (reads in both themes)
     const px = x0 + (P_I - (C_I - WIN)) * s, py = y0 + (P_J - (C_J - WIN)) * s;
@@ -224,8 +219,17 @@
       ctx.stroke();
       ctx.fillText(String(km), xi, y0 + side + 6);
     }
-    ctx.textAlign = "left";
-    ctx.fillText("km", x0 + side - 24, y0 + side + 6);
+    // y-axis ticks + labels (km north)
+    ctx.textBaseline = "middle";
+    for (const km of TICKS_KM) {
+      const yi = y0 + (km / DX + WIN) * s;
+      ctx.beginPath();
+      ctx.moveTo(x0, yi); ctx.lineTo(x0 - 4, yi);
+      ctx.stroke();
+      ctx.fillText(String(km), x0 - 6, yi);
+    }
+    ctx.textAlign = "center"; ctx.textBaseline = "top";
+    ctx.fillText("km", x0 + side / 2, y0 + side + 18);   // unit centred below the axis
   }
 
   /* ------------------------------------------------------- panel (b) */
@@ -248,11 +252,10 @@
     const skew = (v3 / NENS) / Math.pow(sd, 3);
     const kurt = (v4 / NENS) / Math.pow(sd, 4) - 3;
 
-    // histogram
-    let lo = Infinity, hi = -Infinity;
-    for (let m = 0; m < NENS; m++) { if (e[m] < lo) lo = e[m]; if (e[m] > hi) hi = e[m]; }
-    const pad = Math.max(0.5, (hi - lo) * 0.06);
-    lo -= pad; hi += pad;
+    // fixed x range, anchored to the truth wind at P: e = u - u_truth always lies in
+    // [-35 - u_t, +35 - u_t] plus a margin.  Constant under Lsprd changes; re-anchors
+    // (and only then) when P is moved by clicking the map in panel (a).
+    const lo = -43 - V_T, hi = 43 - V_T;
     const NB = 48;
     const binW = (hi - lo) / NB;
     const counts = new Float64Array(NB);
@@ -263,20 +266,34 @@
     }
     const cmax = Math.max.apply(null, counts);
 
-    // zero line (e = 0)
-    ctx.strokeStyle = T.axis; ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
-    const zx = margin.l + ((-lo) / (hi - lo)) * pw;
-    ctx.beginPath(); ctx.moveTo(zx, margin.t); ctx.lineTo(zx, margin.t + ph); ctx.stroke();
-    ctx.setLineDash([]);
-
     // bars
     for (let b = 0; b < NB; b++) {
       const bx = margin.l + b * binW / (hi - lo) * pw;
       const bw = Math.max(1, binW / (hi - lo) * pw - 1);
-      const bh = (counts[b] / cmax) * ph;
-      ctx.fillStyle = theme === "dark" ? hexA(T.amber, 0.5) : T.hair;
+      const bh = (counts[b] / cmax) * ph * 0.72;   // y-range padded: top ~28% stays free for the legend box
+      ctx.fillStyle = theme === "dark" ? hexA(T.amber, 0.5) : hexA(T.amber, 0.32);
       ctx.fillRect(bx, margin.t + ph - bh, bw, bh);
     }
+
+    // kernel density estimate of the error (Gaussian kernel, Silverman bandwidth)
+    const es = Array.from(e).sort((a, b) => a - b);
+    const iqr = es[Math.floor(0.75 * NENS)] - es[Math.floor(0.25 * NENS)];
+    const h = Math.max(0.2, 0.9 * Math.min(sd, iqr / 1.34) * Math.pow(NENS, -0.2));
+    const k2p = Math.sqrt(2 * Math.PI);
+    ctx.strokeStyle = T.amber;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    const NPTS = 220;
+    for (let i = 0; i <= NPTS; i++) {
+      const x = lo + (hi - lo) * i / NPTS;
+      let s = 0;
+      for (let m = 0; m < NENS; m++) { const z = (x - e[m]) / h; s += Math.exp(-0.5 * z * z); }
+      const f = s / (NENS * h * k2p);
+      const cy = margin.t + ph - (f * binW * NENS) / cmax * ph * 0.72;
+      if (i === 0) ctx.moveTo(margin.l + (x - lo) / (hi - lo) * pw, cy);
+      else ctx.lineTo(margin.l + (x - lo) / (hi - lo) * pw, cy);
+    }
+    ctx.stroke();
 
     // Gaussian fit (same mean & std)
     ctx.strokeStyle = T.ink2;
@@ -284,7 +301,7 @@
     ctx.setLineDash([5, 4]);
     ctx.beginPath();
     const yOf = (x) => margin.t + ph - (Math.exp(-0.5 * Math.pow((x - mu) / sd, 2)) /
-      (sd * Math.sqrt(2 * Math.PI)) * binW * NENS) / cmax * ph;
+      (sd * Math.sqrt(2 * Math.PI)) * binW * NENS) / cmax * ph * 0.72;
     for (let i = 0; i <= 120; i++) {
       const x = lo + (hi - lo) * i / 120;
       const y = yOf(x);
@@ -294,26 +311,29 @@
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // mean and +/- std markers
+    // truth (the error is zero at the truth: u = u_true at P)
     ctx.strokeStyle = T.ink1;
     ctx.lineWidth = 1.4;
-    const mx = margin.l + ((mu - lo) / (hi - lo)) * pw;
-    ctx.beginPath(); ctx.moveTo(mx, margin.t + 4); ctx.lineTo(mx, margin.t + ph); ctx.stroke();
-    ctx.strokeStyle = hexA(T.ink3, 0.7);
-    ctx.lineWidth = 1;
-    ctx.setLineDash([3, 3]);
-    for (const s of [1, -1]) {
-      const sx = margin.l + ((mu + s * sd - lo) / (hi - lo)) * pw;
-      ctx.beginPath(); ctx.moveTo(sx, margin.t + 4); ctx.lineTo(sx, margin.t + ph); ctx.stroke();
-    }
-    ctx.setLineDash([]);
+    const tx = margin.l + ((0 - lo) / (hi - lo)) * pw;
+    ctx.beginPath(); ctx.moveTo(tx, margin.t + 4); ctx.lineTo(tx, margin.t + ph); ctx.stroke();
 
-    // axis
+    // "truth" tag on the line itself, at its lower end (the legend box takes the top)
+    ctx.font = "10px system-ui, sans-serif";
+    ctx.textAlign = "center"; ctx.textBaseline = "bottom";
+    const truthLabel = "truth";
+    const tw = ctx.measureText(truthLabel).width;
+    const ly = margin.t + ph - 8;
+    ctx.fillStyle = hexA(T.surface1, 0.85);
+    ctx.fillRect(tx - tw / 2 - 3, ly - 12, tw + 6, 13);
+    ctx.fillStyle = T.ink1;
+    ctx.fillText(truthLabel, tx, ly + 1);
+    ctx.textBaseline = "top";
+
+    // axis (ticks: nice step over the anchored range)
     ctx.strokeStyle = T.axis; ctx.lineWidth = 1;
     ctx.strokeRect(margin.l, margin.t, pw, ph);
     ctx.fillStyle = T.ink3; ctx.font = "10px system-ui, sans-serif";
     ctx.textAlign = "center"; ctx.textBaseline = "top";
-    // nice ticks across the adaptive range
     const step = niceStep((hi - lo) / 5);
     const t0 = Math.ceil(lo / step) * step;
     for (let v = t0; v <= hi + 1e-9; v += step) {
@@ -321,24 +341,29 @@
       ctx.beginPath(); ctx.moveTo(xi, margin.t + ph); ctx.lineTo(xi, margin.t + ph + 4); ctx.stroke();
       ctx.fillText(String(Math.round(v * 10) / 10), xi, margin.t + ph + 6);
     }
-    ctx.textAlign = "right";
-    ctx.fillText("m/s", margin.l + pw, margin.t + ph + 6);
+    ctx.textAlign = "center";
+    ctx.fillText("m/s", margin.l + pw / 2, margin.t + ph + 18);   // unit centred below the axis
 
     // readout spans
     const f2 = (x) => (x >= 0 ? "+" : "") + x.toFixed(2);
     $("rk-skew").textContent = f2(skew);
     $("rk-kurt").textContent = f2(kurt);
     const verdictEl = $("rk-verdict");
-    const gaussLike = Math.abs(skew) < 0.25 && Math.abs(kurt) < 0.35;
+    // z-scores for skewness and excess kurtosis (Kim 2013; D'Agostino 1970):
+    // SE(skew) = sqrt(6/n), SE(kurt) = sqrt(24/n), so the thresholds adapt to NENS.
+    // 5% two-tailed critical value 1.96 (≈ "Gaussian" when both |z| < 1.96).
+    const zSkew = skew / Math.sqrt(6 / NENS);
+    const zKurt = kurt / Math.sqrt(24 / NENS);
+    const gaussLike = Math.abs(zSkew) < 1.96 && Math.abs(zKurt) < 1.96;
     let txt;
     if (gaussLike) txt = "≈ Gaussian";
     else {
       const parts = [];
-      if (skew < -0.25) parts.push("left-skewed");
-      else if (skew > 0.25) parts.push("right-skewed");
+      if (zSkew < -1.96) parts.push("left-skewed");
+      else if (zSkew > 1.96) parts.push("right-skewed");
       else parts.push("symmetric");
-      if (kurt < -0.35) parts.push("flat-topped");
-      else if (kurt > 0.35) parts.push("heavy-tailed");
+      if (zKurt < -1.96) parts.push("flat-topped");
+      else if (zKurt > 1.96) parts.push("heavy-tailed");
       txt = "non-Gaussian — " + parts.join(", ");
     }
     verdictEl.textContent = txt;
@@ -348,7 +373,7 @@
   }
 
   /* ------------------------------------------------------- panel (c) */
-  const D_MIN = -12, D_MAX = 12;       // displacement range (grid points)
+  const D_MIN = -20, D_MAX = 20;       // displacement range (grid points)
 
   function niceStep(raw) {
     const pow = Math.pow(10, Math.floor(Math.log10(raw)));
@@ -361,7 +386,7 @@
     const margin = { l: 46, r: 12, t: 14, b: 32 };
     const pw = W - margin.l - margin.r, ph = H - margin.t - margin.b;
     const xOf = (d) => margin.l + (d - D_MIN) / (D_MAX - D_MIN) * pw;
-    const yOf = (v) => margin.t + ph - (v - (-40)) / (80) * ph;   // v in [-40, 40]
+    const yOf = (v) => margin.t + ph - (v - (-50)) / (100) * ph;   // v in [-50, 50] — padded top leaves room for the legend box
 
     // location pdf (Gaussian, std = Lsprd) as a shaded hump on the axis
     const pdf = (d) => Math.exp(-0.5 * Math.pow(d / Lsprd, 2)) / (Lsprd * Math.sqrt(2 * Math.PI));
@@ -392,10 +417,13 @@
     ctx.stroke();
 
     // member samples: (centre displacement toward P, zonal wind u at P)
+    // points outside the axes range are skipped
     for (let m = 0; m < NENS; m++) {
       const d = (ci[m] - C_I) * P_DIR.i + (cj[m] - C_J) * P_DIR.j;
-      ctx.fillStyle = hexA(memColor(m), 0.5);
-      ctx.fillRect(xOf(d) - 1.2, yOf(uWind(ci[m], cj[m], P_I, P_J)) - 1.2, 2.4, 2.4);
+      const x = xOf(d), y = yOf(uWind(ci[m], cj[m], P_I, P_J));
+      if (x < margin.l || x > margin.l + pw || y < margin.t || y > margin.t + ph) continue;
+      ctx.fillStyle = hexA(memColor(m), 0.4);
+      ctx.fillRect(x - 1.2, y - 1.2, 2.4, 2.4);
     }
 
     // truth point
@@ -420,15 +448,15 @@
     ctx.strokeRect(margin.l, margin.t, pw, ph);
     ctx.fillStyle = T.ink3;
     ctx.textAlign = "center"; ctx.textBaseline = "top";
-    for (const km of [-90, -45, 0, 45, 90]) {
+    for (const km of [-180, -90, 0, 90, 180]) {
       const d = km / DX;
       if (d < D_MIN || d > D_MAX) continue;
       const xi = xOf(d);
       ctx.beginPath(); ctx.moveTo(xi, margin.t + ph); ctx.lineTo(xi, margin.t + ph + 4); ctx.stroke();
       ctx.fillText(String(km), xi, margin.t + ph + 6);
     }
-    ctx.textAlign = "right";
-    ctx.fillText("km", margin.l + pw, margin.t + ph + 6);
+    ctx.textAlign = "center";
+    ctx.fillText("km", margin.l + pw / 2, margin.t + ph + 18);   // unit centred below the axis
     ctx.save();
     ctx.translate(12, margin.t + ph / 2);
     ctx.rotate(-Math.PI / 2);
@@ -438,18 +466,63 @@
   }
 
   /* ------------------------------------------------------------ glue */
+  const obsPosEl = $("rk-obs-pos");
+
+  // move the observation point (grid coordinates) and re-derive everything that follows
+  function setP(gi, gj) {
+    const di = gi - C_I, dj = gj - C_J;
+    const r = Math.hypot(di, dj);
+    P_I = gi; P_J = gj;
+    if (r >= 0.5) { P_DIR = { i: di / r, j: dj / r }; R0 = r; }
+    else R0 = 0;                       // P on the centre: direction undefined, keep the last one
+    V_T = uWind(C_I, C_J, P_I, P_J);
+    updateObsPos();
+    render();
+  }
+  function updateObsPos() {
+    if (!obsPosEl) return;
+    const ang = (Math.atan2(P_I - C_I, -(P_J - C_J)) * 180 / Math.PI + 360) % 360;
+    obsPosEl.textContent = "r = " + Math.round(R0 * DX) + " km · " + Math.round(ang)
+      + "° · u\u209C = " + V_T.toFixed(1) + " m/s";
+  }
+
+  // click on the (a) map to move P
+  cvA.addEventListener("click", (ev) => {
+    const rect = cvA.getBoundingClientRect();
+    const g = aGeom(cvA.clientWidth, cvA.clientHeight);
+    const cx = ev.clientX - rect.left, cy = ev.clientY - rect.top;
+    if (cx < g.x0 || cx > g.x0 + g.side || cy < g.y0 || cy > g.y0 + g.side) return;
+    setP(C_I - WIN + (cx - g.x0) / g.s, C_J - WIN + (cy - g.y0) / g.s);
+  });
+
   function render() { updateT(); renderA(); renderB(); renderC(); }
 
   sprdSlider.addEventListener("input", () => {
-    Lsprd = parseFloat(sprdSlider.value);
-    sprdVal.textContent = Lsprd.toFixed(1) + " gp · " + (Lsprd * DX).toFixed(0) + " km";
+    Lsprd = parseFloat(sprdSlider.value) * RMW;   // slider is in units of Rmw
+    sprdVal.innerHTML = sprdSlider.value + " R<sub>mw</sub>";
+    sampleEnsemble();
+    render();
+  });
+  nensSlider.addEventListener("input", () => {
+    NENS = parseInt(nensSlider.value, 10);
+    nensVal.textContent = NENS;
+    const lbl = $("rk-nens-label");
+    if (lbl) lbl.textContent = NENS;
+    ci = new Float64Array(NENS);
+    cj = new Float64Array(NENS);
     sampleEnsemble();
     render();
   });
   rerunBtn.addEventListener("click", () => { sampleEnsemble(); render(); });
 
   root.dataset.theme = theme;           // apply theme variables before the first render
-  sprdVal.textContent = Lsprd.toFixed(1) + " gp · " + (Lsprd * DX).toFixed(0) + " km";
+  updateObsPos();
+  sprdSlider.value = (Lsprd / RMW).toFixed(1);   // put the slider head back at the default (0.6 Rmw)
+  sprdVal.innerHTML = (Lsprd / RMW).toFixed(1) + " R<sub>mw</sub>";
+  nensSlider.value = NENS;
+  nensVal.textContent = NENS;
+  const nensLbl = $("rk-nens-label");
+  if (nensLbl) nensLbl.textContent = NENS;
   sampleEnsemble();
   render();
 

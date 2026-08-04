@@ -9,7 +9,7 @@
 
 <link rel="stylesheet" href="../../../style.css">
 <link rel="stylesheet" href="chapters.css">
-<link rel="stylesheet" href="widgets/rankine/style.css">
+<link rel="stylesheet" href="widgets/rankine/style.css?v=25">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <!-- Global site tag (gtag.js) - Google Analytics -->
@@ -61,14 +61,15 @@
         A Rankine vortex &#8212; solid-body rotation inside the radius of maximum wind, a
         (R<sub>mw</sub>/r)<sup>1.5</sup> decay outside, the profile used in
         <a href="../../../pages/research/2019.multiscale.DA/article.html">Ying 2019</a> &#8212; is a
-        minimal model of a coherent vortex. The ensemble below has 400 members that differ
+        minimal model of a coherent vortex. The ensemble below has 100 members that differ
         <em>only</em> in where the vortex sits: each centre is drawn from a Gaussian with standard
-        deviation L<sub>sprd</sub> around the truth location. The observation point P (marked +)
-        sits southeast of the truth centre (compass 135&#176;), just outside the radius of maximum
-        wind, and the state we watch is the zonal wind u at P (a strong westerly there, about 23 m/s
-        short of calm). Slide L<sub>sprd</sub> up and down: at small spread the error u &#8722; u<sub>truth</sub>
-        at P is Gaussian; once the spread reaches the vortex size the histogram skews and fattens, and
-        no Gaussian prior can represent it.
+        deviation L<sub>sprd</sub> around the truth location (given in units of the radius of
+        maximum wind R<sub>mw</sub>). The observation point P (marked +) sits southeast of the
+        truth centre (compass 135&#176;), just outside the radius of maximum wind, and the state we
+        watch is the zonal wind u at P (a strong westerly of about 23 m/s there). Click P on panel
+        (a) to move it anywhere. Slide L<sub>sprd</sub> up and down: at small spread the error
+        u &#8722; u<sub>truth</sub> at P is Gaussian; once the spread reaches the vortex size the
+        histogram skews and fattens, and no Gaussian prior can represent it.
       </p>
 
       <div class="da-widget" id="rankine">
@@ -77,72 +78,60 @@
 
           <div class="workspace">
 
-            <div class="side">
+            <div class="rk-col rk-col-left">
 
-              <div class="controls">
-                <div class="ctl-group" data-color="member">
-                  <h4 class="ctl-title">Location spread <span class="ctl-note">centre position error</span></h4>
-                  <label class="ctl-row">
-                    <span class="ctl-label">L<sub>sprd</sub></span>
-                    <input type="range" id="rk-sprd" min="0.2" max="10" step="0.1" value="3">
-                    <span class="ctl-val" id="rk-sprd-val"></span>
-                  </label>
-                  <button class="ctl-btn" id="rk-rerun" title="draw a new 400-member ensemble">&#8635; new ensemble</button>
-                </div>
+<div class="controls">
+              <div class="ctl-group" data-color="member">
+                <h4 class="ctl-title">Location spread <span class="ctl-note">centre position error, in units of R<sub>mw</sub></span></h4>
+                <label class="ctl-row">
+                  <span class="ctl-label">L<sub>sprd</sub></span>
+                  <input type="range" id="rk-sprd" min="0.1" max="3" step="0.1" value="0.6">
+                  <span class="ctl-val" id="rk-sprd-val"></span>
+                </label>
+                <label class="ctl-row">
+                  <span class="ctl-label">N<sub>ens</sub></span>
+                  <input type="range" id="rk-nens" min="20" max="400" step="10" value="100">
+                  <span class="ctl-val" id="rk-nens-val"></span>
+                </label>
+                <button class="ctl-btn" id="rk-rerun" title="draw a new ensemble">&#8635; new ensemble</button>
               </div>
-
-              <div class="controls">
-                <div class="ctl-group">
-                  <h4 class="ctl-title">Model <span class="ctl-note">fixed</span></h4>
-                  <p class="ctl-note" style="margin:8px 0 2px;line-height:1.5;">
-                    Modified Rankine vortex: V<sub>max</sub> = 35 m/s, radius of maximum wind
-                    R<sub>mw</sub> = 45 km, 400 members, only the centre position varies
-                    (truth &#8801; ensemble mean location).
-                  </p>
-                </div>
+            </div>
+              <div class="plot-wrap panel-a">
+              <div class="plot-body">
+                  <ul class="legend">
+                    <li><span class="mark truth"></span> truth</li>
+                    <li><span class="mark member"></span> <span id="rk-nens-label">100</span> members</li>
+                    <li><span class="mark obs">+</span> obs P</li>
+                  </ul>
+                <canvas id="rk-plot-a"></canvas>
               </div>
-
+            </div>
             </div>
 
-            <div class="plots">
-
-              <div class="plot-row">
-                <div class="plot-wrap">
-                  <p class="plot-title">(a) vortex ensemble</p>
+            <div class="rk-col rk-col-right">
+              <div class="plot-wrap panel-b">
+              <div class="plot-body">
                   <ul class="legend">
-                    <li><span class="mark truth"></span> truth (20 m/s ring)</li>
-                    <li><span class="mark member"></span> 400 members (20 m/s rings)</li>
-                    <li><span class="mark obs">+</span> observation point P</li>
+                    <li><span class="mark kde"></span> sample dist.</li>
+                    <li><span class="mark fit"></span> Gaussian fit</li>
+                    <li class="legend-note">mean <span id="rk-mean">&#8212;</span> &#183; std <span id="rk-std">&#8212;</span>
+                        &#183; skew <span id="rk-skew">&#8212;</span> &#183; kurt <span id="rk-kurt">&#8212;</span>
+                        <span class="rk-verdict-line">&#8594; <span id="rk-verdict">&#8212;</span></span></li>
                   </ul>
-                  <canvas id="rk-plot-a"></canvas>
-                </div>
-                <div class="plot-wrap">
-                  <p class="plot-title">(b) error at P: u minus truth</p>
-                  <ul class="legend">
-                    <li><span class="mark err"></span> member error histogram</li>
-                    <li><span class="mark fit"></span> Gaussian fit (same mean &amp; std)</li>
-                    <li class="legend-note">mean <span id="rk-mean">&#8212;</span> m/s &#183; std <span id="rk-std">&#8212;</span> m/s
-                        &#183; skew <span id="rk-skew">&#8212;</span> &#183; excess kurtosis <span id="rk-kurt">&#8212;</span>
-                        &#8594; <span id="rk-verdict">&#8212;</span></li>
-                  </ul>
-                  <canvas id="rk-plot-b"></canvas>
-                </div>
+                <canvas id="rk-plot-b"></canvas>
               </div>
+            </div>
 
-              <div class="plot-wrap">
-                <p class="plot-title">(c) why: zonal wind u at P vs the centre displacement toward P</p>
-                <ul class="legend">
-                  <li><span class="mark member"></span> member samples</li>
-                  <li><span class="mark truth"></span> truth wind at P</li>
-                  <li><span class="mark sprd"></span> centre pdf (std = L<sub>sprd</sub>)</li>
-                  <li class="legend-note">The shaded hump is the Gaussian centre pdf
-                      (std = L<sub>sprd</sub>). Through P the map peaks as a member's core edge
-                      reaches P and reverses sign as its centre passes P (dashed). A small spread
-                      rides the local slope and keeps the error Gaussian; a wide spread straddles
-                      the bend, and the error distribution of panel (b) skews and fattens.</li>
-                </ul>
+              <div class="plot-wrap panel-c">
+              <div class="plot-body">
+                  <ul class="legend">
+                    <li><span class="mark member"></span> member samples</li>
+                    <li><span class="mark truth"></span> truth u at P</li>
+                    <li><span class="mark sprd"></span> vortex center dist.</li>
+                  </ul>
                 <canvas id="rk-plot-c"></canvas>
               </div>
+            </div>
 
             </div>
 
@@ -184,6 +173,6 @@
   </div>
 
   <script src="../../../footer.js"></script>
-  <script src="widgets/rankine/app.js?v=1"></script>
+  <script src="widgets/rankine/app.js?v=9"></script>
 </body>
 </html>

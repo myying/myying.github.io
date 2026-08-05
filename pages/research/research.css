@@ -1,0 +1,97 @@
+/* Nav bar for the standalone research article pages (the "Read More" targets).
+   Same look as the Data Assimilation Tutorials' chapter navigation
+   (pages/software/2026.DA.short.tutorial/chapters.css): "Back to Research",
+   then Previous | current title | Next around the accent pill. */
+
+.widget-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0 18px;
+  font-size: 0.85rem;
+}
+.widget-nav .nav-home,
+.widget-nav .nav-arrow {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--accent-link);
+  text-decoration: none;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+.widget-nav .nav-home { gap: 6px; padding: 0 14px; white-space: nowrap; }
+.widget-nav .nav-arrow { gap: 7px; padding: 0 13px; white-space: nowrap; }
+.widget-nav .nav-arrow .nav-label { font-size: 0.82rem; }
+.widget-nav .nav-arrow i,
+.widget-nav .nav-home i { font-size: 0.95rem; line-height: 1; }
+.widget-nav .nav-home:hover,
+.widget-nav .nav-arrow:hover {
+  border-color: var(--accent);
+  background: var(--nav-hover);
+  color: var(--text);
+}
+/* current article title: highlighted accent pill, centred between buttons */
+.widget-nav .nav-page {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  margin: 0 auto;
+}
+.widget-nav .nav-current {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  white-space: nowrap;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 9px;
+  padding: 0 18px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+}
+.widget-nav .nav-current .nav-long {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.widget-nav .nav-current .nav-short { display: none; }
+
+@media (max-width: 560px) {
+  /* tighter page side padding so the nav row fits the phone width */
+  .page { padding-left: 16px; padding-right: 16px; }
+  .widget-nav { gap: 7px; }
+  .widget-nav .nav-home { padding: 0 10px; }
+  /* icon-only back button on phones (like the prev/next arrows) */
+  .widget-nav .nav-home .nav-home-label { display: none; }
+  .widget-nav .nav-arrow { width: 38px; min-width: 38px; padding: 0; }
+  .widget-nav .nav-arrow .nav-label { display: none; }
+  /* the title pill shrinks (with ellipsis) rather than overflowing */
+  .widget-nav .nav-page { flex: 1 1 auto; min-width: 0; }
+  .widget-nav .nav-current { flex: 0 1 auto; min-width: 0; max-width: 100%; padding: 0 12px; }
+  .widget-nav .nav-current .nav-long { display: none; }
+  .widget-nav .nav-current .nav-short {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

@@ -3,13 +3,14 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="Yue (Michael) Ying — Data Assimilation Interactive Tutorials, Localization and inflation (planned)">
-<meta name="keywords" content="data assimilation, tutorial, 05-localization-inflation">
+<meta name="description" content="Yue (Michael) Ying — Data Assimilation Interactive Tutorials, Ch 6: Sample covariance, localization and inflation">
+<meta name="keywords" content="data assimilation, ensemble, covariance, localization, inflation, Gaspari-Cohn, tutorial, NEDAS">
 <meta name="author" content="Yue Ying">
 
 <link rel="stylesheet" href="../../../style.css">
 <link rel="stylesheet" href="chapters.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="widgets/cov-explorer/style.css">
 
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-148955805-2"></script>
@@ -26,6 +27,7 @@
 </script>
 
 <title>Data Assimilation Interactive Tutorials · Yue (Michael) Ying</title>
+
 </head>
 
 <body>
@@ -45,16 +47,144 @@
         </span>
       </nav>
 
-      <div class="planned">
-        <p class="planned-tag">Planned</p>
-        <h3>Localization and inflation</h3>
-        <p class="planned-desc">Two knobs make the EnKF work in high dimensions: <b>localization</b> zeros out spurious long-range correlations born of sampling noise, and <b>inflation</b> widens the ensemble to compensate for its small size. A planned widget will add both as sliders on the correlation map &#8212; watch the scatter re-fill as inflation is dialed up.</p>
-        <p class="planned-ref">&#8594; Evensen et al., <i>Data Assimilation Fundamentals</i> (2022), Ch 10 &#8212; localization and inflation.</p>
+      <h3>Localization and inflation</h3>
+      <p>
+        Chapter 2 showed the <em>correlation</em> between an observation and the state. What the
+        ensemble Kalman filter actually uses is the <strong>sample covariance</strong> &#8212; the same
+        quantity with units (K&#178; here). This widget replays the experiment with a shorter-scale
+        truth &#8212; a compact warm hump on a smooth random background &#8212; and shows the covariance the
+        ensemble estimates next to the <em>true</em> covariance, so the sampling error is directly
+        visible. You control the ensemble size, the observation location, and the
+        <strong>localization</strong> knob that makes small ensembles usable: a smooth kernel that zeros
+        out covariance beyond a chosen radius, where sampling noise hides any real signal.
+      </p>
+      <p class="hint">
+        <strong>Try it:</strong> drag the red observation anywhere on a map &#8212; the covariance follows
+        it (click it to pin it in place). Slide the ensemble size down to 10 and watch the sample
+        map fill with spurious blobs; slide it up and it converges toward the true covariance in the
+        middle panel. Then turn localization on and dial the radius: everything beyond the dashed
+        circle is set to zero.
+      </p>
+
+      <!-- ================= Sample Covariance Explorer ===================== -->
+      <div class="da-widget" id="cov-explorer">
+
+        <main class="viz-root">
+
+          <div class="workspace">
+            <div class="panels-wrap">
+              <div class="panel-grid">
+                <section class="panel">
+                  <h2 class="panel-title">Truth T</h2>
+                  <canvas class="map" id="map-truth"></canvas>
+                  <div class="colorbar"><canvas id="cb-truth"></canvas><div class="cb-labels"><span class="cb-min"></span><span class="cb-mid"></span><span class="cb-max"></span></div></div>
+                </section>
+                <section class="panel">
+                  <h2 class="panel-title">True Cov(Obs T, State T)</h2>
+                  <canvas class="map" id="map-true"></canvas>
+                  <div class="colorbar"><canvas id="cb-true"></canvas><div class="cb-labels"><span class="cb-min"></span><span class="cb-mid"></span><span class="cb-max"></span></div></div>
+                </section>
+                <section class="panel">
+                  <h2 class="panel-title">Sample Cov(Obs T, State T)</h2>
+                  <canvas class="map" id="map-cov"></canvas>
+                  <div class="colorbar"><canvas id="cb-cov"></canvas><div class="cb-labels"><span class="cb-min"></span><span class="cb-mid"></span><span class="cb-max"></span></div></div>
+                </section>
+              </div>
+            </div>
+          </div>
+
+          <div class="controls">
+            <div class="ctl">
+              <button type="button" id="ctl-lock" class="lock-btn" aria-pressed="false">
+                <i class="fa fa-unlock" aria-hidden="true"></i>
+                <span class="lock-label">lock obs</span>
+              </button>
+            </div>
+            <div class="ctl">
+              <label for="ctl-nens">ensemble size <em>n</em></label>
+              <input type="range" id="ctl-nens" min="5" max="300" step="5" value="100">
+              <span class="ctl-val" id="nens-val">100</span>
+            </div>
+            <div class="ctl">
+              <label for="ctl-loc">localization radius <em>R</em></label>
+              <input type="range" id="ctl-loc" min="20" max="250" step="5" value="100">
+              <span class="ctl-val" id="loc-val">100 km</span>
+            </div>
+            <div class="ctl ctl-toggle">
+              <label class="switch">
+                <input type="checkbox" id="ctl-locon" checked>
+                <span class="switch-slider" aria-hidden="true"></span>
+                <span class="switch-label">localize</span>
+              </label>
+            </div>
+          </div>
+
+          <p class="readout" id="readout" role="status"></p>
+
+          <ul class="legend">
+            <li><span class="mark obs"></span> observation &#8212; drag to move, click to lock</li>
+            <li><span class="mark loc"></span> localization radius <em>R</em></li>
+          </ul>
+        </main>
+
       </div>
+      <!-- ================= end widget ===================================== -->
+
+      <h3>Reading the panels</h3>
+      <p>
+        <b>1 &#183; The truth field</b> — the field the analysis is trying to estimate: a compact warm
+        hump (peak &#8776; 8 K above the background, radius scale 30 km) on a smooth random background
+        (std 1.5 K, correlation &#8776; 40 km), on a 50&#215;50 grid with 10 km cells. The field is shifted
+        so the temperature stays positive, and drawn in the <em>YlOrRd</em> colormap &#8212; cold pale
+        yellow, warm deep red &#8212; to keep it visually distinct from the blue&#8211;white&#8211;red covariance
+        scales.
+        The red circle is the <em>observation</em> of T at that point &#8212; drag it anywhere and
+        everything follows.
+      </p>
+      <p>
+        <b>2 &#183; The true covariance</b> — the <em>exact</em> covariance of this perturbation model, known
+        analytically: the covariance of the hump under random translation (std 25 km) plus the
+        background covariance. Because the hump is compact, so is the pattern: <b>+7.0 K&#178;</b> right at
+        the observation, <b>&#8722;3.0 K&#178;</b> on the opposite flank ~86 km away, essentially gone by
+        150 km. It depends only on the observation location &#8212; not on the ensemble size. Both
+        covariance panels share one fixed colour scale, <b>&#177;7 K&#178;</b> (the true peak at the default
+        observation is 6.96 K&#178;): the sample is compared against it directly, and sample values
+        beyond &#177;7 saturate the scale.
+      </p>
+      <p>
+        <b>3 &#183; The sample covariance</b> — what a finite ensemble actually gives you,
+        <code>(1/(n&#8722;1)) &#931; (x<sub>m</sub>&#8722;x&#772;)(y<sub>m</sub>&#8722;y&#772;)</code>,
+        on the same colour scale as the true panel so the two can be compared directly. With
+        <b>n = 100</b> the pattern is close to the truth; slide n down to 10 and spurious blobs appear
+        <em>everywhere</em> — values beyond 80 km can even exceed the true peak (9.1 K&#178; vs the true
+        3.0 K&#178; there). That sampling noise is exactly what localization removes.
+      </p>
+
+      <h3>Localization: the fix for sampling noise</h3>
+      <p>
+        Toggle <b>localize</b> on: the sample covariance map is multiplied, point by point, by the
+        <strong>Gaspari&#8211;Cohn</strong> compact-support kernel &#8212; weight 1 at the observation, a smooth
+        taper, and <em>exactly zero</em> beyond the dashed circle of radius <em>R</em>. The positive core
+        near the observation survives; everything beyond <em>R</em> is discarded, whether spurious or
+        genuine, because with a small ensemble the far-field sample covariance is mostly noise anyway.
+        Compare the middle and right panels: the true covariance&#8217;s negative lobe at ~86 km is real,
+        yet with <em>R</em> = 100 km it lies close to the kernel&#8217;s cutoff and nearly vanishes from the
+        sample map &#8212; that is the price of killing sampling noise. Slide <em>R</em> down to localize more
+        aggressively, or toggle localization off to see the raw sample.
+      </p>
+      <p>
+        <b>Inflation</b> is the other knob: multiplying the ensemble perturbations by a factor
+        slightly above 1 widens the sample spread, compensating for the variance lost to sampling
+        error &#8212; and, together with localization, keeps the filter from collapsing onto a wrong
+        analysis. It is not part of this widget, but it acts on the same diagonal of the covariance
+        matrix that you see here as the peak at the observation.
+      </p>
+      <p class="planned-ref">&#8594; Evensen et al., <i>Data Assimilation Fundamentals</i> (2022), Ch 10 &#8212; localization and inflation; Gaspari &amp; Cohn (1999), <i>QJRMS</i> 125, 723&#8211;757.</p>
 
     </div>
   </div>
 
   <script src="../../../footer.js"></script>
+  <script src="widgets/cov-explorer/app.js"></script>
 </body>
 </html>

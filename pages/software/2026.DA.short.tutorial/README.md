@@ -19,9 +19,9 @@ in prose. The course structure follows Evensen, Vossepoel & van Leeuwen,
 | `02-observation-state-correlation.html` | Ch 2 page: Observation–State Correlation Explorer + annotations |
 | `03-challenges-dynamical-systems.html` | Ch 3 page: challenges from dynamical systems — Lorenz-96 chaos widget + embedded vort3d uncertainty demo |
 | `vort3d-demo.html`, `widgets/vort3d-data/` | The vort3d uncertainty demo (20-realization hurricane forecast: track/intensity/size + maps & cross-sections), embedded by Ch 3; data bundle + build script inside `widgets/vort3d-data/` |
-| `04-kalman-filter.html`, `05-ensemble-kalman-filter.html` | Ch 4–5 placeholder pages (planned) — full widget-nav chain, `.planned` panel |
-| `06-localization-inflation.html` | Ch 6 page: Sample Covariance Explorer — truth (compact hump + smooth random background), analytic true covariance, and sample covariance (raw or Gaspari–Cohn localized); drag the observation, ensemble-size / localization-radius sliders, localization toggle + radius circle + annotations |
-| `07-nonlinear-filters.html`, `08-parameters-applications.html` | Ch 7–8 placeholder pages (planned) — full widget-nav chain, `.planned` panel |
+| `05-ensemble-kalman-filter.html` | Ch 4 page: The ensemble Kalman filter (planned; merged from the former Ch 4–5) — full widget-nav chain, `.planned` panel |
+| `06-localization-inflation.html` | Ch 5 page: Sample Covariance Explorer — truth (compact hump + smooth random background), analytic true covariance, and sample covariance (raw or Gaspari–Cohn localized); drag the observation, ensemble-size / localization-radius sliders, localization toggle + radius circle + annotations |
+| `07-nonlinear-filters.html`, `08-parameters-applications.html` | Ch 6–7 placeholder pages (planned) — full widget-nav chain, `.planned` panel |
 | `widgets/corr-explorer/app.js` | Widget logic (embedding-ready copy) |
 | `widgets/corr-explorer/style.css` | Widget styles (scoped to `.da-widget`) |
 | `widgets/corr-explorer/data.js` | Synthetic demo data (generated) |

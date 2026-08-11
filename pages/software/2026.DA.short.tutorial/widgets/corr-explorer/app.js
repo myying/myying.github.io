@@ -58,14 +58,29 @@
     ],
   };
 
+  // sequential truth-field ramp, same as the Ch. 6 covariance explorer:
+  // YlOrRd (ColorBrewer) in light mode, bright thermal in dark mode
+  const LUT_THERMAL = {
+    light: [
+      [0.000, "#ffffcc"], [0.125, "#ffeda0"], [0.250, "#fed976"], [0.375, "#feb24c"],
+      [0.500, "#fd8d3c"], [0.625, "#fc4e2a"], [0.750, "#e31a1c"], [0.875, "#bd0026"],
+      [1.000, "#800026"],
+    ],
+    dark: [
+      [0.0, "#241439"], [0.18, "#4a1a7d"], [0.38, "#8d218f"], [0.55, "#d23570"],
+      [0.72, "#f9702f"], [0.86, "#ffb94d"], [0.95, "#fff0a0"], [1.0, "#ffffff"],
+    ],
+  };
+
   function hex2rgb(h) {
     return [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
   }
-  function makeLUT(stops) {
+  // generic 256-entry LUT; `map` turns the field fraction t (0..1) into the
+  // stops' domain: diverging uses v = 2t−1, sequential uses v = t
+  function makeLUT(stops, map) {
     const lut = new Array(256);
     for (let k = 0; k < 256; k++) {
-      const t = k / 255;               // 0..1 across field range
-      const v = t * 2 - 1;             // -1..1
+      const v = map(k / 255);
       let s = 0;
       while (s < stops.length - 2 && v > stops[s + 1][0]) s++;
       const [v0, c0] = stops[s], [v1, c1] = stops[s + 1];
@@ -75,7 +90,10 @@
     }
     return lut;
   }
-  const lut = makeLUT(LUT_STOPS.light);
+  const divMap = (t) => t * 2 - 1;
+  const seqMap = (t) => t;
+  const lut = makeLUT(LUT_STOPS.light, divMap);       // diverging: correlation
+  const lutTh = makeLUT(LUT_THERMAL.light, seqMap);   // sequential: truth
 
   // ----------------------------------------------------------- ranges
   // truth range (symmetric, rounded to a whole K)
@@ -133,7 +151,7 @@
     return { ctx, w: rect.width, h: rect.height };
   }
 
-  function drawField(ctx, W, H, field, lo, hi) {
+  function drawField(ctx, W, H, field, lo, hi, lutArr) {
     const off = document.createElement("canvas");
     off.width = nx; off.height = ny;
     const octx = off.getContext("2d");
@@ -142,7 +160,7 @@
     for (let j = 0; j < ny; j++) {
       for (let i = 0; i < nx; i++) {
         const t = clamp((field[j][i] - lo) / (hi - lo || 1), 0, 1);
-        const c = lut[Math.round(t * 255)];
+        const c = lutArr[Math.round(t * 255)];
         const p = (j * nx + i) * 4;
         data[p] = c[0]; data[p + 1] = c[1]; data[p + 2] = c[2]; data[p + 3] = 255;
       }
@@ -197,7 +215,7 @@
     }
   }
 
-  function drawColorbar(cv, lo, hi) {
+  function drawColorbar(cv, lo, hi, lutArr, seq) {
     const fit = fitCanvas(cv);
     if (!fit) return;
     const { ctx, w, h } = fit;
@@ -206,7 +224,7 @@
     // aborting render() before the scatter panel is ever drawn. Clamp the LUT
     // index to [0,255].
     for (let k = 0; k < w; k++) {
-      const c = lut[Math.max(0, Math.min(255, Math.round((k / (w - 1)) * 255)))];
+      const c = lutArr[Math.max(0, Math.min(255, Math.round((k / (w - 1)) * 255)))];
       ctx.fillStyle = `rgb(${c[0] | 0},${c[1] | 0},${c[2] | 0})`;
       ctx.fillRect(k, 0, 1, h);
     }
@@ -214,7 +232,7 @@
     if (lbl) {
       const f = (x) => (Math.abs(x) < 1e-9 ? "0" : x.toFixed(x < 3 ? 1 : 0));
       lbl.querySelector(".cb-min").textContent = f(lo);
-      lbl.querySelector(".cb-mid").textContent = "0";
+      lbl.querySelector(".cb-mid").textContent = seq ? f((lo + hi) / 2) : "0";
       lbl.querySelector(".cb-max").textContent = f(hi);
     }
   }
@@ -290,14 +308,16 @@
   function render() {
     // re-build LUT for current theme
     const stops = LUT_STOPS[theme];
-    const l2 = makeLUT(stops);
+    const l2 = makeLUT(stops, divMap);
     lut.splice(0, lut.length, ...l2);
+    const th2 = makeLUT(LUT_THERMAL[theme], seqMap);
+    lutTh.splice(0, lutTh.length, ...th2);
 
-    // truth / corr maps
-    drawMap($("map-truth"), truthT, -vmax, vmax);
-    drawMap($("map-corr"), corrT, -1, 1);
-    drawColorbar($("cb-truth"), -vmax, vmax);
-    drawColorbar($("cb-corr"), -1, 1);
+    // truth map (sequential YlOrRd, 0..vmax) / corr map (diverging, -1..1)
+    drawMap($("map-truth"), truthT, 0, vmax, lutTh);
+    drawMap($("map-corr"), corrT, -1, 1, lut);
+    drawColorbar($("cb-truth"), 0, vmax, lutTh, true);
+    drawColorbar($("cb-corr"), -1, 1, lut, false);
 
     // scatter panel
     let r = corrT[sj][si];
@@ -313,10 +333,10 @@
       `corr(obs T, state T) = <strong>${r.toFixed(2)}</strong>`;
   }
 
-  function drawMap(cv, field, lo, hi) {
+  function drawMap(cv, field, lo, hi, lutArr) {
     const fit = fitCanvas(cv);
     if (!fit) return;
-    drawField(fit.ctx, fit.w, fit.h, field, lo, hi);
+    drawField(fit.ctx, fit.w, fit.h, field, lo, hi, lutArr);
     drawMarkers(fit.ctx, fit.w, fit.h);
     drawMapAxis(fit.ctx, fit.w, fit.h);
   }

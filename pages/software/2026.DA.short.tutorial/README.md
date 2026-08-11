@@ -16,7 +16,9 @@ in prose. The course structure follows Evensen, Vossepoel & van Leeuwen,
 | `toc.html` | Chapter table of contents — series hub (widget-nav back to `software.html`) |
 | `chapters.css` | Shared chapter-page styles: page column, `.widget-nav` (home + arrow buttons, highlighted current title), `.planned` panel |
 | `01-bayes-gaussians.html` | Ch 1 page: Bayes' rule for Gaussians — 1-D and 2-D widgets on one page + annotations |
-| `02-observation-state-correlation.html` | Ch 2 page: Observation–State Correlation Explorer + annotations |
+| `02-observation-state-correlation.html` | Ch 2 page: Ensemble 4 K contour explorer (truth + member contours, member slider) + Observation–State Correlation Explorer + annotations |
+| `widgets/contour-explorer/app.js` | Ch 2 ensemble-contour widget: marching-squares 4 K contours of truth + all members (Tab20 palette), member slider with highlight + blob-centre readout (shares `corr-explorer/data.js`) |
+| `widgets/contour-explorer/style.css` | Ch 2 contour widget styles (scoped to `.da-widget`) |
 | `03-challenges-dynamical-systems.html` | Ch 5 page: challenges from dynamical systems — Lorenz-96 chaos widget + embedded vort3d uncertainty demo |
 | `vort3d-demo.html`, `widgets/vort3d-data/` | The vort3d uncertainty demo (20-realization hurricane forecast: track/intensity/size + maps & cross-sections), embedded by Ch 3; data bundle + build script inside `widgets/vort3d-data/` |
 | `05-ensemble-kalman-filter.html` | Ch 3 page: The ensemble Kalman filter (planned; merged from the former Ch 4–5) — full widget-nav chain, `.planned` panel |

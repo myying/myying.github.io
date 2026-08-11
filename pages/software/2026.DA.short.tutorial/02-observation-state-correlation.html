@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="chapters.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="widgets/corr-explorer/style.css">
+<link rel="stylesheet" href="widgets/contour-explorer/style.css">
 
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-148955805-2"></script>
@@ -47,13 +48,70 @@
         </span>
       </nav>
 
+      <h3>Ensemble contours: where is the 4 K line?</h3>
+      <p>
+        The ensemble perturbs only the blob's <em>position</em> (std 50 km) — so every member's
+        4 K contour (where T = 4 K) is the same circle, displaced somewhere else. Overlaying all
+        100 of them shows the position uncertainty as a band of coloured rings around the
+        truth's own 4 K contour.
+      </p>
+      <p class="hint">
+        <strong>Try it:</strong> drag the member slider to walk through the members — each one's
+        contour (and blob centre) lights up against the truth.
+      </p>
+
+      <!-- ================= Ensemble 4 K contour explorer ================== -->
+      <div class="da-widget" id="contour-explorer">
+
+        <main class="viz-root">
+          <div class="workspace">
+            <div class="panels-wrap">
+              <div class="panel-grid">
+                <section class="panel">
+                  <h2 class="panel-title">Truth T and ensemble 4 K contours</h2>
+                  <canvas class="map" id="cont-map"></canvas>
+                  <div class="colorbar"><canvas id="cont-cb"></canvas><div class="cb-labels"><span class="cb-min"></span><span class="cb-mid"></span><span class="cb-max"></span></div></div>
+                </section>
+              </div>
+            </div>
+          </div>
+
+          <div class="controls">
+            <div class="ctl">
+              <label for="cont-mem">member <em>m</em></label>
+              <input type="range" id="cont-mem" min="1" max="100" step="1" value="50">
+              <span class="ctl-val" id="cont-mem-val">50</span>
+            </div>
+          </div>
+
+          <p class="readout" id="cont-readout" role="status"></p>
+
+          <ul class="legend">
+            <li><span class="mark truthc"></span> truth 4 K contour</li>
+            <li><span class="mark memc"></span> member 4 K contours (thin, coloured)</li>
+            <li><span class="mark selc"></span> selected member + blob centre</li>
+          </ul>
+        </main>
+
+      </div>
+      <!-- ================= end widget ===================================== -->
+
+      <p>
+        <b>Reading it:</b> the truth's 4 K contour is the dark ring at radius &#8776; 59 km around
+        the blob centre; each member's blob centre is displaced by up to ~100 km, so its contour
+        is the same ring shifted somewhere else. A narrow band means the position is well
+        constrained; a wide band means the analysis cannot know where the warm core's edge is.
+        This is exactly the uncertainty the correlation explorer below turns into a map.
+      </p>
+
       <h3>Observation–State Correlation Explorer</h3>
       <p>
         A single <strong>temperature</strong> observation (red circle) is assimilated from a
         smooth 2-D field. The ensemble gives an <em>estimate</em> of how that observation
         correlates with the temperature state at every grid point — the core quantity of
         covariance-based data assimilation, reduced to a single variable so the idea is
-        unmistakable. The numbered annotations below explain what each panel shows.
+        unmistakable. First, the contour map above showed the ensemble's position uncertainty
+        directly; now the correlation explorer turns it into the covariance the filter uses.
       </p>
       <p class="hint">
         <strong>Try it:</strong> click or drag anywhere on a map to move the black state marker — the correlation map and the scatter respond live.
@@ -127,6 +185,7 @@
 
   <script src="../../../footer.js"></script>
   <script src="widgets/corr-explorer/data.js"></script>
+  <script src="widgets/contour-explorer/app.js"></script>
   <script src="widgets/corr-explorer/app.js"></script>
 </body>
 </html>

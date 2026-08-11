@@ -36,8 +36,11 @@
   let theme = darkMq.matches ? "dark" : "light";
   // when embedded in a site page the widget lives inside a .da-widget wrapper,
   // which carries the CSS custom properties and the data-theme attribute;
-  // standalone (file://) it falls back to the document root.
-  const root = document.querySelector(".da-widget") || document.documentElement;
+  // standalone (file://) it falls back to the document root. Target the own
+  // wrapper id so two widgets on one page (here: the 4 K contour explorer)
+  // each bind to their own root.
+  const root = document.getElementById("corr-explorer") ||
+    document.querySelector(".da-widget") || document.documentElement;
   const setTheme = (t) => { theme = t; root.dataset.theme = t; render(); };
   darkMq.addEventListener("change", (e) => setTheme(e.matches ? "dark" : "light"));
 

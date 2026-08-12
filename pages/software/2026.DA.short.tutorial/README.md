@@ -16,16 +16,14 @@ in prose. The course structure follows Evensen, Vossepoel & van Leeuwen,
 | `toc.html` | Chapter table of contents — series hub (widget-nav back to `software.html`) |
 | `chapters.css` | Shared chapter-page styles: page column, `.widget-nav` (home + arrow buttons, highlighted current title), `.planned` panel |
 | `01-bayes-gaussians.html` | Ch 1 page: Bayes' rule for Gaussians — 1-D and 2-D widgets on one page + annotations |
-| `02-observation-state-correlation.html` | Ch 2 page: Ensemble 4 K contour explorer (truth + member contours, member slider) + Observation–State Correlation Explorer + annotations |
-| `widgets/contour-explorer/app.js` | Ch 2 ensemble-contour widget: marching-squares 4 K contours of truth + all members (Tab20 palette), member slider with highlight + blob-centre readout (shares `corr-explorer/data.js`) |
-| `widgets/contour-explorer/style.css` | Ch 2 contour widget styles (scoped to `.da-widget`) |
+| `02-observation-state-correlation.html` | Ch 2 page: merged Observation–State Correlation Explorer (truth + 4 K contours, member slider, correlation map, scatter) + annotations |
 | `03-challenges-dynamical-systems.html` | Ch 5 page: challenges from dynamical systems — Lorenz-96 chaos widget + embedded vort3d uncertainty demo |
 | `vort3d-demo.html`, `widgets/vort3d-data/` | The vort3d uncertainty demo (20-realization hurricane forecast: track/intensity/size + maps & cross-sections), embedded by Ch 3; data bundle + build script inside `widgets/vort3d-data/` |
 | `05-ensemble-kalman-filter.html` | Ch 3 page: The ensemble Kalman filter (planned; merged from the former Ch 4–5) — full widget-nav chain, `.planned` panel |
 | `06-localization-inflation.html` | Ch 4 page: Sample Covariance Explorer — truth (compact hump + smooth random background), analytic true covariance, and sample covariance (raw or Gaspari–Cohn localized); drag the observation, ensemble-size / localization-radius sliders, localization toggle + radius circle + annotations |
 | `07-nonlinear-filters.html`, `08-parameters-applications.html` | Ch 6–7 placeholder pages (planned) — full widget-nav chain, `.planned` panel |
-| `widgets/corr-explorer/app.js` | Widget logic (embedding-ready copy) |
-| `widgets/corr-explorer/style.css` | Widget styles (scoped to `.da-widget`) |
+| `widgets/corr-explorer/app.js` | Widget logic: truth T + marching-squares 4 K contours of truth & all members (Tab20 palette), member slider (highlight + blob-centre readout + scatter ring), state marker with live corr/scatter (embedding-ready copy) |
+| `widgets/corr-explorer/style.css` | Widget styles incl. member-slider controls + contour legend marks (scoped to `.da-widget`) |
 | `widgets/corr-explorer/data.js` | Synthetic demo data (generated) |
 | `widgets/cov-explorer/app.js` | Ch 6 Sample Covariance Explorer logic — computed live in the browser (seeded 300-member pool: displaced hump + smooth random background per member; analytic true-covariance field; no data file) |
 | `widgets/cov-explorer/style.css` | Ch 6 widget styles (scoped to `.da-widget`, incl. controls / switch / localization circle) |

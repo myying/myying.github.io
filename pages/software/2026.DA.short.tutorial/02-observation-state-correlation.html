@@ -11,7 +11,6 @@
 <link rel="stylesheet" href="chapters.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="widgets/corr-explorer/style.css">
-<link rel="stylesheet" href="widgets/contour-explorer/style.css">
 
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-148955805-2"></script>
@@ -48,73 +47,22 @@
         </span>
       </nav>
 
-      <h3>Ensemble contours: where is the 4 K line?</h3>
-      <p>
-        The ensemble perturbs only the blob's <em>position</em> (std 50 km) — so every member's
-        4 K contour (where T = 4 K) is the same circle, displaced somewhere else. Overlaying all
-        100 of them shows the position uncertainty as a band of coloured rings around the
-        truth's own 4 K contour.
-      </p>
-      <p class="hint">
-        <strong>Try it:</strong> drag the member slider to walk through the members — each one's
-        contour (and blob centre) lights up against the truth.
-      </p>
-
-      <!-- ================= Ensemble 4 K contour explorer ================== -->
-      <div class="da-widget" id="contour-explorer">
-
-        <main class="viz-root">
-          <div class="workspace">
-            <div class="panels-wrap">
-              <div class="panel-grid">
-                <section class="panel">
-                  <h2 class="panel-title">Truth T and ensemble 4 K contours</h2>
-                  <canvas class="map" id="cont-map"></canvas>
-                  <div class="colorbar"><canvas id="cont-cb"></canvas><div class="cb-labels"><span class="cb-min"></span><span class="cb-mid"></span><span class="cb-max"></span></div></div>
-                </section>
-              </div>
-            </div>
-          </div>
-
-          <div class="controls">
-            <div class="ctl">
-              <label for="cont-mem">member <em>m</em></label>
-              <input type="range" id="cont-mem" min="1" max="100" step="1" value="50">
-              <span class="ctl-val" id="cont-mem-val">50</span>
-            </div>
-          </div>
-
-          <p class="readout" id="cont-readout" role="status"></p>
-
-          <ul class="legend">
-            <li><span class="mark truthc"></span> truth 4 K contour</li>
-            <li><span class="mark memc"></span> member 4 K contours (thin, coloured)</li>
-            <li><span class="mark selc"></span> selected member + blob centre</li>
-          </ul>
-        </main>
-
-      </div>
-      <!-- ================= end widget ===================================== -->
-
-      <p>
-        <b>Reading it:</b> the truth's 4 K contour is the dark ring at radius &#8776; 59 km around
-        the blob centre; each member's blob centre is displaced by up to ~100 km, so its contour
-        is the same ring shifted somewhere else. A narrow band means the position is well
-        constrained; a wide band means the analysis cannot know where the warm core's edge is.
-        This is exactly the uncertainty the correlation explorer below turns into a map.
-      </p>
-
       <h3>Observation–State Correlation Explorer</h3>
       <p>
         A single <strong>temperature</strong> observation (red circle) is assimilated from a
         smooth 2-D field. The ensemble gives an <em>estimate</em> of how that observation
         correlates with the temperature state at every grid point — the core quantity of
         covariance-based data assimilation, reduced to a single variable so the idea is
-        unmistakable. First, the contour map above showed the ensemble's position uncertainty
-        directly; now the correlation explorer turns it into the covariance the filter uses.
+        unmistakable. The left panel shows where the uncertainty comes from: the ensemble
+        perturbs only the blob's <em>position</em> (std 50 km), so every member's 4 K contour
+        (where T = 4 K) is the same circle displaced somewhere else — a band of coloured rings.
+        The correlation map turns that position uncertainty into the covariance the filter uses.
       </p>
       <p class="hint">
-        <strong>Try it:</strong> click or drag anywhere on a map to move the black state marker — the correlation map and the scatter respond live.
+        <strong>Try it:</strong> drag the member slider to walk through the members — the
+        selected member's 4 K contour lights up, its blob centre is marked, and its point is
+        ringed in the scatter — and click or drag on a map to move the black state marker: the
+        correlation map and the scatter respond live.
       </p>
 
       <!-- ================= Observation–State Correlation Explorer ============= -->
@@ -125,10 +73,10 @@
           <div class="workspace">
 
             <div class="panels-wrap">
-              <!-- three panels: truth | correlation | scatter. -->
+              <!-- three panels: truth + contours | correlation | scatter. -->
               <div class="panel-grid">
                 <section class="panel">
-                  <h2 class="panel-title">Truth T</h2>
+                  <h2 class="panel-title">Truth T + ensemble 4 K contours</h2>
                   <canvas class="map" id="map-truth"></canvas>
                   <div class="colorbar"><canvas id="cb-truth"></canvas><div class="cb-labels"><span class="cb-min"></span><span class="cb-mid"></span><span class="cb-max"></span></div></div>
                 </section>
@@ -145,12 +93,23 @@
             </div>
           </div>
 
+          <div class="controls">
+            <div class="ctl">
+              <label for="cont-mem">member <em>m</em></label>
+              <input type="range" id="cont-mem" min="1" max="100" step="1" value="50">
+              <span class="ctl-val" id="cont-mem-val">50</span>
+            </div>
+          </div>
+
           <p class="readout" id="readout" role="status"></p>
 
           <ul class="legend">
             <li><span class="mark obs"></span> T observation (assimilated)</li>
             <li><span class="mark state"></span> state location (i, j)</li>
-            <li><span class="mark dot"></span> ensemble members</li>
+            <li><span class="mark truthc"></span> truth 4 K contour</li>
+            <li><span class="mark memc"></span> member 4 K contours</li>
+            <li><span class="mark selc"></span> selected member + blob centre</li>
+            <li><span class="mark dot"></span> ensemble members (scatter)</li>
             <li><span class="mark amber"></span> observation value</li>
             <li><span class="mark ink"></span> truth value at (i, j)</li>
           </ul>
@@ -161,10 +120,14 @@
 
       <h3>Reading the panels</h3>
       <p>
-        <b>1 &#183; The truth field</b> — the &#8220;answer key&#8221; we are trying to estimate from sparse
-        observations: a single warm blob (peak &#8776; 7.9 K, radius scale 100 km) on a 50&#215;50 grid
-        with 10 km cells. The black square marks the state location <code>(i, j)</code> you are
-        inspecting.
+        <b>1 &#183; The truth field and the 4 K contours</b> — the &#8220;answer key&#8221; we are trying to
+        estimate from sparse observations: a single warm blob (peak &#8776; 7.9 K, radius scale 100 km)
+        on a 50&#215;50 grid with 10 km cells. Its 4 K contour is the dark ring at radius &#8776; 59 km.
+        Every member&#8217;s blob centre is displaced by up to ~100 km, so its 4 K contour is the same
+        ring shifted somewhere else — the band of thin coloured rings is the position
+        uncertainty. The slider walks through the members: the selected ring thickens, its blob
+        centre is marked, and its point is ringed in the scatter. The black square marks the
+        state location <code>(i, j)</code> you are inspecting.
       </p>
       <p>
         <b>2 &#183; The correlation map</b> — how the observation covaries with the state at every grid
@@ -175,9 +138,12 @@
       </p>
       <p>
         <b>3 &#183; The scatter</b> — the joint distribution of the observation ensemble (x) and the
-        state ensemble at the marker (y). Each dot is one member; the amber line is the observed
-        value, the ink line the truth. Move the marker across the dipole and watch the slope — and
-        the reported <code>r</code> — flip sign.
+        state ensemble at the marker (y). Each dot is one member; the ringed dot is the member
+        selected by the slider — where its 4 K contour sits in panel 1 decides where it falls
+        here: a member whose blob is shifted toward the marker reads warmer at the state
+        location, one shifted away reads colder. The amber line is the observed value, the ink
+        line the truth. Move the marker across the dipole and watch the slope — and the
+        reported <code>r</code> — flip sign.
       </p>
 
     </div>
@@ -185,7 +151,6 @@
 
   <script src="../../../footer.js"></script>
   <script src="widgets/corr-explorer/data.js"></script>
-  <script src="widgets/contour-explorer/app.js"></script>
   <script src="widgets/corr-explorer/app.js"></script>
 </body>
 </html>

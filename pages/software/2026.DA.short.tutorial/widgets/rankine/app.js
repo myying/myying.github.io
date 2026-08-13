@@ -364,7 +364,9 @@
   }
 
   /* ------------------------------------------------------- panel (c) */
-  const D_MIN = -20, D_MAX = 20;       // displacement range (grid points)
+  const D_MIN = -50, D_MAX = 80;       // displacement range (grid points) — wide
+  // enough for the whole T(P) bell (peak at R0 ~ 18 gp, tails ~ +-40 gp) and
+  // the member samples at the default L_sprd
 
   function niceStep(raw) {
     const pow = Math.pow(10, Math.floor(Math.log10(raw)));
@@ -452,7 +454,7 @@
     ctx.strokeRect(margin.l, margin.t, pw, ph);
     ctx.fillStyle = T.ink3;
     ctx.textAlign = "center"; ctx.textBaseline = "top";
-    for (const km of [-180, -90, 0, 90, 180]) {
+    for (const km of [-360, -180, 0, 180, 360, 540, 720]) {
       const d = km / DX;
       if (d < D_MIN || d > D_MAX) continue;
       const xi = xOf(d);

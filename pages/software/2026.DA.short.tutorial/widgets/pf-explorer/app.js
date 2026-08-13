@@ -198,8 +198,9 @@
   }
 
   /* ------------------------------------------------------- spaghetti */
-  const WIN = 30;
-  const TICKS_KM = [-270, -180, -90, 0, 90, 180, 270];
+  const WIN = 22;                       // half-window in grid points — the true
+  // vortex (20 m/s ring, radius ~7.3 gp) then spans the central 1/9 of the map
+  const TICKS_KM = [-180, -90, 0, 90, 180];
 
   function aGeom(W, H) {
     const margin = { l: 46, r: 12, t: 14, b: 32 };

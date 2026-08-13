@@ -96,11 +96,12 @@
       vmax = Math.max(vmax, Math.abs(truthT[j][i]));
   vmax = Math.ceil(vmax);
 
-  // scatter axes: state values range over [0, 8] (background) and the
-  // analysis can overshoot to ~±10; a fixed asymmetric range keeps the
-  // axes stable while the sliders move
-  const AX_LO = -5, AX_HI = 15;
-  const AX_TICKS = [-5, 0, 5, 10, 15];
+  // scatter axes: zoomed on the ensemble cloud — every state and observation
+  // value lies in [0, ~10] K (the truth blob peaks at ~7.9 K and the analysis
+  // can overshoot slightly), so the fixed window [-2, 10] keeps the axes
+  // stable while the sliders move
+  const AX_LO = -2, AX_HI = 10;
+  const AX_TICKS = [0, 2, 4, 6, 8, 10];
 
   // ----------------------------------------------------------- state
   let si = 33, sj = 18;                  // (i, j) of the state marker

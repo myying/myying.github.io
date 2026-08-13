@@ -57,6 +57,7 @@
   let NENS = 100;                     // ensemble size (tunable)
   let Lsprd = 1.5 * SIG;              // location spread, grid points (default 1.5 SIG)
   let sel = 49;                       // highlighted member, 0-based (default #50)
+  let showContours = true;            // show all member rings in the spaghetti
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
   // temperature of the Gaussian hump at (x, y) from a centre at (ci, cj)
@@ -216,20 +217,22 @@
     ctx.beginPath();
     ctx.rect(x0, y0, side, side);
     ctx.clip();
-    for (let m = 0; m < NENS; m++) {
-      if (m === sel) continue;
-      const st = styleFn(m);
-      if (!st || st.alpha <= 0.01) continue;
-      const cx = x0 + (centres.ci[m] - (C_I - WIN)) * s;
-      const cy = y0 + (centres.cj[m] - (C_J - WIN)) * s;
-      ctx.strokeStyle = hexA(st.color, st.alpha);
-      ctx.lineWidth = st.lw;
-      ctx.beginPath();
-      ctx.arc(cx, cy, rIn * s, 0, 6.2832);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.arc(cx, cy, rOut * s, 0, 6.2832);
-      ctx.stroke();
+    if (showContours) {
+      for (let m = 0; m < NENS; m++) {
+        if (m === sel) continue;
+        const st = styleFn(m);
+        if (!st || st.alpha <= 0.01) continue;
+        const cx = x0 + (centres.ci[m] - (C_I - WIN)) * s;
+        const cy = y0 + (centres.cj[m] - (C_J - WIN)) * s;
+        ctx.strokeStyle = hexA(st.color, st.alpha);
+        ctx.lineWidth = st.lw;
+        ctx.beginPath();
+        ctx.arc(cx, cy, rIn * s, 0, 6.2832);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(cx, cy, rOut * s, 0, 6.2832);
+        ctx.stroke();
+      }
     }
     // the highlighted member: white halo + thick ring in its colour
     {
@@ -362,6 +365,15 @@
     render();
   });
   rerunBtn.addEventListener("click", () => { sampleEnsemble(); render(); });
+  const contoursBtn = $("pf-contours");
+  if (contoursBtn) {
+    contoursBtn.addEventListener("click", () => {
+      showContours = !showContours;
+      contoursBtn.textContent = showContours ? "Contours: on" : "Contours: off";
+      contoursBtn.setAttribute("aria-pressed", String(showContours));
+      render();
+    });
+  }
 
   root.dataset.theme = theme;           // apply theme variables before the first render
   sprdSlider.value = (Lsprd / SIG).toFixed(1);   // put the slider head back at the default (1.5 sigma)

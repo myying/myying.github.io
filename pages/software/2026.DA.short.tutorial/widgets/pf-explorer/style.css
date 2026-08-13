@@ -156,6 +156,27 @@
 }
 #pf-explorer .ctl-btn:hover { border-color: var(--series-amber); color: var(--series-amber); }
 
+/* member-highlight group: contours toggle to the left of the member slider */
+#pf-explorer .ctl-flex {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+  margin-top: 9px;
+}
+#pf-explorer .ctl-flex .ctl-row { flex: 1 1 190px; margin-top: 0; }
+#pf-explorer .ctl-btn-sm {
+  width: auto;
+  margin-top: 0;
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+#pf-explorer .ctl-btn-sm[aria-pressed="false"] {
+  color: var(--ink-3);
+  border-color: var(--axis);
+}
+
 /* -------------------------------------------------------------- readout */
 #pf-explorer .readout {
   margin: 14px 0 8px;

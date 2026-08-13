@@ -144,6 +144,18 @@
   for (let m = 0; m < nens; m++) meanZ += obsZ[m];
   meanZ /= nens;
 
+  // 2-D view of a flat field (index c = j*nx+i) for the canvas shading
+  function flatField(f) {
+    const out = new Array(ny);
+    for (let j = 0; j < ny; j++) {
+      const row = new Float64Array(nx);
+      for (let i = 0; i < nx; i++) row[i] = f[j * nx + i];
+      out[j] = row;
+    }
+    return out;
+  }
+  const bgMean2D = flatField(meanF);   // background ensemble-mean field (fixed)
+
   // ------------------------------------------------ marching squares
   // segments of the LEVEL contour of a flat field (value at j*nx+i), in
   // normalised map coordinates
@@ -483,16 +495,30 @@
     const th2 = makeLUT(LUT_THERMAL[theme]);
     lutTh.splice(0, lutTh.length, ...th2);
 
+    const R = sigO * sigO, denom = varB + R, sq = Math.sqrt(R);
     const an = getAnContours();
-    drawEnsMap($("map-bg"), bgSegs, bgCentres, 0.45, false);
-    drawEnsMap($("map-an"), an.segs, an.centres, 0.7, true);
-    drawColorbar($("cb-bg"), 0, vmax);
-    drawColorbar($("cb-an"), 0, vmax);
+
+    // ensemble-mean fields for the shading: the background forecast mean
+    // (fixed) and the analysis mean (recomputed at the current σ_o); a
+    // shared adaptive scale keeps both panels directly comparable
+    const meanInc = (obs.val - hxbMean + meanZ * sq) / denom;
+    const anMeanF = new Float64Array(nx * ny);
+    let bgMax = 0, anMax = 0;
+    for (let c = 0; c < nx * ny; c++) {
+      anMeanF[c] = meanF[c] + covF[c] * meanInc;
+      if (meanF[c] > bgMax) bgMax = meanF[c];
+      if (anMeanF[c] > anMax) anMax = anMeanF[c];
+    }
+    const vmaxMean = Math.max(5, Math.ceil(Math.max(bgMax, anMax)));
+
+    drawEnsMap($("map-bg"), bgSegs, bgCentres, 0.45, false, bgMean2D, vmaxMean);
+    drawEnsMap($("map-an"), an.segs, an.centres, 0.7, true, flatField(anMeanF), vmaxMean);
+    drawColorbar($("cb-bg"), 0, vmaxMean);
+    drawColorbar($("cb-an"), 0, vmaxMean);
     drawScatter($("scat"));
 
     // readout
     const sgn = (x) => (Math.abs(x) < 0.5 ? "0" : (x > 0 ? "+" : "\u2212") + Math.abs(x).toFixed(0));
-    const R = sigO * sigO, denom = varB + R, sq = Math.sqrt(R);
     const Kobs = varB / denom;
     const incSel = obs.val + obsZ[sel] * sq - hxb[sel];
     const dT = (covF[sj * nx + si] / denom) * incSel;
@@ -509,13 +535,13 @@
       `obs-space spread ${Math.sqrt(varB).toFixed(2)} &rarr; <strong>${Math.sqrt(varB * R / denom).toFixed(2)}</strong> K`;
   }
 
-  // ensemble map: truth field + member 4 K contours (+ selected member +
-  // centre dot + optional displacement line) + truth ring + markers + axis
-  function drawEnsMap(cv, segs, centres, dim, isAn) {
+  // ensemble map: ensemble-mean field shading + member 4 K contours (+ selected
+  // member + centre dot + optional displacement line) + truth ring + markers + axis
+  function drawEnsMap(cv, segs, centres, dim, isAn, field2d, fhi) {
     const fit = fitCanvas(cv);
     if (!fit) return;
     const { ctx, w, h } = fit;
-    drawField(ctx, w, h, truthT, 0, vmax, lutTh);
+    drawField(ctx, w, h, field2d, 0, fhi, lutTh);
     if (showMembers) {
       for (let m = 0; m < nens; m++) {
         if (m === sel) continue;
@@ -602,7 +628,7 @@
     const anMean = meanF[c] + covF[c] * (obs.val - hxbMean + meanZ * Math.sqrt(R)) / denom;
     tip.innerHTML =
       `<strong>(${i}, ${j})</strong>` +
-      ` · T = ${truthT[j][i].toFixed(2)} K` +
+      ` · truth = ${truthT[j][i].toFixed(2)} K` +
       ` · mean bg = ${meanF[c].toFixed(2)}` +
       ` · mean an = ${anMean.toFixed(2)} K`;
     tip.style.display = "block";

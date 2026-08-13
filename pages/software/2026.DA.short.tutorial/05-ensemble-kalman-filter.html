@@ -87,12 +87,12 @@
               <!-- three panels: background | analysis | scatter. -->
               <div class="panel-grid">
                 <section class="panel">
-                  <h2 class="panel-title">Background T + 4 K contours</h2>
+                  <h2 class="panel-title">Background mean T + 4 K contours</h2>
                   <canvas class="map" id="map-bg"></canvas>
                   <div class="colorbar"><canvas id="cb-bg"></canvas><div class="cb-labels"><span class="cb-min"></span><span class="cb-mid"></span><span class="cb-max"></span></div></div>
                 </section>
                 <section class="panel">
-                  <h2 class="panel-title">Analysis T + 4 K contours</h2>
+                  <h2 class="panel-title">Analysis mean T + 4 K contours</h2>
                   <canvas class="map" id="map-an"></canvas>
                   <div class="colorbar"><canvas id="cb-an"></canvas><div class="cb-labels"><span class="cb-min"></span><span class="cb-mid"></span><span class="cb-max"></span></div></div>
                 </section>
@@ -136,17 +136,20 @@
       <p>
         <b>1 &#183; The background</b> — the forecast: the same position-uncertainty ensemble as
         Chapter 2 (std 50 km), its 4 K contours a loose coloured band around the truth ring. The
-        selected member's ring is thick and its blob centre is marked. The observation (red
-        circle) reads <b>5.53 K</b> — some members see it as warmer, some as colder, depending on
-        where their blob sits.
+        shading is the ensemble <em>mean</em> — position uncertainty averages out the blob, so the
+        forecast mean is broader and weaker than the truth (the dark ring). The selected member's
+        ring is thick and its blob centre is marked. The observation (red circle) reads
+        <b>5.53 K</b> — some members see it as warmer, some as colder, depending on where their
+        blob sits.
       </p>
       <p>
         <b>2 &#183; The analysis</b> — every member after the EnKF update. Each one has been pushed
-        toward the observed value: the contour band tightens around the truth ring, and the
-        selected member's blob centre moves toward the observation (the dashed line shows where
-        it came from). The tighter the band, the smaller &sigma;<sub>o</sub> — try it. Far from
-        the observation the band barely moves: a single observation cannot constrain the whole
-        field.
+        toward the observed value: the contour band tightens around the truth ring, the shading is
+        the analysis <em>mean</em> (pulled toward the observation, its peak rising toward the
+        truth ring's value), and the selected member's blob centre moves toward the observation
+        (the dashed line shows where it came from). The tighter the band, the smaller
+        &sigma;<sub>o</sub> — try it. Far from the observation the band barely moves: a single
+        observation cannot constrain the whole field.
       </p>
       <p>
         <b>3 &#183; The scatter</b> — the update in the joint distribution: background points

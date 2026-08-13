@@ -22,6 +22,13 @@
   margin: 6px 0 18px;
   font-size: 0.85rem;
 }
+/* second copy at the foot of the page: same bar, flipped margins (bigger
+   gap above to separate it from the last paragraph, border-top as a rule) */
+.widget-nav-bottom {
+  margin: 32px 0 6px;
+  padding-top: 22px;
+  border-top: 1px solid var(--border);
+}
 .widget-nav .nav-home,
 .widget-nav .nav-arrow {
   flex: 0 0 auto;

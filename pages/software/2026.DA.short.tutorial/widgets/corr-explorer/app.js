@@ -121,6 +121,7 @@
   // ----------------------------------------------------------- state
   let si = 33, sj = 18;                  // (i, j) of the state marker
   let sel = 49;                          // selected member, 0-based (default #50)
+  let showMembers = true;                // show the ensemble members (contours + scatter dots)
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
   // ------------------------------ 4 K contour extraction (marching squares)
@@ -362,16 +363,18 @@
 
     // ensemble points (aqua); skip any non-finite member so a single bad value
     // can't silently break the rest of the panel
-    ctx.fillStyle = cssVar("--series-aqua");
-    for (let m = 0; m < nens; m++) {
-      const x = X(obsEns[m]), y = Y(ensVals[m]);
-      if (!isFinite(x) || !isFinite(y)) continue;
-      ctx.globalAlpha = 0.75;
-      ctx.beginPath();
-      ctx.arc(x, y, 2.4, 0, Math.PI * 2);
-      ctx.fill();
+    if (showMembers) {
+      ctx.fillStyle = cssVar("--series-aqua");
+      for (let m = 0; m < nens; m++) {
+        const x = X(obsEns[m]), y = Y(ensVals[m]);
+        if (!isFinite(x) || !isFinite(y)) continue;
+        ctx.globalAlpha = 0.75;
+        ctx.beginPath();
+        ctx.arc(x, y, 2.4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
     }
-    ctx.globalAlpha = 1;
 
     // observation value line (amber) at x = obs.val
     ctx.strokeStyle = cssVar("--series-amber");
@@ -447,9 +450,11 @@
     if (!fit) return;
     const { ctx, w, h } = fit;
     drawField(ctx, w, h, truthT, 0, vmax, lutTh);
-    for (let m = 0; m < nens; m++) {
-      if (m === sel) continue;
-      drawSegs(ctx, w, h, memberSegs[m], memColor(m), 1, 0.45);
+    if (showMembers) {
+      for (let m = 0; m < nens; m++) {
+        if (m === sel) continue;
+        drawSegs(ctx, w, h, memberSegs[m], memColor(m), 1, 0.45);
+      }
     }
     // selected member: thick ring + blob centre dot
     drawSegs(ctx, w, h, memberSegs[sel], memColor(sel), 2.4, 1);
@@ -574,6 +579,15 @@
         if (d2 < bd) { bd = d2; best = m; }
       }
       if (best >= 0) setSel(best);
+    });
+  }
+  const membersBtn = $("cont-members");
+  if (membersBtn) {
+    membersBtn.addEventListener("click", () => {
+      showMembers = !showMembers;
+      membersBtn.textContent = showMembers ? "Members: on" : "Members: off";
+      membersBtn.setAttribute("aria-pressed", String(showMembers));
+      render();
     });
   }
   window.addEventListener("resize", () => render());

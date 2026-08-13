@@ -167,6 +167,24 @@
   accent-color: var(--series-ink);
   cursor: pointer;
 }
+
+/* member on/off toggle (left of the member slider) */
+.da-widget .ctl-btn {
+  flex: none;
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-1);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  white-space: nowrap;
+}
+.da-widget .ctl-btn[aria-pressed="false"] { color: var(--ink-3); border-color: var(--axis); }
+.da-widget .ctl-btn:hover { border-color: var(--series-amber); color: var(--series-amber); }
+
 .da-widget .ctl-val {
   min-width: 44px;
   font-weight: 650;

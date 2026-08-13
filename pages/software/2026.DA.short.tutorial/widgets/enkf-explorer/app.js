@@ -107,6 +107,7 @@
   // ----------------------------------------------------------- state
   let si = 33, sj = 18;                  // (i, j) of the state marker
   let sel = 49;                          // selected member, 0-based (default #50)
+  let showMembers = true;                // show the ensemble members (contours + scatter dots)
   let sigO = 1.0;                        // obs error std, K (slider)
 
   // ------------------------------------------------ EnKF statistics
@@ -423,27 +424,29 @@
     ctx.stroke();
 
     // background points (aqua)
-    ctx.fillStyle = cssVar("--series-aqua");
-    for (let m = 0; m < nens; m++) {
-      const x = X(hxb[m]), y = Y(ensT[sj][si][m]);
-      if (!isFinite(x) || !isFinite(y)) continue;
-      ctx.globalAlpha = 0.75;
-      ctx.beginPath();
-      ctx.arc(x, y, 2.4, 0, Math.PI * 2);
-      ctx.fill();
+    if (showMembers) {
+      ctx.fillStyle = cssVar("--series-aqua");
+      for (let m = 0; m < nens; m++) {
+        const x = X(hxb[m]), y = Y(ensT[sj][si][m]);
+        if (!isFinite(x) || !isFinite(y)) continue;
+        ctx.globalAlpha = 0.75;
+        ctx.beginPath();
+        ctx.arc(x, y, 2.4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // analysis points (red)
+      ctx.fillStyle = cssVar("--series-red");
+      for (let m = 0; m < nens; m++) {
+        const inc = obs.val + obsZ[m] * sq - hxb[m];
+        const x = X(hxb[m] + Kobs * inc), y = Y(ensT[sj][si][m] + Kcell * inc);
+        if (!isFinite(x) || !isFinite(y)) continue;
+        ctx.globalAlpha = 0.85;
+        ctx.beginPath();
+        ctx.arc(x, y, 2.4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
     }
-    // analysis points (red)
-    ctx.fillStyle = cssVar("--series-red");
-    for (let m = 0; m < nens; m++) {
-      const inc = obs.val + obsZ[m] * sq - hxb[m];
-      const x = X(hxb[m] + Kobs * inc), y = Y(ensT[sj][si][m] + Kcell * inc);
-      if (!isFinite(x) || !isFinite(y)) continue;
-      ctx.globalAlpha = 0.85;
-      ctx.beginPath();
-      ctx.arc(x, y, 2.4, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.globalAlpha = 1;
 
     // selected member: update arrow + endpoint rings
     const incSel = obs.val + obsZ[sel] * sq - hxb[sel];
@@ -513,9 +516,11 @@
     if (!fit) return;
     const { ctx, w, h } = fit;
     drawField(ctx, w, h, truthT, 0, vmax, lutTh);
-    for (let m = 0; m < nens; m++) {
-      if (m === sel) continue;
-      drawSegs(ctx, w, h, segs[m], memColor(m), 1, dim);
+    if (showMembers) {
+      for (let m = 0; m < nens; m++) {
+        if (m === sel) continue;
+        drawSegs(ctx, w, h, segs[m], memColor(m), 1, dim);
+      }
     }
     drawSegs(ctx, w, h, segs[sel], memColor(sel), 2.4, 1);
     const cxm = centres[2 * sel] * w, cym = centres[2 * sel + 1] * h;
@@ -665,6 +670,15 @@
     });
   }
 
+  const membersBtn = $("enkf-members");
+  if (membersBtn) {
+    membersBtn.addEventListener("click", () => {
+      showMembers = !showMembers;
+      membersBtn.textContent = showMembers ? "Members: on" : "Members: off";
+      membersBtn.setAttribute("aria-pressed", String(showMembers));
+      render();
+    });
+  }
   window.addEventListener("resize", () => render());
   if (window.ResizeObserver) {
     const ro = new ResizeObserver(() => render());

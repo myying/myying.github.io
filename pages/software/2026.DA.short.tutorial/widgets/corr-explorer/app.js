@@ -116,6 +116,7 @@
   // value lies in [0, 8] (the truth blob peaks at ~7.9 K), so the axes stay
   // stable and the cloud fills the plot (zoomed compared with the full range)
   const S_LO = -2, S_HI = 10;
+  const SC_M = { l: 40, r: 12, t: 10, b: 30 };   // scatter plot margins (CSS px)
 
   // ----------------------------------------------------------- state
   let si = 33, sj = 18;                  // (i, j) of the state marker
@@ -327,7 +328,7 @@
     const fit = fitCanvas(cv);
     if (!fit) return;
     const { ctx, w, h } = fit;
-    const mL = 40, mR = 12, mT = 10, mB = 30;
+    const mL = SC_M.l, mR = SC_M.r, mT = SC_M.t, mB = SC_M.b;
     const pw = w - mL - mR, ph = h - mT - mB;
     const X = (v) => mL + ((v - S_LO) / (S_HI - S_LO)) * pw;
     const Y = (v) => mT + ((S_HI - v) / (S_HI - S_LO)) * ph;
@@ -539,15 +540,40 @@
   const nensEl = $("nens-label");   // optional: shown in the standalone hero tag
   if (nensEl) nensEl.textContent = nens;
 
-  // member slider: walk the ensemble — highlights the selected member's
-  // 4 K contour (truth panel) and its point in the scatter
+  // select a member (slider or scatter click) — highlights its 4 K contour
+  // (truth panel), its blob centre and its ringed point in the scatter
   const memEl = $("cont-mem"), memVal = $("cont-mem-val");
+  function setSel(m) {
+    sel = clamp(m, 0, nens - 1);
+    if (memEl) { memEl.value = sel + 1; memVal.textContent = sel + 1; }
+    render();
+  }
   if (memEl) {
     memEl.value = sel + 1;
     memEl.addEventListener("input", () => {
-      sel = clamp(parseInt(memEl.value, 10) || 1, 1, nens) - 1;
-      memVal.textContent = sel + 1;
-      render();
+      setSel((parseInt(memEl.value, 10) || 1) - 1);
+    });
+  }
+  // click on the scatter to select the nearest member
+  const scatCv = $("scat");
+  if (scatCv) {
+    scatCv.addEventListener("click", (e) => {
+      const rect = scatCv.getBoundingClientRect();
+      const cx = e.clientX - rect.left, cy = e.clientY - rect.top;
+      const pw = rect.width - SC_M.l - SC_M.r, ph = rect.height - SC_M.t - SC_M.b;
+      if (pw <= 0 || ph <= 0) return;
+      const X = (v) => SC_M.l + ((v - S_LO) / (S_HI - S_LO)) * pw;
+      const Y = (v) => SC_M.t + ((S_HI - v) / (S_HI - S_LO)) * ph;
+      const ensVals = ensT[sj][si];
+      if (!ensVals) return;
+      let best = -1, bd = 25 * 25;          // click within 25 CSS px of a dot
+      for (let m = 0; m < nens; m++) {
+        const x = X(obsEns[m]), y = Y(ensVals[m]);
+        if (!isFinite(x) || !isFinite(y)) continue;
+        const dx = x - cx, dy = y - cy, d2 = dx * dx + dy * dy;
+        if (d2 < bd) { bd = d2; best = m; }
+      }
+      if (best >= 0) setSel(best);
     });
   }
   window.addEventListener("resize", () => render());

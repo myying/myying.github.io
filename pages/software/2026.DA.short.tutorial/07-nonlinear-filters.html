@@ -3,13 +3,14 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="Yue (Michael) Ying — Data Assimilation Interactive Tutorials, Nonlinear filters (planned)">
+<meta name="description" content="Yue (Michael) Ying — Data Assimilation Interactive Tutorials, Nonlinear filters: EnKF vs particle filter on a non-Gaussian position-error prior">
 <meta name="keywords" content="data assimilation, tutorial, 07-nonlinear-filters">
 <meta name="author" content="Yue Ying">
 
 <link rel="stylesheet" href="../../../style.css">
 <link rel="stylesheet" href="chapters.css">
 <link rel="stylesheet" href="widgets/rankine/style.css?v=25">
+<link rel="stylesheet" href="widgets/pf-explorer/style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <!-- Global site tag (gtag.js) - Google Analytics -->
@@ -160,18 +161,143 @@
         <a href="https://github.com/mying/rankine">rankine code</a>.
       </p>
 
-      <!-- ====================== particle filters (planned) ============ -->
-      <div class="planned">
-        <p class="planned-tag">Planned</p>
-        <h4>2 &#183; Particle filters</h4>
-        <p class="planned-desc">When the Gaussian assumptions fail, Bayes' rule is solved directly on a set of weighted samples &#8212; particle filters. A planned widget will show weight collapse: the particles pile onto a single trajectory as the filter struggles with a strongly nonlinear observation, and why resampling fights it.</p>
-        <p class="planned-ref">&#8594; Evensen et al., <i>Data Assimilation Fundamentals</i> (2022), Ch 9 &#8212; nonlinear filters.</p>
+      <!-- ====================== EnKF vs particle filter ================ -->
+      <h4 id="sec-pf">2 &#183; EnKF vs particle filter on the same prior</h4>
+      <p>
+        When the Gaussian assumptions fail, Bayes' rule is solved directly on the ensemble: the
+        <strong>particle filter</strong> turns the prior members into a <em>weighted</em> sample,
+        each particle reweighted by the observation likelihood p(y&#8202;|&#8202;centre). The EnKF cannot do
+        that &#8212; its analysis is an affine combination of the prior members, so the posterior keeps
+        the Gaussian shape of the prior. The widget below runs <em>both</em> filters on the same
+        vortex ensemble from section 1, after assimilating a single observation of the zonal wind u
+        at P (the +): the prior (blue), the EnKF analysis (red), and the particle-filter posterior
+        (green, dot size = weight).
+      </p>
+      <p class="hint">
+        <strong>Try it:</strong> drag <em>y</em> away from the truth value (the default is already a
+        3&sigma;<sub>o</sub> outlier): the EnKF posterior is pulled only partway and stays a broad
+        Gaussian, while the particle filter reweights the particles toward the observation &#8212; and
+        watch the effective sample size N<sub>eff</sub> collapse. Slide L<sub>sprd</sub> up to make the
+        prior u at P non-Gaussian, and N<sub>ens</sub> to change how many particles the filters share.
+      </p>
+
+      <div class="da-widget" id="pf-explorer">
+
+        <main class="viz-root">
+
+          <div class="workspace">
+
+            <div class="pf-col pf-col-left">
+
+              <div class="controls">
+                <div class="ctl-group" data-color="member">
+                  <h4 class="ctl-title">Location spread <span class="ctl-note">centre position error, in units of R<sub>mw</sub></span></h4>
+                  <label class="ctl-row">
+                    <span class="ctl-label">L<sub>sprd</sub></span>
+                    <input type="range" id="pf-sprd" min="0.1" max="3" step="0.1" value="1">
+                    <span class="ctl-val" id="pf-sprd-val"></span>
+                  </label>
+                  <label class="ctl-row">
+                    <span class="ctl-label">N<sub>ens</sub></span>
+                    <input type="range" id="pf-nens" min="20" max="400" step="10" value="100">
+                    <span class="ctl-val" id="pf-nens-val"></span>
+                  </label>
+                  <button class="ctl-btn" id="pf-rerun" title="draw a new prior ensemble">&#8635; new ensemble</button>
+                </div>
+                <div class="ctl-group" data-color="obs">
+                  <h4 class="ctl-title">Observation <span class="ctl-note">zonal wind u at P, m/s</span></h4>
+                  <label class="ctl-row">
+                    <span class="ctl-label">y</span>
+                    <input type="range" id="pf-y" min="-30" max="34" step="0.5">
+                    <span class="ctl-val" id="pf-y-val"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="plot-wrap panel-a">
+                <div class="plot-body">
+                  <ul class="legend">
+                    <li><span class="mark truth"></span> truth</li>
+                    <li><span class="mark prior"></span> prior</li>
+                    <li><span class="mark enkf"></span> EnKF analysis</li>
+                    <li><span class="mark pf"></span> PF posterior <span class="ctl-note">(dot &#8733; weight)</span></li>
+                    <li><span class="mark obs">+</span> obs P</li>
+                  </ul>
+                  <canvas id="pf-plot-a"></canvas>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="pf-col pf-col-right">
+
+              <div class="plot-wrap panel-b">
+                <div class="plot-body">
+                  <ul class="legend">
+                    <li><span class="mark prior"></span> prior u at P</li>
+                    <li><span class="mark enkf"></span> EnKF posterior</li>
+                    <li><span class="mark pf"></span> PF posterior (weighted)</li>
+                    <li><span class="mark yline"></span> obs y &plusmn; &sigma;<sub>o</sub></li>
+                    <li class="legend-note">
+                      prior: mean <span id="pf-prior-mean">&#8212;</span> &#183; std <span id="pf-prior-std">&#8212;</span>
+                      &#183; skew <span id="pf-prior-skew">&#8212;</span>
+                      <span class="pf-verdict-line">&#8594; <span id="pf-prior-verdict">&#8212;</span></span><br>
+                      EnKF: mean <span id="pf-enkf-mean">&#8212;</span> &#183; std <span id="pf-enkf-std">&#8212;</span>
+                      &#183; PF: mean <span id="pf-pf-mean">&#8212;</span> &#183; N<sub>eff</sub> <span id="pf-neff">&#8212;</span>
+                      of <span id="pf-nens2">100</span> &#183; max w <span id="pf-wmax">&#8212;</span>%
+                    </li>
+                  </ul>
+                  <canvas id="pf-plot-b"></canvas>
+                </div>
+              </div>
+
+              <div class="plot-wrap panel-c">
+                <div class="plot-body">
+                  <ul class="legend">
+                    <li><span class="mark prior"></span> prior particles</li>
+                    <li><span class="mark enkf"></span> EnKF analysis</li>
+                    <li><span class="mark pf"></span> PF posterior (dot &#8733; weight)</li>
+                    <li><span class="mark vline"></span> u(P) vs centre displacement</li>
+                    <li><span class="mark yline"></span> obs y (crossings = likelihood modes)</li>
+                  </ul>
+                  <canvas id="pf-plot-c"></canvas>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+        </main>
+
       </div>
+
+      <p>
+        <strong>Reading the panels.</strong> <b>(a)</b> The three ensembles in position space: the
+        prior cloud (blue), the EnKF analysis (red) &#8212; still a Gaussian blob, just shifted and
+        shrunk along the regression direction &#8212; and the particle-filter posterior (green), which
+        reweights the <em>same</em> prior particles, so its support is wherever the likelihood
+        allows the vortex to be. <b>(b)</b> The three distributions of the observed quantity u at P:
+        the prior can be skewed (once L<sub>sprd</sub> reaches the vortex size), the EnKF posterior
+        is always near-Gaussian and lags the observation, the PF posterior (weighted histogram)
+        hugs the observation. <b>(c)</b> Why: u at P as a function of the centre displacement is
+        non-monotone, so the observation line y crosses it at <em>several</em> displacements &#8212;
+        the likelihood is multimodal in position space, and only the particle filter can carry
+        that structure. The readout's effective sample size
+        N<sub>eff</sub> = 1/&Sigma;w<sub>m</sub><sup>2</sup> quantifies the price: when the
+        observation is unlikely under the prior, the weights collapse onto a few particles.
+      </p>
+
+      <p class="planned-ref">
+        &#8594; Evensen et al., <i>Data Assimilation Fundamentals</i> (2022), Ch 9 &#8212; nonlinear filters;
+        van Leeuwen (2009), <i>Mon. Wea. Rev.</i>, particle filters in geoscience.
+      </p>
 
     </div>
   </div>
 
   <script src="../../../footer.js"></script>
   <script src="widgets/rankine/app.js?v=10"></script>
+  <script src="widgets/pf-explorer/app.js"></script>
 </body>
 </html>

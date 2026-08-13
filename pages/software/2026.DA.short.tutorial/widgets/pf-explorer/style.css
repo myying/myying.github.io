@@ -1,0 +1,246 @@
+/* Particle filter vs EnKF on the Rankine vortex (Ch. 6, §2) — embedding stylesheet.
+   Embedding stylesheet, scoped to .da-widget (same convention as the other
+   tutorial widgets).  Custom properties live on the .da-widget wrapper.
+*/
+.da-widget {
+  --surface-1:      #fcfcfb;
+  --surface-2:      #f9f9f7;
+  --surface-hair:   #f3f2ef;
+  --ink-1:          #0b0b0b;
+  --ink-2:          #52514e;
+  --ink-3:          #898781;
+  --line:           #e1e0d9;
+  --axis:           #c3c2b7;
+  --legend-bg:      rgba(252, 252, 251, 0.9);
+  --border:         rgba(11,11,11,0.10);
+  --series-amber:   #eda100;
+  --series-blue:    #2b7bba;
+  --series-pf:      #2ca02c;
+  --series-red:     #e34948;
+  --series-ink:     #0b0b0b;
+  --shadow:         0 1px 2px rgba(11,11,11,0.06), 0 4px 16px rgba(11,11,11,0.05);
+}
+
+.da-widget[data-theme="dark"] {
+  --surface-1:      #1a1a19;
+  --surface-2:      #0d0d0d;
+  --surface-hair:   #232321;
+  --ink-1:          #ffffff;
+  --ink-2:          #c3c2b7;
+  --ink-3:          #898781;
+  --line:           #3f3f3c;
+  --axis:           #4d4d49;
+  --legend-bg:      rgba(26, 26, 25, 0.85);
+  --border:         rgba(255,255,255,0.10);
+  --series-amber:   #e0a61d;
+  --series-blue:    #6fb3e8;
+  --series-pf:      #52c94f;
+  --series-red:     #e66767;
+  --series-ink:     #ffffff;
+  --shadow:         0 1px 2px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.35);
+}
+
+.da-widget, .da-widget * { box-sizing: border-box; }
+
+.da-widget {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--surface-2);
+  color: var(--ink-1);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  margin: 20px 0 8px;
+}
+
+.da-widget .viz-root {
+  max-width: 1180px;
+  padding: 18px;
+  margin: 0 auto;
+}
+
+.da-widget .workspace {
+  display: grid;
+  grid-template-columns: 1fr 1fr;      /* one row: left column | right column (not a rigid 2x2) */
+  gap: 16px;
+  align-items: start;
+}
+.da-widget .pf-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.da-widget .plot-wrap {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;   /* so the canvas can stretch to fill its grid cell */
+}
+.da-widget .plot-body {
+  position: relative;        /* the legend box floats inside the plot */
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.da-widget .plot-body .legend {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  z-index: 2;
+  max-width: 62%;
+  list-style: none;
+  margin: 0;
+  padding: 6px 10px;
+  background: var(--legend-bg);
+  border: 1px solid var(--axis);
+  border-radius: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+.da-widget .plot-body canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  aspect-ratio: 8 / 5;      /* (b)/(c): a bit taller than 16:9 so the right column fills the left column */
+}
+.da-widget #pf-plot-a { aspect-ratio: 321 / 309; }   /* square-ish: the map square fills the plot area */
+/* legend box tweaks: (a) wide and single-line, (b) wide enough that the readout does not wrap */
+.da-widget .panel-a .legend { max-width: none; }
+.da-widget .panel-b .legend { max-width: min(max(320px, 58%), 100%); }
+.da-widget .plot-title {
+  font-size: 0.8rem;
+  font-weight: 650;
+  color: var(--ink-2);
+  margin: 0 0 6px;
+}
+
+/* ------------------------------------------------------------- controls */
+.da-widget .controls {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: calc(100% - 58px);   /* the panels' plot-area width (full cell minus the axes margins) */
+  margin-left: 46px;           /* line up with the plotting areas */
+  justify-self: start;
+}
+.da-widget .ctl-group {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px 10px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+}
+.da-widget .ctl-group[data-color="member"] { --ctl-accent: var(--series-amber); }
+.da-widget .ctl-group[data-color="obs"]   { --ctl-accent: var(--series-red); }
+.da-widget .ctl-title {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: var(--ink-1);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.da-widget .ctl-note { font-size: 0.7rem; font-weight: 500; color: var(--ink-3); }
+.da-widget .ctl-row {
+  display: grid;
+  grid-template-columns: 44px 1fr 52px;
+  align-items: center;
+  gap: 8px;
+  margin-top: 9px;
+  font-size: 0.75rem;
+  color: var(--ink-2);
+}
+.da-widget .ctl-row input[type="range"] {
+  width: 100%;
+  margin: 0;
+  accent-color: var(--ctl-accent);
+  cursor: pointer;
+}
+.da-widget #pf-nens { accent-color: var(--series-blue); }   /* ensemble-size bar in a different colour */
+.da-widget .ctl-val {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-1);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.da-widget .ctl-btn {
+  width: 100%;
+  padding: 9px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink-1);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+.da-widget .ctl-btn:hover { border-color: var(--series-amber); color: var(--series-amber); }
+
+/* --------------------------------------------------------------- legend */
+.da-widget .plot-body .legend li { display: flex; align-items: flex-start; gap: 8px; line-height: 1.45; }
+.da-widget .plot-body .legend li.legend-note {
+  display: block;            /* text flows normally (the marks' li stays flex) */
+  flex-basis: 100%;
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+.da-widget .plot-body .legend li.legend-note .pf-verdict-line { display: block; }
+.da-widget .mark { display: inline-block; flex: 0 0 auto; margin-top: 3px; }
+.da-widget .mark.member { height: 2px; width: 18px;
+  background: linear-gradient(90deg, #1f77b4, #ff7f0e, #2ca02c, #d62728, #9467bd, #17becf);
+  border-radius: 2px; }
+.da-widget .mark.truth  { height: 3px; width: 16px; background: var(--series-ink); border-radius: 2px; }
+.da-widget .mark.obs {
+  display: inline-flex;      /* white + on a dark chip, like the map marker */
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  height: 13px;
+  border-radius: 3px;
+  background: #101010;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  margin-top: 1px;
+}
+.da-widget .mark.vline { width: 2px; height: 14px; background: var(--ink-1); border-radius: 1px; }
+.da-widget .mark.err    { height: 3px; width: 16px; background: var(--series-ink); border-radius: 2px; }
+.da-widget .mark.fit    { height: 0; width: 16px; border-top: 2px dashed var(--ink-3); }
+.da-widget .mark.kde    { height: 0; width: 16px; border-top: 2px solid var(--series-amber); }
+
+.da-widget .mark.sprd   { height: 0; width: 16px; border-top: 2px solid var(--series-amber); }
+.da-widget .mark.prior  { border-radius: 50%; background: var(--series-blue); width: 10px; height: 10px; }
+.da-widget .mark.enkf   { border-radius: 50%; background: var(--series-red); width: 10px; height: 10px; }
+.da-widget .mark.pf     { border-radius: 50%; background: var(--series-pf); width: 10px; height: 10px; }
+.da-widget .mark.yline  { height: 0; width: 16px; border-top: 2.5px solid var(--series-amber); }
+
+@media (max-width: 899px) {
+  /* narrow: plain block flow — control, then (a), (b), (c), full width each */
+  .da-widget .workspace { display: block; }
+  .da-widget .pf-col { display: block; margin-bottom: 16px; }
+  .da-widget .pf-col .controls,
+  .da-widget .pf-col .plot-wrap { grid-area: auto; margin-left: 0; width: auto; }
+  .da-widget .controls { width: 100%; margin-left: 0; }
+  .da-widget .plot-wrap { margin-bottom: 16px; }
+  /* (b)/(c): too squat at 8:5 when they stretch full-width on a phone — give them
+     1.5x the height (8:5 -> 16:15 at the same width). Panel (a) keeps its own
+     square-ish map aspect (its #pf-plot-a rule out-specifies this). */
+  .da-widget .plot-body canvas:not(#pf-plot-a) { aspect-ratio: 16 / 15; }
+}

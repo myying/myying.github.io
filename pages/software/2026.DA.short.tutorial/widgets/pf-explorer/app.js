@@ -53,7 +53,7 @@
   /* ------------------------------------------------------------- model */
   const A = 8, SIG = 15;               // hump peak (K), width (grid points = 135 km)
   const RING = 4;                      // K contour shown in the panels
-  const DX = 9.0;                      // km per grid point
+  const DX = 10.0;                      // km per grid point (the Ch. 2 setting)
   const NX = 128, NY = 128;            // grid (0.5 * 128 = 64 = truth centre)
   const C_I = 64, C_J = 64;            // truth centre
   const P_ANG0 = 135 * Math.PI / 180;  // obs point: compass 135° = southeast
@@ -225,9 +225,10 @@
   }
 
   /* ------------------------------------------------------- spaghetti */
-  const WIN = 30;                       // half-window in grid points (±270 km) —
-  // the same extent as the section-1 widget: ticks in km from −270 to 270
-  const TICKS_KM = [-270, -180, -90, 0, 90, 180, 270];
+  const WIN = 64;                       // half-window in grid points — the whole
+  // 128 x 128 domain is plotted (±640 km at dx = 10 km), like the Ch. 2
+  // panel shows all of its grid
+  const TICKS_KM = [-600, -400, -200, 0, 200, 400, 600];
   let x0c = 0, y0c = 0, sidec = 1;      // current map square (for drawField)
 
   function aGeom(W, H) {

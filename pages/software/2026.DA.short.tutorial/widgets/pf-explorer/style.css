@@ -1,4 +1,4 @@
-/* Particle filter vs EnKF on the Rankine vortex (Ch. 6, §2) — embedding
+/* Particle filter vs EnKF on the Gaussian hump (Ch. 6, §2) — embedding
    stylesheet.  Scoped to .da-widget; custom properties live on the wrapper.
    Three spaghetti-map panels side by side (phone: stacked), controls row
    and readout below — the same visual language as the Ch. 2/3 widgets.

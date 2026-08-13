@@ -1,4 +1,4 @@
-/* Rankine vortex — position errors break the Gaussian assumption.
+/* Gaussian hump — position errors break the Gaussian assumption.
    Embedding stylesheet, scoped to .da-widget (same convention as the other
    tutorial widgets).  Custom properties live on the .da-widget wrapper.
 */
@@ -63,7 +63,7 @@
   gap: 16px;
   align-items: start;
 }
-.da-widget .rk-col {
+.da-widget .pe-col {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -109,7 +109,7 @@
   min-height: 0;
   aspect-ratio: 8 / 5;      /* (b)/(c): a bit taller than 16:9 so the right column fills the left column */
 }
-.da-widget #rk-plot-a { aspect-ratio: 321 / 309; }   /* square-ish: the map square fills the plot area */
+.da-widget #pe-plot-a { aspect-ratio: 321 / 309; }   /* square-ish: the map square fills the plot area */
 /* legend box tweaks: (a) wide and single-line, (b) wide enough that the readout does not wrap */
 .da-widget .panel-a .legend { max-width: none; white-space: nowrap; }
 .da-widget .panel-b .legend { max-width: min(max(300px, 58%), 100%); }
@@ -165,7 +165,7 @@
   accent-color: var(--ctl-accent);
   cursor: pointer;
 }
-.da-widget #rk-nens { accent-color: var(--series-blue); }   /* ensemble-size bar in a different colour */
+.da-widget #pe-nens { accent-color: var(--series-blue); }   /* ensemble-size bar in a different colour */
 .da-widget .ctl-val {
   text-align: right;
   font-variant-numeric: tabular-nums;
@@ -197,7 +197,7 @@
   color: var(--ink-2);
   font-variant-numeric: tabular-nums;
 }
-.da-widget .plot-body .legend li.legend-note .rk-verdict-line { display: block; }
+.da-widget .plot-body .legend li.legend-note .pe-verdict-line { display: block; }
 .da-widget .mark { display: inline-block; flex: 0 0 auto; margin-top: 3px; }
 .da-widget .mark.member { height: 2px; width: 18px;
   background: linear-gradient(90deg, #1f77b4, #ff7f0e, #2ca02c, #d62728, #9467bd, #17becf);
@@ -221,19 +221,20 @@
 .da-widget .mark.err    { height: 3px; width: 16px; background: var(--series-ink); border-radius: 2px; }
 .da-widget .mark.fit    { height: 0; width: 16px; border-top: 2px dashed var(--ink-3); }
 .da-widget .mark.kde    { height: 0; width: 16px; border-top: 2px solid var(--series-amber); }
-.da-widget #rk-plot-a { cursor: crosshair; }
+.da-widget #pe-plot-a { cursor: crosshair; }
+.da-widget #pe-plot-c { cursor: pointer; }
 .da-widget .mark.sprd   { height: 0; width: 16px; border-top: 2px solid var(--series-amber); }
 
 @media (max-width: 899px) {
   /* narrow: plain block flow — control, then (a), (b), (c), full width each */
   .da-widget .workspace { display: block; }
-  .da-widget .rk-col { display: block; margin-bottom: 16px; }
-  .da-widget .rk-col .controls,
-  .da-widget .rk-col .plot-wrap { grid-area: auto; margin-left: 0; width: auto; }
+  .da-widget .pe-col { display: block; margin-bottom: 16px; }
+  .da-widget .pe-col .controls,
+  .da-widget .pe-col .plot-wrap { grid-area: auto; margin-left: 0; width: auto; }
   .da-widget .controls { width: 100%; margin-left: 0; }
   .da-widget .plot-wrap { margin-bottom: 16px; }
   /* (b)/(c): too squat at 8:5 when they stretch full-width on a phone — give them
      1.5x the height (8:5 -> 16:15 at the same width). Panel (a) keeps its own
-     square-ish map aspect (its #rk-plot-a rule out-specifies this). */
-  .da-widget .plot-body canvas:not(#rk-plot-a) { aspect-ratio: 16 / 15; }
+     square-ish map aspect (its #pe-plot-a rule out-specifies this). */
+  .da-widget .plot-body canvas:not(#pe-plot-a) { aspect-ratio: 16 / 15; }
 }

@@ -9,7 +9,7 @@
 
 <link rel="stylesheet" href="../../../style.css">
 <link rel="stylesheet" href="chapters.css">
-<link rel="stylesheet" href="widgets/rankine/style.css?v=25">
+<link rel="stylesheet" href="widgets/position-error/style.css?v=27">
 <link rel="stylesheet" href="widgets/pf-explorer/style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
@@ -57,67 +57,70 @@
       </p>
 
       <!-- ====================== Gaussian hump widget ================== -->
-      <h4 id="sec-rankine">1 &#183; Position errors break the Gaussian assumption</h4>
+      <h4 id="sec-position-error">1 &#183; Position errors break the Gaussian assumption</h4>
       <p>
-        A Gaussian hump &#8212; the same warm blob as Chapter 2 (peak 8 K) &#8212; is the simplest model
-        of a coherent anomaly. The ensemble below has 100 members that differ <em>only</em> in
-        where the hump sits: each centre is drawn from a Gaussian with standard deviation
-        L<sub>sprd</sub> around the truth location (given in units of the hump width
-        &sigma; = 135 km). The observation point P (marked +) sits southeast of the truth centre
-        (compass 135&#176;), right on the 4 K contour, and the state we watch is the temperature
-        T at P (4 K there). Click P on panel (a) to move it anywhere. Slide L<sub>sprd</sub> up and
-        down: at small spread the error T &#8722; T<sub>truth</sub> at P is Gaussian; once the spread
-        reaches the hump size, members' centres pass P and the histogram skews hard against the
-        T = 0 bound &#8212; no Gaussian prior can represent it.
+        A Gaussian hump &#8212; the exact same warm blob as Chapter 2's own data generator (peak 8 K,
+        radius scale &sigma; = 50 km, on the same 500&#8201;&#215;&#8201;500&#8201;km / 10&#8201;km
+        grid) &#8212; is the simplest model of a coherent anomaly. The ensemble below has 100 members
+        that differ <em>only</em> in where the hump sits: each centre is drawn from a Gaussian with
+        standard deviation L<sub>sprd</sub> around the truth location (given in units of the hump
+        radius scale &sigma;). The observation point P (marked +) sits at the same grid offset from
+        the truth centre as Chapter 2's own observation from its blob peak &#8212; not on the
+        4&#8201;K contour, same as in Chapter 2 &#8212; and the state we watch is the temperature T
+        at P. Click P on panel (a) to move it anywhere; click a dot in
+        panel (c) to highlight that member's ring in panel (a). Slide L<sub>sprd</sub> up and down:
+        at small spread the distribution of T at P (panel (b)) is Gaussian; once the spread reaches
+        the hump size, members' centres pass P and the histogram skews hard against the T = 0
+        bound &#8212; no Gaussian prior can represent it.
       </p>
 
-      <div class="da-widget" id="rankine">
+      <div class="da-widget" id="position-error">
 
         <main class="viz-root">
 
           <div class="workspace">
 
-            <div class="rk-col rk-col-left">
+            <div class="pe-col pe-col-left">
 
 <div class="controls">
               <div class="ctl-group" data-color="member">
                 <h4 class="ctl-title">Location spread <span class="ctl-note">centre position error, in units of the hump width &sigma;</span></h4>
                 <label class="ctl-row">
                   <span class="ctl-label">L<sub>sprd</sub></span>
-                  <input type="range" id="rk-sprd" min="0.1" max="3" step="0.1" value="1">
-                  <span class="ctl-val" id="rk-sprd-val"></span>
+                  <input type="range" id="pe-sprd" min="0.1" max="3" step="0.1" value="1">
+                  <span class="ctl-val" id="pe-sprd-val"></span>
                 </label>
                 <label class="ctl-row">
                   <span class="ctl-label">N<sub>ens</sub></span>
-                  <input type="range" id="rk-nens" min="20" max="400" step="10" value="100">
-                  <span class="ctl-val" id="rk-nens-val"></span>
+                  <input type="range" id="pe-nens" min="20" max="400" step="10" value="100">
+                  <span class="ctl-val" id="pe-nens-val"></span>
                 </label>
-                <button class="ctl-btn" id="rk-rerun" title="draw a new ensemble">&#8635; new ensemble</button>
+                <button class="ctl-btn" id="pe-rerun" title="draw a new ensemble">&#8635; new ensemble</button>
               </div>
             </div>
               <div class="plot-wrap panel-a">
               <div class="plot-body">
                   <ul class="legend">
                     <li><span class="mark truth"></span> truth</li>
-                    <li><span class="mark member"></span> <span id="rk-nens-label">100</span> members</li>
+                    <li><span class="mark member"></span> <span id="pe-nens-label">100</span> members</li>
                     <li><span class="mark obs">+</span> obs P</li>
                   </ul>
-                <canvas id="rk-plot-a"></canvas>
+                <canvas id="pe-plot-a"></canvas>
               </div>
             </div>
             </div>
 
-            <div class="rk-col rk-col-right">
+            <div class="pe-col pe-col-right">
               <div class="plot-wrap panel-b">
               <div class="plot-body">
                   <ul class="legend">
                     <li><span class="mark kde"></span> sample dist.</li>
                     <li><span class="mark fit"></span> Gaussian fit</li>
-                    <li class="legend-note">mean <span id="rk-mean">&#8212;</span> &#183; std <span id="rk-std">&#8212;</span>
-                        &#183; skew <span id="rk-skew">&#8212;</span> &#183; kurt <span id="rk-kurt">&#8212;</span>
-                        <span class="rk-verdict-line">&#8594; <span id="rk-verdict">&#8212;</span></span></li>
+                    <li class="legend-note">mean <span id="pe-mean">&#8212;</span> &#183; std <span id="pe-std">&#8212;</span>
+                        &#183; skew <span id="pe-skew">&#8212;</span> &#183; kurt <span id="pe-kurt">&#8212;</span>
+                        <span class="pe-verdict-line">&#8594; <span id="pe-verdict">&#8212;</span></span></li>
                   </ul>
-                <canvas id="rk-plot-b"></canvas>
+                <canvas id="pe-plot-b"></canvas>
               </div>
             </div>
 
@@ -127,7 +130,7 @@
                     <li><span class="mark member"></span> member samples</li>
                     <li><span class="mark sprd"></span> vortex center dist.</li>
                   </ul>
-                <canvas id="rk-plot-c"></canvas>
+                <canvas id="pe-plot-c"></canvas>
               </div>
             </div>
 
@@ -268,7 +271,7 @@
   </div>
 
   <script src="../../../footer.js"></script>
-  <script src="widgets/rankine/app.js?v=10"></script>
+  <script src="widgets/position-error/app.js?v=19"></script>
   <script src="widgets/pf-explorer/app.js"></script>
 </body>
 </html>

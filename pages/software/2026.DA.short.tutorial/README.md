@@ -24,13 +24,13 @@ in prose. The course structure follows Evensen, Vossepoel & van Leeuwen,
 | `widgets/enkf-explorer/style.css` | Ch 3 widget styles (scoped to `.da-widget`, from corr-explorer) |
 | `widgets/enkf-explorer/data.js`, `build_enkf_data.py` | Ch 3 data: reuses Ch 2 experiment + `obs_z` unit normals for the perturbed obs (build script) |
 | `06-localization-inflation.html` | Ch 4 page: Sample Covariance Explorer — truth (compact hump + smooth random background), analytic true covariance, and sample covariance (raw or Gaspari–Cohn localized); drag the observation, ensemble-size / localization-radius sliders, localization toggle + radius circle + annotations |
-| `07-nonlinear-filters.html` | Ch 6 page: §1 Rankine vortex widget (position errors break the Gaussian prior) + §2 EnKF-vs-particle-filter widget — prior/EnKF-analysis/PF-posterior ensembles on the same vortex prior, Lsprd + Nens + obs-value y sliders, weight-collapse readout (Neff) + annotations |
+| `07-nonlinear-filters.html` | Ch 6 page: §1 Rankine vortex widget (position errors break the Gaussian prior) + §2 EnKF-vs-particle-filter widget — prior / EnKF-analysis / PF-posterior 20 m/s contour-spaghetti panels on the same vortex prior (PF members light up ∝ weight), Lsprd + Nens sliders, Neff / centre-distance readout + annotations |
 | `08-parameters-applications.html` | Ch 7 placeholder page (planned) — full widget-nav chain, `.planned` panel |
 | `widgets/corr-explorer/app.js` | Widget logic: truth T + marching-squares 4 K contours of truth & all members (Tab20 palette), member slider (highlight + blob-centre readout + scatter ring), state marker with live corr/scatter (embedding-ready copy) |
 | `widgets/corr-explorer/style.css` | Widget styles incl. member-slider controls + contour legend marks (scoped to `.da-widget`) |
 | `widgets/corr-explorer/data.js` | Synthetic demo data (generated) |
-| `widgets/pf-explorer/app.js` | Ch 6 §2 widget: in-browser EnKF (linear regression of centres on innovation) vs particle filter (likelihood weights) on the shared Rankine-vortex prior; map with prior/EnKF/PF centre dots, weighted histograms + obs band, u(P)-vs-displacement mechanism panel with obs crossings; Neff / wmax readout |
-| `widgets/pf-explorer/style.css` | Ch 6 §2 widget styles (scoped to `.da-widget`, from rankine) |
+| `widgets/pf-explorer/app.js` | Ch 6 §2 widget: in-browser EnKF (linear regression of centres on innovation) vs particle filter (likelihood weights) on the shared Rankine-vortex prior; three 20 m/s contour-spaghetti panels (prior / EnKF / PF with brightness ∝ weight), fixed 3σ_o observation, Neff + rms-centre-distance readout |
+| `widgets/pf-explorer/style.css` | Ch 6 §2 widget styles, scoped to `#pf-explorer` so it coexists with the rankine widget on the same page |
 | `widgets/cov-explorer/app.js` | Ch 6 Sample Covariance Explorer logic — computed live in the browser (seeded 300-member pool: displaced hump + smooth random background per member; analytic true-covariance field; no data file) |
 | `widgets/cov-explorer/style.css` | Ch 6 widget styles (scoped to `.da-widget`, incl. controls / switch / localization circle) |
 | `widgets/bayes-gaussian/app.js` | 1-D Bayes widget logic (embedding-ready, no data file — computed live) |

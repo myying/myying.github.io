@@ -2,34 +2,29 @@
    Same toy model as the rankine widget (section 1): a modified Rankine
    vortex, ensemble members that differ ONLY in the centre position
    (centre = truth centre + N(0, L_sprd)), and one observation of the
-   zonal wind u at the point P (the + on panel (a)).
+   zonal wind u at the point P (the + on every panel).
 
-   Three ensembles, all computed in-browser from the SAME prior particles:
-   - prior:          centres drawn from the Gaussian location distribution.
-   - EnKF posterior: the linear-regression update of the centres on the
-                     innovation (y - u(P)): with one scalar observation the
-                     gain is the sample covariance of centre vs u divided by
+   The three panels are 20 m/s wind-contour spaghetti plots of the SAME
+   ensemble, before and after assimilating the observation:
+   - (a) prior:      every member's 20 m/s rings around its centre.
+   - (b) EnKF posterior: the linear-regression update of the centres on
+                     the innovation (y - u(P)): with one scalar observation
+                     the gain is the sample covariance of centre vs u over
                      the sample variance of u plus R.  Affine in the
                      centres, so the posterior keeps the Gaussian shape of
                      the prior — and is biased when u(centre) is nonlinear.
-   - PF posterior:   the SAME prior particles reweighted by the likelihood
-                     p(y | centre) = N(y; u(centre), R).  Weighted dots on
-                     the map (dot size = weight), weighted histograms in
-                     panel (b), and an effective sample size readout.
-
-   Panels:
-   (a) map — truth rings, the three ensembles as centre dots, obs P.
-   (b) histograms of u at P — prior, EnKF posterior, PF posterior
-       (weighted), with the observed value ± σ_o and the truth.
-   (c) mechanism — zonal wind u at P vs centre displacement toward P (the
-       non-monotone map from section 1): the observation line crosses it at
-       several displacements, so the likelihood is multimodal in position
-       space; the PF posterior inherits that structure, the EnKF cannot.
+   - (c) PF posterior: the SAME prior particles reweighted by the
+                     likelihood p(y | centre) = N(y; u(centre), R).  The
+                     rings LIGHT UP with the weight: brightness ∝ weight,
+                     so only the members consistent with the observation
+                     survive.
 
    Controls: L_sprd (centre-position error, units of R_mw), N_ens (shared
-   ensemble size), and the observed value y (m/s) — the third knob exposes
-   the weight collapse: drag y away from the prior mass and watch N_eff
-   fall while the EnKF posterior stays a broad Gaussian.
+   ensemble size), and a "new ensemble" button.  The observation value is
+   fixed at truth + 3σ_o — a deliberately unlikely realization that exposes
+   the filters' differences — and the readout reports how far the centres
+   are pulled toward the truth and how many particles effectively survive
+   (N_eff = 1/Σ w²).
 
    Embedding-ready: root is the element with id="pf-explorer" (falls back
    to .da-widget / document root), theme follows prefers-color-scheme, and
@@ -40,10 +35,9 @@
 
   const $ = (id) => document.getElementById(id);
   const root = document.getElementById("pf-explorer") || document.querySelector(".da-widget") || document.documentElement;
-  const cvA = $("pf-plot-a"), cvB = $("pf-plot-b"), cvC = $("pf-plot-c");
+  const cvPrior = $("pf-prior"), cvEnKF = $("pf-enkf"), cvPF = $("pf-pf");
   const sprdSlider = $("pf-sprd"), sprdVal = $("pf-sprd-val");
   const nensSlider = $("pf-nens"), nensVal = $("pf-nens-val");
-  const ySlider = $("pf-y"), yVal = $("pf-y-val");
   const rerunBtn = $("pf-rerun");
 
   /* ------------------------------------------------------------- model */
@@ -55,11 +49,9 @@
   const R0_0 = RMW + 0.2;              // slightly outside the radius of max wind
   const P_I = C_I + R0_0 * P_DIR0.i, P_J = C_J + R0_0 * P_DIR0.j;
   const SIG_O = 2.0;                   // observation error std, m/s (fixed)
-  const NENS_MIN = 20, NENS_MAX = 400;
 
   let NENS = 100;                     // ensemble size (tunable)
   let Lsprd = RMW;                    // location spread, grid points (default 1 Rmw)
-  let Y_OBS = 0;                      // observed u at P, m/s (set at init)
 
   // tangential wind speed of the modified Rankine vortex
   function vtheta(r) {
@@ -72,8 +64,10 @@
     const r = Math.hypot(di, dj) || 1e-6;
     return -vtheta(r) * dj / r;
   }
-  const V_T = uWind(C_I, C_J, P_I, P_J);   // truth zonal wind at P
-  // radii of the 20 m/s contour around a centre (analytic)
+  const V_T = uWind(C_I, C_J, P_I, P_J);          // truth zonal wind at P
+  const Y_OBS = V_T + 3 * SIG_O;                  // observed u at P (a 3σ_o outlier)
+  // radii of the 20 m/s contour around a centre (analytic: one inside Rmw,
+  // one outside — see the rankine widget)
   function ringRadii() {
     return [20 * RMW / VMAX, RMW * Math.pow(VMAX / 20, 2 / 3)];
   }
@@ -105,17 +99,15 @@
   darkMq.addEventListener("change", (e) => setTheme(e.matches ? "dark" : "light"));
   const cssVar = (n) => getComputedStyle(root).getPropertyValue(n).trim();
   const T = {
-    surface1: "#fcfcfb", ink1: "#0b0b0b", ink2: "#52514e", ink3: "#898781",
-    line: "#e1e0d9", axis: "#c3c2b7", red: "#e34948", amber: "#eda100",
-    blue: "#2b7bba", pf: "#2ca02c"
+    surface1: "#fcfcfb", ink1: "#0b0b0b", ink3: "#898781", axis: "#c3c2b7",
+    blue: "#2b7bba", red: "#e34948", pf: "#2ca02c"
   };
   const updateT = () => {
     const kv = (n, f) => { const v = cssVar(n); if (v) f(v); };
     kv("--surface-1", v => T.surface1 = v); kv("--ink-1", v => T.ink1 = v);
-    kv("--ink-2", v => T.ink2 = v); kv("--ink-3", v => T.ink3 = v);
-    kv("--line", v => T.line = v); kv("--axis", v => T.axis = v);
-    kv("--series-red", v => T.red = v); kv("--series-amber", v => T.amber = v);
-    kv("--series-blue", v => T.blue = v); kv("--series-pf", v => T.pf = v);
+    kv("--ink-3", v => T.ink3 = v); kv("--axis", v => T.axis = v);
+    kv("--series-blue", v => T.blue = v); kv("--series-red", v => T.red = v);
+    kv("--series-pf", v => T.pf = v);
   };
   updateT();
 
@@ -137,7 +129,7 @@
     return "rgba(" + r + "," + g + "," + b + "," + a + ")";
   }
 
-  /* ------------------------------------------- the three ensembles */
+  /* ------------------------------------------------- the two analyses */
   // recomputed on every render (cheap up to 400 members)
   function compute() {
     const u = new Float64Array(NENS);
@@ -158,17 +150,10 @@
     varU /= n1; covI /= n1; covJ /= n1;
     const KI = covI / (varU + R), KJ = covJ / (varU + R);
     const ai = new Float64Array(NENS), aj = new Float64Array(NENS);
-    const ua = new Float64Array(NENS);
     for (let m = 0; m < NENS; m++) {
       ai[m] = ci[m] + KI * (Y_OBS - u[m]);
       aj[m] = cj[m] + KJ * (Y_OBS - u[m]);
-      ua[m] = uWind(ai[m], aj[m], P_I, P_J);
     }
-    let uaMean = 0, uaV2 = 0;
-    for (let m = 0; m < NENS; m++) uaMean += ua[m];
-    uaMean /= NENS;
-    for (let m = 0; m < NENS; m++) { const d = ua[m] - uaMean; uaV2 += d * d; }
-    const uaStd = Math.sqrt(uaV2 / NENS);
 
     // particle filter: likelihood weights
     const w = new Float64Array(NENS);
@@ -179,26 +164,28 @@
       wsum += w[m];
     }
     for (let m = 0; m < NENS; m++) w[m] /= wsum;
-    let w2 = 0, wu = 0;
-    for (let m = 0; m < NENS; m++) { w2 += w[m] * w[m]; wu += w[m] * u[m]; }
-    const neff = 1 / w2;
-    let wmax = 0;
-    for (let m = 0; m < NENS; m++) if (w[m] > wmax) wmax = w[m];
-
-    // prior statistics at P
-    let v2 = 0, v3 = 0, v4 = 0;
+    let w2 = 0, wmax = 0;
     for (let m = 0; m < NENS; m++) {
-      const d = u[m] - ubar;
-      v2 += d * d; v3 += d * d * d; v4 += d * d * d * d;
+      w2 += w[m] * w[m];
+      if (w[m] > wmax) wmax = w[m];
     }
-    const sd = Math.sqrt(v2 / NENS);
-    const skew = (v3 / NENS) / Math.pow(sd, 3);
-    const kurt = (v4 / NENS) / Math.pow(sd, 4) - 3;
+    const neff = 1 / w2;
 
-    return { u, ubar, sd, skew, kurt, ai, aj, ua, uaMean, uaStd, w, wu, neff, wmax, KI, KJ };
+    // how far each ensemble's centres sit from the truth centre (rms, grid pts)
+    let rmsP = 0, rmsE = 0, rmsW = 0;
+    for (let m = 0; m < NENS; m++) {
+      const dp = Math.hypot(ci[m] - C_I, cj[m] - C_J);
+      const de = Math.hypot(ai[m] - C_I, aj[m] - C_J);
+      rmsP += dp * dp; rmsE += de * de; rmsW += w[m] * dp * dp;
+    }
+    rmsP = Math.sqrt(rmsP / NENS);
+    rmsE = Math.sqrt(rmsE / NENS);
+    rmsW = Math.sqrt(rmsW);
+
+    return { u, ai, aj, w, neff, wmax, rmsP, rmsE, rmsW };
   }
 
-  /* ------------------------------------------------------- panel (a) */
+  /* ------------------------------------------------------- spaghetti */
   const WIN = 30;
   const TICKS_KM = [-270, -180, -90, 0, 90, 180, 270];
 
@@ -211,11 +198,30 @@
     return { margin, side, x0, y0: margin.t, s: side / (2 * WIN) };
   }
 
-  function renderA(c) {
-    const [ctx, W, H] = sizeCanvas(cvA);
+  // one spaghetti panel: every member's 20 m/s rings, then the truth rings,
+  // the observation point P, and the axes
+  function drawEnsembleMap(cv, centres, alphas, color, lw) {
+    const [ctx, W, H] = sizeCanvas(cv);
     const { margin, side, x0, y0, s } = aGeom(W, H);
     const [rIn, rOut] = ringRadii();
 
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x0, y0, side, side);
+    ctx.clip();
+    ctx.lineWidth = lw;
+    for (let m = 0; m < NENS; m++) {
+      const cx = x0 + (centres.ci[m] - (C_I - WIN)) * s;
+      const cy = y0 + (centres.cj[m] - (C_J - WIN)) * s;
+      const a = alphas[m];
+      ctx.strokeStyle = hexA(color, a);
+      ctx.beginPath();
+      ctx.arc(cx, cy, rIn * s, 0, 6.2832);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(cx, cy, rOut * s, 0, 6.2832);
+      ctx.stroke();
+    }
     // truth rings (thick)
     ctx.strokeStyle = T.ink1;
     ctx.lineWidth = 2.6;
@@ -225,29 +231,7 @@
     ctx.beginPath();
     ctx.arc(x0 + WIN * s, y0 + WIN * s, rOut * s, 0, 6.2832);
     ctx.stroke();
-
-    // prior centres (blue)
-    ctx.fillStyle = hexA(T.blue, 0.4);
-    for (let m = 0; m < NENS; m++) {
-      ctx.beginPath();
-      ctx.arc(x0 + (ci[m] - (C_I - WIN)) * s, y0 + (cj[m] - (C_J - WIN)) * s, 2, 0, 6.2832);
-      ctx.fill();
-    }
-    // EnKF analysis centres (red)
-    ctx.fillStyle = hexA(T.red, 0.65);
-    for (let m = 0; m < NENS; m++) {
-      ctx.beginPath();
-      ctx.arc(x0 + (c.ai[m] - (C_I - WIN)) * s, y0 + (c.aj[m] - (C_J - WIN)) * s, 2.1, 0, 6.2832);
-      ctx.fill();
-    }
-    // PF posterior centres (green, dot size ∝ weight)
-    for (let m = 0; m < NENS; m++) {
-      const r = Math.min(7, 1.2 + 1.8 * (c.w[m] * NENS));
-      ctx.fillStyle = hexA(T.pf, Math.min(1, 0.35 + 0.45 * (c.w[m] * NENS)));
-      ctx.beginPath();
-      ctx.arc(x0 + (ci[m] - (C_I - WIN)) * s, y0 + (cj[m] - (C_J - WIN)) * s, r, 0, 6.2832);
-      ctx.fill();
-    }
+    ctx.restore();
 
     // observation point P — white cross with a dark halo
     const px = x0 + (P_I - (C_I - WIN)) * s, py = y0 + (P_J - (C_J - WIN)) * s;
@@ -293,280 +277,33 @@
     ctx.fillText("km", x0 + side / 2, y0 + side + 18);
   }
 
-  /* ------------------------------------------------------- panel (b) */
-  const U_LO = -40, U_HI = 40;         // u at P range (u ∈ [−35, 35] for any centre)
-  const NB = 48;
-
-  function niceStep(raw) {
-    const pow = Math.pow(10, Math.floor(Math.log10(raw)));
-    const m = raw / pow;
-    return (m < 1.5 ? 1 : m < 3.5 ? 2 : m < 7.5 ? 5 : 10) * pow;
-  }
-
-  function renderB(c) {
-    const [ctx, W, H] = sizeCanvas(cvB);
-    const margin = { l: 46, r: 12, t: 14, b: 30 };
-    const pw = W - margin.l - margin.r, ph = H - margin.t - margin.b;
-    const xOf = (v) => margin.l + (v - U_LO) / (U_HI - U_LO) * pw;
-    const binW = (U_HI - U_LO) / NB;
-
-    // KDE bandwidth (Silverman-ish), shared by all three curves
-    const es = Array.from(c.u).sort((a, b) => a - b);
-    const iqr = es[Math.floor(0.75 * NENS)] - es[Math.floor(0.25 * NENS)];
-    const h = Math.max(0.5, 0.9 * Math.min(c.sd, iqr / 1.34) * Math.pow(NENS, -0.2));
-    const k2p = Math.sqrt(2 * Math.PI);
-    const NPTS = 240;
-    const xs = new Array(NPTS + 1), fPrior = new Array(NPTS + 1), fEnKF = new Array(NPTS + 1), fPF = new Array(NPTS + 1);
-    let fmax = 1;
-    for (let i = 0; i <= NPTS; i++) {
-      const x = U_LO + (U_HI - U_LO) * i / NPTS;
-      xs[i] = x;
-      let sP = 0, sE = 0, sW = 0;
-      for (let m = 0; m < NENS; m++) {
-        const z = (x - c.u[m]) / h;
-        const k = Math.exp(-0.5 * z * z);
-        sP += k;
-        sE += Math.exp(-0.5 * ((x - c.ua[m]) / h) ** 2);
-        sW += c.w[m] * k;
-      }
-      fPrior[i] = sP / (NENS * h * k2p);
-      fEnKF[i] = sE / (NENS * h * k2p);
-      fPF[i] = sW / (h * k2p);            // weighted: Σ w·K / h
-      fmax = Math.max(fmax, fPrior[i], fEnKF[i], fPF[i]);
-    }
-    const cmax = fmax * binW * NENS;      // scale = equivalent bin counts
-
-    // prior histogram bars (light blue)
-    const counts = new Float64Array(NB);
-    for (let m = 0; m < NENS; m++) {
-      let b = Math.floor((c.u[m] - U_LO) / binW);
-      if (b < 0) b = 0; if (b >= NB) b = NB - 1;
-      counts[b]++;
-    }
-    for (let b = 0; b < NB; b++) {
-      const bx = margin.l + b * binW / (U_HI - U_LO) * pw;
-      const bw = Math.max(1, binW / (U_HI - U_LO) * pw - 1);
-      const bh = (counts[b] / cmax) * ph * 0.72;
-      ctx.fillStyle = hexA(T.blue, 0.18);
-      ctx.fillRect(bx, margin.t + ph - bh, bw, bh);
-    }
-    const yOf = (f) => margin.t + ph - (f * binW * NENS) / cmax * ph * 0.72;
-    const line = (arr, color, lw) => {
-      ctx.strokeStyle = color;
-      ctx.lineWidth = lw;
-      ctx.beginPath();
-      for (let i = 0; i <= NPTS; i++) {
-        const x = xOf(xs[i]), y = yOf(arr[i]);
-        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-    };
-    line(fPrior, T.blue, 1.7);
-    line(fEnKF, T.red, 2);
-    line(fPF, T.pf, 2.4);
-
-    // observation y ± σ_o (amber band + line)
-    ctx.fillStyle = hexA(T.amber, 0.14);
-    ctx.fillRect(xOf(Y_OBS - SIG_O), margin.t, xOf(Y_OBS + SIG_O) - xOf(Y_OBS - SIG_O), ph);
-    ctx.strokeStyle = T.amber;
-    ctx.lineWidth = 2.5;
-    ctx.beginPath();
-    ctx.moveTo(xOf(Y_OBS), margin.t);
-    ctx.lineTo(xOf(Y_OBS), margin.t + ph);
-    ctx.stroke();
-    ctx.lineWidth = 1;
-    for (const v of [Y_OBS - SIG_O, Y_OBS + SIG_O]) {
-      ctx.beginPath();
-      ctx.moveTo(xOf(v), margin.t + 4); ctx.lineTo(xOf(v), margin.t + ph - 4);
-      ctx.stroke();
-    }
-
-    // truth u at P (ink)
-    ctx.strokeStyle = T.ink1;
-    ctx.lineWidth = 1.4;
-    const tx = xOf(V_T);
-    ctx.beginPath(); ctx.moveTo(tx, margin.t + 4); ctx.lineTo(tx, margin.t + ph); ctx.stroke();
-    ctx.font = "10px system-ui, sans-serif";
-    ctx.textAlign = "center"; ctx.textBaseline = "bottom";
-    const truthLabel = "truth";
-    const tw = ctx.measureText(truthLabel).width;
-    const ly = margin.t + ph - 8;
-    ctx.fillStyle = hexA(T.surface1, 0.85);
-    ctx.fillRect(tx - tw / 2 - 3, ly - 12, tw + 6, 13);
-    ctx.fillStyle = T.ink1;
-    ctx.fillText(truthLabel, tx, ly + 1);
-    ctx.textBaseline = "top";
-
-    // axes
-    ctx.strokeStyle = T.axis; ctx.lineWidth = 1;
-    ctx.strokeRect(margin.l, margin.t, pw, ph);
-    ctx.fillStyle = T.ink3; ctx.font = "10px system-ui, sans-serif";
-    ctx.textAlign = "center"; ctx.textBaseline = "top";
-    const step = niceStep((U_HI - U_LO) / 5);
-    const t0 = Math.ceil(U_LO / step) * step;
-    for (let v = t0; v <= U_HI + 1e-9; v += step) {
-      const xi = xOf(v);
-      ctx.beginPath(); ctx.moveTo(xi, margin.t + ph); ctx.lineTo(xi, margin.t + ph + 4); ctx.stroke();
-      ctx.fillText(String(Math.round(v * 10) / 10), xi, margin.t + ph + 6);
-    }
-    ctx.textAlign = "center";
-    ctx.fillText("m/s", margin.l + pw / 2, margin.t + ph + 18);
-
-    // readouts
-    const f2 = (x) => (x >= 0 ? "+" : "") + x.toFixed(2);
-    $("pf-prior-mean").textContent = f2(c.ubar);
-    $("pf-prior-std").textContent = c.sd.toFixed(1);
-    $("pf-prior-skew").textContent = f2(c.skew);
-    const verdictEl = $("pf-prior-verdict");
-    const zSkew = c.skew / Math.sqrt(6 / NENS);
-    const zKurt = c.kurt / Math.sqrt(24 / NENS);
-    const gaussLike = Math.abs(zSkew) < 1.96 && Math.abs(zKurt) < 1.96;
-    let txt;
-    if (gaussLike) txt = "≈ Gaussian";
-    else {
-      const parts = [];
-      if (zSkew < -1.96) parts.push("left-skewed");
-      else if (zSkew > 1.96) parts.push("right-skewed");
-      else parts.push("symmetric");
-      if (zKurt < -1.96) parts.push("flat-topped");
-      else if (zKurt > 1.96) parts.push("heavy-tailed");
-      txt = "non-Gaussian — " + parts.join(", ");
-    }
-    verdictEl.textContent = txt;
-    verdictEl.style.color = gaussLike ? T.amber : T.red;
-    $("pf-enkf-mean").textContent = f2(c.uaMean);
-    $("pf-enkf-std").textContent = c.uaStd.toFixed(1);
-    $("pf-pf-mean").textContent = f2(c.wu);
-    $("pf-neff").textContent = c.neff.toFixed(0);
-    const nn = $("pf-nens2"); if (nn) nn.textContent = NENS;
-    $("pf-neff").style.color = (c.neff < 0.15 * NENS) ? T.red : T.ink1;
-    $("pf-wmax").textContent = (c.wmax * 100).toFixed(1);
-  }
-
-  /* ------------------------------------------------------- panel (c) */
-  const D_MIN = -20, D_MAX = 20;       // displacement range (grid points)
-
-  function renderC(c) {
-    const [ctx, W, H] = sizeCanvas(cvC);
-    const margin = { l: 46, r: 12, t: 14, b: 32 };
-    const pw = W - margin.l - margin.r, ph = H - margin.t - margin.b;
-    const xOf = (d) => margin.l + (d - D_MIN) / (D_MAX - D_MIN) * pw;
-    const yOf = (v) => margin.t + ph - (v - (-50)) / 100 * ph;   // v ∈ [−50, 50]
-
-    // prior location pdf (Gaussian, std = Lsprd) as a shaded hump on the axis
-    const pdf = (d) => Math.exp(-0.5 * Math.pow(d / Lsprd, 2)) / (Lsprd * Math.sqrt(2 * Math.PI));
-    const pmax = pdf(0);
-    const hump = 0.42 * ph;
-    ctx.fillStyle = hexA(T.blue, 0.2);
-    ctx.beginPath();
-    ctx.moveTo(xOf(D_MIN), margin.t + ph);
-    for (let i = 0; i <= 160; i++) {
-      const d = D_MIN + (D_MAX - D_MIN) * i / 160;
-      ctx.lineTo(xOf(d), margin.t + ph - hump * pdf(d) / pmax);
-    }
-    ctx.lineTo(xOf(D_MAX), margin.t + ph);
-    ctx.closePath();
-    ctx.fill();
-
-    // the map: u at P vs centre displacement toward P (non-monotone)
-    ctx.strokeStyle = T.ink1;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    for (let i = 0; i <= 300; i++) {
-      const d = D_MIN + (D_MAX - D_MIN) * i / 300;
-      const v = uWind(C_I + d * P_DIR0.i, C_J + d * P_DIR0.j, P_I, P_J);
-      if (i === 0) ctx.moveTo(xOf(d), yOf(v));
-      else ctx.lineTo(xOf(d), yOf(v));
-    }
-    ctx.stroke();
-
-    // observation value y — amber line across the panel
-    ctx.strokeStyle = hexA(T.amber, 0.85);
-    ctx.lineWidth = 1.8;
-    ctx.beginPath();
-    ctx.moveTo(margin.l, yOf(Y_OBS));
-    ctx.lineTo(margin.l + pw, yOf(Y_OBS));
-    ctx.stroke();
-    // intersections u(d) = y
-    ctx.fillStyle = T.amber;
-    ctx.strokeStyle = T.surface1;
-    ctx.lineWidth = 1.2;
-    let prev = uWind(C_I + D_MIN * P_DIR0.i, C_J + D_MIN * P_DIR0.j, P_I, P_J) - Y_OBS;
-    for (let i = 1; i <= 300; i++) {
-      const d = D_MIN + (D_MAX - D_MIN) * i / 300;
-      const v = uWind(C_I + d * P_DIR0.i, C_J + d * P_DIR0.j, P_I, P_J) - Y_OBS;
-      if ((prev <= 0 && v > 0) || (prev >= 0 && v < 0)) {
-        const dd = d - (D_MAX - D_MIN) / 300 * v / (v - prev);
-        ctx.beginPath();
-        ctx.arc(xOf(dd), yOf(Y_OBS), 4, 0, 6.2832);
-        ctx.fill();
-        ctx.stroke();
-      }
-      prev = v;
-    }
-
-    // the three ensembles: (centre displacement toward P, u at P)
-    for (let m = 0; m < NENS; m++) {
-      const dP = (ci[m] - C_I) * P_DIR0.i + (cj[m] - C_J) * P_DIR0.j;
-      const dA = (c.ai[m] - C_I) * P_DIR0.i + (c.aj[m] - C_J) * P_DIR0.j;
-      const xb = xOf(dP), yb = yOf(c.u[m]);
-      if (xb >= margin.l && xb <= margin.l + pw && yb >= margin.t && yb <= margin.t + ph) {
-        ctx.fillStyle = hexA(T.blue, 0.4);
-        ctx.fillRect(xb - 1.2, yb - 1.2, 2.4, 2.4);
-      }
-      const xa = xOf(dA), ya = yOf(c.ua[m]);
-      if (xa >= margin.l && xa <= margin.l + pw && ya >= margin.t && ya <= margin.t + ph) {
-        ctx.fillStyle = hexA(T.red, 0.6);
-        ctx.fillRect(xa - 1.2, ya - 1.2, 2.4, 2.4);
-      }
-      const rP = Math.min(6, 1 + 1.6 * (c.w[m] * NENS));
-      ctx.fillStyle = hexA(T.pf, Math.min(1, 0.3 + 0.5 * (c.w[m] * NENS)));
-      ctx.beginPath();
-      ctx.arc(xb, yb, rP, 0, 6.2832);
-      ctx.fill();
-    }
-
-    // truth point (centre on the truth: u = V_T)
-    ctx.fillStyle = T.ink1;
-    ctx.beginPath(); ctx.arc(xOf(0), yOf(V_T), 4, 0, 6.2832); ctx.fill();
-    ctx.strokeStyle = T.surface1; ctx.lineWidth = 1.4;
-    ctx.stroke();
-
-    // reference: the centre passes P (u reverses sign there)
-    ctx.strokeStyle = hexA(T.ink3, 0.8);
-    ctx.lineWidth = 1;
-    ctx.setLineDash([4, 4]);
-    ctx.beginPath(); ctx.moveTo(xOf(R0_0), margin.t); ctx.lineTo(xOf(R0_0), margin.t + ph); ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillStyle = T.ink3;
-    ctx.font = "10px system-ui, sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("centre passes P", xOf(R0_0), margin.t + 2);
-
-    // axes
-    ctx.strokeStyle = T.axis; ctx.lineWidth = 1;
-    ctx.strokeRect(margin.l, margin.t, pw, ph);
-    ctx.fillStyle = T.ink3;
-    ctx.textAlign = "center"; ctx.textBaseline = "top";
-    for (const km of [-180, -90, 0, 90, 180]) {
-      const d = km / DX;
-      if (d < D_MIN || d > D_MAX) continue;
-      const xi = xOf(d);
-      ctx.beginPath(); ctx.moveTo(xi, margin.t + ph); ctx.lineTo(xi, margin.t + ph + 4); ctx.stroke();
-      ctx.fillText(String(km), xi, margin.t + ph + 6);
-    }
-    ctx.textAlign = "center";
-    ctx.fillText("km", margin.l + pw / 2, margin.t + ph + 18);
-    ctx.save();
-    ctx.translate(12, margin.t + ph / 2);
-    ctx.rotate(-Math.PI / 2);
-    ctx.textAlign = "center";
-    ctx.fillText("zonal wind u at P (m/s)", 0, 0);
-    ctx.restore();
-  }
-
   /* ------------------------------------------------------------ glue */
-  function render() { updateT(); const c = compute(); renderA(c); renderB(c); renderC(c); }
+  function render() {
+    updateT();
+    const c = compute();
+
+    // panel (a): prior — every member equally dim
+    const aPrior = new Float64Array(NENS).fill(0.4);
+    drawEnsembleMap(cvPrior, { ci, cj }, aPrior, T.blue, 1);
+
+    // panel (b): EnKF analysis
+    const aEnKF = new Float64Array(NENS).fill(0.55);
+    drawEnsembleMap(cvEnKF, { ci: c.ai, cj: c.aj }, aEnKF, T.red, 1);
+
+    // panel (c): PF posterior — brightness ∝ weight (the members "light up")
+    const aPF = new Float64Array(NENS);
+    for (let m = 0; m < NENS; m++) aPF[m] = 0.08 + 0.92 * (c.w[m] / c.wmax);
+    drawEnsembleMap(cvPF, { ci, cj }, aPF, T.pf, 1);
+
+    // readout
+    const km = (g) => (g * DX).toFixed(0);
+    $("pf-readout").innerHTML =
+      `obs u(P) = <strong>${Y_OBS.toFixed(1)} m/s</strong> (&sigma;<sub>o</sub> = ${SIG_O.toFixed(1)}) ` +
+      `&#183; centre distance from truth (rms): prior <strong>${km(c.rmsP)} km</strong> ` +
+      `&rarr; EnKF <strong>${km(c.rmsE)} km</strong> &#183; PF (weighted) <strong>${km(c.rmsW)} km</strong> ` +
+      `&#183; N<sub>eff</sub> = <strong>${c.neff.toFixed(0)}</strong> of ${NENS} ` +
+      `&#183; max w <strong>${(c.wmax * 100).toFixed(1)}%</strong>`;
+  }
 
   sprdSlider.addEventListener("input", () => {
     Lsprd = parseFloat(sprdSlider.value) * RMW;   // slider is in units of Rmw
@@ -582,28 +319,16 @@
     sampleEnsemble();
     render();
   });
-  ySlider.addEventListener("input", () => {
-    Y_OBS = parseFloat(ySlider.value);
-    yVal.textContent = Y_OBS.toFixed(1);
-    render();
-  });
   rerunBtn.addEventListener("click", () => { sampleEnsemble(); render(); });
 
   root.dataset.theme = theme;           // apply theme variables before the first render
-  // defaults: Lsprd = 1 Rmw; y = truth + 3σ_o (an unlikely realization that
-  // exposes the filters' differences)
-  Y_OBS = V_T + 3 * SIG_O;
   sprdSlider.value = (Lsprd / RMW).toFixed(1);
   sprdVal.innerHTML = (Lsprd / RMW).toFixed(1) + " R<sub>mw</sub>";
   nensSlider.value = NENS;
   nensVal.textContent = NENS;
-  ySlider.min = Math.min(-30, Math.floor((V_T - 25) / 0.5) * 0.5).toFixed(1);
-  ySlider.max = Math.max(34, Math.ceil((V_T + 25) / 0.5) * 0.5).toFixed(1);
-  ySlider.value = Y_OBS.toFixed(1);
-  yVal.textContent = Y_OBS.toFixed(1);
   sampleEnsemble();
   render();
 
   const ro = new ResizeObserver(render);
-  [cvA, cvB, cvC].forEach((cv) => ro.observe(cv));
+  [cvPrior, cvEnKF, cvPF].forEach((cv) => ro.observe(cv));
 })();

@@ -1,0 +1,254 @@
+/* Ensemble Kalman Filter Explorer (Ch. 3) — embedding stylesheet.
+   Scoped variant of the standalone style.css: every selector is prefixed
+   with .da-widget so the widget can be dropped into a site page without
+   touching the page's own styles. Custom properties are declared on the
+   .da-widget wrapper (they inherit down into the widget's DOM).
+
+   Source of truth: Ch. 2 corr-explorer/style.css, adapted.
+*/
+.da-widget {
+  --surface-1:      #fcfcfb;   /* chart surface */
+  --surface-2:      #f9f9f7;   /* page plane */
+  --surface-hair:   #f3f2ef;   /* panels / wells */
+  --ink-1:          #0b0b0b;
+  --ink-2:          #52514e;
+  --ink-3:          #898781;   /* muted, axis labels */
+  --line:           #e1e0d9;   /* hairline gridline */
+  --axis:           #c3c2b7;   /* baseline / axis */
+  --border:         rgba(11,11,11,0.10);
+  --series-aqua:    #1baf7a;
+  --series-amber:   #eda100;
+  --series-red:     #e34948;
+  --series-ink:     #0b0b0b;
+  --accent-fill:    #ffffff;   /* marker face fill */
+  --shadow:         0 1px 2px rgba(11,11,11,0.06), 0 4px 16px rgba(11,11,11,0.05);
+}
+
+.da-widget[data-theme="dark"] {
+  --surface-1:      #1a1a19;
+  --surface-2:      #0d0d0d;
+  --surface-hair:   #232321;
+  --ink-1:          #ffffff;
+  --ink-2:          #c3c2b7;
+  --ink-3:          #898781;
+  --line:           #3f3f3c;    /* hairline grid — brightened so the scatter
+                                   panel isn't an empty-looking dark square */
+  --axis:           #4d4d49;
+  --border:         rgba(255,255,255,0.10);
+  --series-aqua:    #2bcc8b;    /* brighter so the ensemble dots read on dark */
+  --series-amber:   #e0a61d;    /* brighter amber line */
+  --series-red:     #e66767;
+  --series-ink:     #ffffff;
+  --accent-fill:    #1a1a19;
+  --shadow:         0 1px 2px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.35);
+}
+
+.da-widget, .da-widget * { box-sizing: border-box; }
+
+.da-widget {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--surface-2);
+  color: var(--ink-1);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  margin: 20px 0 8px;
+}
+
+.da-widget .viz-root {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 22px 22px 26px;
+}
+
+/* ------------------------------------------------------------ workspace */
+.da-widget .workspace {
+  display: flex;
+  gap: 14px;
+}
+.da-widget .panels-wrap { flex: 1; min-width: 0; }
+
+/* ---------------------------------------------------------- panel grid */
+.da-widget .panel-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);   /* vertical stack — phone-first;
+       minmax(0,1fr) so a 1fr column can shrink below its content's intrinsic
+       width (canvases default to 300 px), letting the widget fit the viewport */
+  gap: 14px;
+}
+/* 2-column: the correlation map and the scatter sit side by side so they can
+   be compared directly; the truth field keeps the same size as them and is
+   centred above the pair. */
+@media (min-width: 600px) and (max-width: 899px) {
+  .da-widget .panel-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+  .da-widget .panel:first-child {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: calc(50% - 7px);   /* one grid track — same width as panels 2 & 3 */
+  }
+}
+/* 3-column: all three side by side */
+@media (min-width: 900px) {
+  .da-widget .panel-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+.da-widget .panel {
+  min-width: 0;                 /* let the panel shrink on narrow screens */
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 12px 10px;
+  box-shadow: var(--shadow);
+}
+
+.da-widget .panel-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-2);
+  margin: 0 0 8px;
+  letter-spacing: 0.01em;
+  text-align: center;
+}
+
+.da-widget canvas.map, .da-widget canvas.scatter {
+  display: block;
+  width: 100%;
+  min-width: 0;                 /* shrink below the 300 px intrinsic width */
+  aspect-ratio: 1 / 1;
+  border-radius: 8px;
+  background: var(--surface-1);
+}
+/* the maps are draggable: stop the browser from turning a touch drag into
+   page scrolling (tap-to-place keeps working) */
+.da-widget canvas.map { touch-action: none; }
+
+.da-widget .colorbar { margin-top: 6px; }
+.da-widget .colorbar canvas { display: block; width: 100%; height: 10px; border-radius: 4px; }
+.da-widget .cb-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  color: var(--ink-3);
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------- controls */
+/* member slider — walks the ensemble, highlights the selected member's
+   4 K contour (truth panel) and its point in the scatter */
+.da-widget .controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 22px;
+  margin: 14px 0 0;
+  padding: 12px 16px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+}
+.da-widget .ctl {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 0.82rem;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.da-widget .ctl em { font-style: italic; color: var(--ink-1); }
+.da-widget .ctl input[type="range"] {
+  width: 220px;
+  accent-color: var(--series-ink);
+  cursor: pointer;
+}
+.da-widget .ctl-val {
+  min-width: 44px;
+  font-weight: 650;
+  color: var(--ink-1);
+  font-variant-numeric: tabular-nums;
+}
+
+/* -------------------------------------------------------------- readout */
+.da-widget .readout {
+  margin: 18px 0 8px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-1);
+  font-size: 0.85rem;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  box-shadow: var(--shadow);
+}
+.da-widget .readout strong { color: var(--ink-1); font-weight: 650; }
+
+/* --------------------------------------------------------------- legend */
+.da-widget .legend {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+  font-size: 0.78rem;
+  color: var(--ink-2);
+}
+.da-widget .legend li { display: flex; align-items: center; gap: 7px; }
+.da-widget .mark { display: inline-block; width: 12px; height: 12px; flex: 0 0 12px; }
+.da-widget .mark.obs {
+  border: 2px solid var(--series-red);
+  background: var(--accent-fill);
+  border-radius: 50%;
+}
+.da-widget .mark.state {
+  border: 2px solid var(--series-ink);
+  background: var(--accent-fill);
+  border-radius: 2px;
+}
+.da-widget .mark.dot { border-radius: 50%; background: var(--series-aqua); }
+.da-widget .mark.amber { height: 2px; width: 16px; background: var(--series-amber); }
+
+/* analysis-member dot (scatter) */
+.da-widget .mark.dota { border-radius: 50%; background: var(--series-red); }
+
+/* ensemble contour legend marks (bg vs analysis) */
+.da-widget .mark.bgc  { width: 18px; height: 2px; background: rgba(31,119,180,0.45); border-radius: 1px; }
+.da-widget .mark.anc  { width: 18px; height: 2px; background: #1f77b4; border-radius: 1px; }
+.da-widget .mark.sel  { width: 18px; height: 4px; background: #ff7f0e; border-radius: 1px; }
+
+.da-widget .mark.ink  { height: 2px; width: 16px; background: var(--series-ink); }
+
+/* contour legend marks */
+.da-widget .mark.truthc { width: 18px; height: 3px; background: var(--series-ink); border-radius: 1px; }
+.da-widget .mark.memc   { width: 18px; height: 2px; background: #1f77b4; border-radius: 1px; }
+.da-widget .mark.selc   { width: 18px; height: 4px; background: #ff7f0e; border-radius: 1px; }
+
+/* --------------------------------------------------------------- tooltip */
+.da-widget #tooltip {
+  position: fixed;
+  pointer-events: none;
+  display: none;
+  background: var(--surface-1);
+  color: var(--ink-1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  box-shadow: var(--shadow);
+  z-index: 20;
+  white-space: nowrap;
+}
+.da-widget #tooltip strong { color: var(--ink-1); }
+
+@media (max-width: 560px) {
+  .da-widget .ctl { flex-wrap: wrap; gap: 6px 9px; }
+  .da-widget .ctl > label { flex: 1 1 100%; }
+  .da-widget .ctl input[type="range"] { flex: 1 1 auto; width: auto; min-width: 70px; max-width: 260px; }
+}

@@ -113,6 +113,19 @@
 /* section divider used on multi-section chapter pages */
 .part-divider { border: none; border-top: 1px solid var(--border); margin: 36px 0 8px; }
 
+/* inline equation display used on chapter pages */
+.formula {
+  font-size: 0.95rem;
+  line-height: 1.9;
+  text-align: center;
+  background: var(--surface, #f5f4f1);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin: 14px 0;
+  overflow-x: auto;
+}
+
 @media (max-width: 560px) {
   #widget-page { padding-left: 14px; padding-right: 14px; }
   .widget-nav { gap: 7px; }

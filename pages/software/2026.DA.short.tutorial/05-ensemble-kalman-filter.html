@@ -3,13 +3,14 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="Yue (Michael) Ying — Data Assimilation Interactive Tutorials, The ensemble Kalman filter (planned)">
-<meta name="keywords" content="data assimilation, tutorial, 04-ensemble-kalman-filter">
+<meta name="description" content="Yue (Michael) Ying — Data Assimilation Interactive Tutorials, The ensemble Kalman filter: the EnKF update on the members">
+<meta name="keywords" content="data assimilation, ensemble Kalman filter, EnKF, gain, tutorial, NEDAS">
 <meta name="author" content="Yue Ying">
 
 <link rel="stylesheet" href="../../../style.css">
 <link rel="stylesheet" href="chapters.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="widgets/enkf-explorer/style.css">
 
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-148955805-2"></script>
@@ -26,6 +27,7 @@
 </script>
 
 <title>Data Assimilation Interactive Tutorials · Yue (Michael) Ying</title>
+
 </head>
 
 <body>
@@ -45,16 +47,132 @@
         </span>
       </nav>
 
-      <div class="planned">
-        <p class="planned-tag">Planned</p>
-        <h3>The ensemble Kalman filter</h3>
-        <p class="planned-desc">From the scalar precision-weighted average of Chapter 1 to the full state vector: the best linear unbiased estimate as a matrix update, x<sub>a</sub> = x<sub>b</sub> + K(y &#8722; Hx<sub>b</sub>), then the ensemble Kalman filter — the covariance is too big to store, so the ensemble carries it and the analysis becomes a linear combination of ensemble perturbations. A planned widget will pull an ensemble of state points toward an observation, with the update determined by the ensemble covariance itself &#8212; no matrix ever assembled.</p>
-        <p class="planned-ref">&#8594; Evensen et al., <i>Data Assimilation Fundamentals</i> (2022), Ch 6, 8 &#8212; linear analysis and the EnKF update.</p>
+      <h3>The ensemble Kalman filter</h3>
+      <p>
+        From the scalar precision-weighted average of Chapter 1 to the full state vector: the best
+        linear unbiased estimate is a matrix update,
+        x<sub>a</sub> = x<sub>b</sub> + K(y &#8722; Hx<sub>b</sub>). But the covariance is too big to
+        store — so the ensemble carries it, and the analysis becomes a linear combination of the
+        ensemble perturbations. This widget assimilates the <em>very same observation</em> as
+        Chapter 2 into the <em>very same ensemble</em>, performing the stochastic EnKF update live
+        in your browser:
+      </p>
+      <p class="formula">
+        x<sub>a</sub><sup>m</sup> = x<sub>b</sub><sup>m</sup> + K (y<sup>m</sup> &#8722; H x<sub>b</sub><sup>m</sup>),
+        &nbsp; K = P<sub>b</sub>H<sup>T</sup> / (H P<sub>b</sub>H<sup>T</sup> + R),
+        &nbsp; y<sup>m</sup> = y + &#949;<sup>m</sup>, &#949;<sup>m</sup> ~ N(0, R).
+      </p>
+      <p>
+        With a single scalar observation, the gain K is one vector — the covariance of every grid
+        cell with the simulated observation, divided by the observation-space variance plus the
+        observation error R: the same dipole you saw as the correlation map in Chapter 2, re-used
+        as the update pattern. No matrix is ever assembled.
+      </p>
+      <p class="hint">
+        <strong>Try it:</strong> drag the <em>obs error</em> slider and watch the pull — a small
+        &sigma;<sub>o</sub> trusts the observation and collapses the analysis band onto the truth
+        ring; a large &sigma;<sub>o</sub> barely moves the ensemble. Walk through members with the
+        member slider (the update arrow in the scatter shows how far each member is pulled), and
+        click or drag on a map to move the black state marker.
+      </p>
+
+      <!-- ================= Ensemble Kalman Filter Explorer ================ -->
+      <div class="da-widget" id="enkf-explorer">
+
+        <main class="viz-root">
+
+          <div class="workspace">
+
+            <div class="panels-wrap">
+              <!-- three panels: background | analysis | scatter. -->
+              <div class="panel-grid">
+                <section class="panel">
+                  <h2 class="panel-title">Background T + 4 K contours</h2>
+                  <canvas class="map" id="map-bg"></canvas>
+                  <div class="colorbar"><canvas id="cb-bg"></canvas><div class="cb-labels"><span class="cb-min"></span><span class="cb-mid"></span><span class="cb-max"></span></div></div>
+                </section>
+                <section class="panel">
+                  <h2 class="panel-title">Analysis T + 4 K contours</h2>
+                  <canvas class="map" id="map-an"></canvas>
+                  <div class="colorbar"><canvas id="cb-an"></canvas><div class="cb-labels"><span class="cb-min"></span><span class="cb-mid"></span><span class="cb-max"></span></div></div>
+                </section>
+                <section class="panel">
+                  <h2 class="panel-title">Scatter &#183; bg &#8594; analysis</h2>
+                  <canvas class="scatter" id="scat"></canvas>
+                </section>
+              </div>
+            </div>
+          </div>
+
+          <div class="controls">
+            <div class="ctl">
+              <label for="mem-slider">member <em>m</em></label>
+              <input type="range" id="mem-slider" min="1" max="100" step="1" value="50">
+              <span class="ctl-val" id="mem-val">50</span>
+            </div>
+            <div class="ctl">
+              <label for="sig-o">obs error <em>&sigma;<sub>o</sub></em> (K)</label>
+              <input type="range" id="sig-o" min="0.2" max="4" step="0.1" value="1">
+              <span class="ctl-val" id="sig-o-val">1.00</span>
+            </div>
+          </div>
+
+          <p class="readout" id="readout" role="status"></p>
+
+          <ul class="legend">
+            <li><span class="mark obs"></span> T observation (assimilated)</li>
+            <li><span class="mark state"></span> state location (i, j)</li>
+            <li><span class="mark truthc"></span> truth 4 K contour</li>
+            <li><span class="mark bgc"></span> background 4 K contours</li>
+            <li><span class="mark anc"></span> analysis 4 K contours</li>
+            <li><span class="mark sel"></span> selected member (bg &#8594; an)</li>
+            <li><span class="mark dot"></span> background members (scatter)</li>
+            <li><span class="mark dota"></span> analysis members (scatter)</li>
+            <li><span class="mark amber"></span> obs value &plusmn; &sigma;<sub>o</sub></li>
+            <li><span class="mark ink"></span> truth at (i, j)</li>
+          </ul>
+        </main>
+
       </div>
+      <!-- ================= end widget ===================================== -->
+
+      <h3>Reading the panels</h3>
+      <p>
+        <b>1 &#183; The background</b> — the forecast: the same position-uncertainty ensemble as
+        Chapter 2 (std 50 km), its 4 K contours a loose coloured band around the truth ring. The
+        selected member's ring is thick and its blob centre is marked. The observation (red
+        circle) reads <b>5.53 K</b> — some members see it as warmer, some as colder, depending on
+        where their blob sits.
+      </p>
+      <p>
+        <b>2 &#183; The analysis</b> — every member after the EnKF update. Each one has been pushed
+        toward the observed value: the contour band tightens around the truth ring, and the
+        selected member's blob centre moves toward the observation (the dashed line shows where
+        it came from). The tighter the band, the smaller &sigma;<sub>o</sub> — try it. Far from
+        the observation the band barely moves: a single observation cannot constrain the whole
+        field.
+      </p>
+      <p>
+        <b>3 &#183; The scatter</b> — the update in the joint distribution: background points
+        (aqua) are pulled to analysis points (red), with the observed value and its
+        &plusmn;&sigma;<sub>o</sub> band (amber). The arrow connects the selected member's
+        before/after. Members that read too warm at the observation are pulled down, members that
+        read too cold are pulled up — the cloud contracts toward the observation. The reported
+        gain K = Var(Hx<sub>b</sub>) / (Var(Hx<sub>b</sub>) + &sigma;<sub>o</sub><sup>2</sup>) is
+        the fraction of the innovation the filter applies: &sigma;<sub>o</sub> = 1 K gives
+        K &#8776; 0.84, so each member moves 84% of the way.
+      </p>
+
+      <p class="planned-ref">
+        &#8594; Evensen et al., <i>Data Assimilation Fundamentals</i> (2022), Ch 6, 8 &#8212; linear analysis
+        and the EnKF update.
+      </p>
 
     </div>
   </div>
 
   <script src="../../../footer.js"></script>
+  <script src="widgets/enkf-explorer/data.js"></script>
+  <script src="widgets/enkf-explorer/app.js"></script>
 </body>
 </html>

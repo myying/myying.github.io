@@ -311,7 +311,7 @@
     // "truth" tag on the line itself, at its lower end (the legend box takes the top)
     ctx.font = "10px system-ui, sans-serif";
     ctx.textAlign = "center"; ctx.textBaseline = "bottom";
-    const truthLabel = "truth";
+    const truthLabel = "truth (error = 0)";
     const tw = ctx.measureText(truthLabel).width;
     const ly = margin.t + ph - 8;
     ctx.fillStyle = hexA(T.surface1, 0.85);
@@ -333,7 +333,7 @@
       ctx.fillText(String(Math.round(v * 10) / 10), xi, margin.t + ph + 6);
     }
     ctx.textAlign = "center";
-    ctx.fillText("K", margin.l + pw / 2, margin.t + ph + 18);   // unit centred below the axis
+    ctx.fillText("T \u2212 T_truth at P (K)", margin.l + pw / 2, margin.t + ph + 18);   // unit centred below the axis
 
     // readout spans
     const f2 = (x) => (x >= 0 ? "+" : "") + x.toFixed(2);

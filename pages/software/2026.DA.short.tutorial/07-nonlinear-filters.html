@@ -56,21 +56,19 @@
         replace the Gaussian assumption altogether.
       </p>
 
-      <!-- ======================= Rankine vortex widget ================= -->
+      <!-- ====================== Gaussian hump widget ================== -->
       <h4 id="sec-rankine">1 &#183; Position errors break the Gaussian assumption</h4>
       <p>
-        A Rankine vortex &#8212; solid-body rotation inside the radius of maximum wind, a
-        (R<sub>mw</sub>/r)<sup>1.5</sup> decay outside, the profile used in
-        <a href="../../../pages/research/2019.multiscale.DA/article.html">Ying 2019</a> &#8212; is a
-        minimal model of a coherent vortex. The ensemble below has 100 members that differ
-        <em>only</em> in where the vortex sits: each centre is drawn from a Gaussian with standard
-        deviation L<sub>sprd</sub> around the truth location (given in units of the radius of
-        maximum wind R<sub>mw</sub>). The observation point P (marked +) sits southeast of the
-        truth centre (compass 135&#176;), just outside the radius of maximum wind, and the state we
-        watch is the zonal wind u at P (a strong westerly of about 23 m/s there). Click P on panel
-        (a) to move it anywhere. Slide L<sub>sprd</sub> up and down: at small spread the error
-        u &#8722; u<sub>truth</sub> at P is Gaussian; once the spread reaches the vortex size the
-        histogram skews and fattens, and no Gaussian prior can represent it.
+        A Gaussian hump &#8212; the same warm blob as Chapter 2 (peak 8 K) &#8212; is the simplest model
+        of a coherent anomaly. The ensemble below has 100 members that differ <em>only</em> in
+        where the hump sits: each centre is drawn from a Gaussian with standard deviation
+        L<sub>sprd</sub> around the truth location (given in units of the hump width
+        &sigma; = 135 km). The observation point P (marked +) sits southeast of the truth centre
+        (compass 135&#176;), right on the 4 K contour, and the state we watch is the temperature
+        T at P (4 K there). Click P on panel (a) to move it anywhere. Slide L<sub>sprd</sub> up and
+        down: at small spread the error T &#8722; T<sub>truth</sub> at P is Gaussian; once the spread
+        reaches the hump size, members' centres pass P and the histogram skews hard against the
+        T = 0 bound &#8212; no Gaussian prior can represent it.
       </p>
 
       <div class="da-widget" id="rankine">
@@ -83,10 +81,10 @@
 
 <div class="controls">
               <div class="ctl-group" data-color="member">
-                <h4 class="ctl-title">Location spread <span class="ctl-note">centre position error, in units of R<sub>mw</sub></span></h4>
+                <h4 class="ctl-title">Location spread <span class="ctl-note">centre position error, in units of the hump width &sigma;</span></h4>
                 <label class="ctl-row">
                   <span class="ctl-label">L<sub>sprd</sub></span>
-                  <input type="range" id="rk-sprd" min="0.1" max="3" step="0.1" value="0.6">
+                  <input type="range" id="rk-sprd" min="0.1" max="3" step="0.1" value="1">
                   <span class="ctl-val" id="rk-sprd-val"></span>
                 </label>
                 <label class="ctl-row">
@@ -142,37 +140,35 @@
       </div>
 
       <p>
-        <strong>Why the bend.</strong> The wind at a fixed point is the tangential profile evaluated
-        at the member centre's distance from that point. Near P that map is locally linear, so a small
-        position spread keeps the error at P Gaussian. As the spread grows, members' centres pass P:
-        the wind there peaks as a member's core edge reaches P and then reverses sign as the centre
-        passes P (panel (c)) &#8212; a non-monotone map pushed through a Gaussian cloud of centres.
-        The histogram in panel (b) skews and fattens, and the readout's excess kurtosis leaves 0. An
-        ensemble that is Gaussian in <em>where</em> the storm is is emphatically non-Gaussian in
-        <em>what the wind is at any fixed point</em>.
+        <strong>Why the bend.</strong> The temperature at a fixed point is the hump evaluated at the
+        member centre's distance from that point: a bell curve in the centre position. Near P that
+        map is locally linear, so a small position spread keeps the error at P Gaussian. As the
+        spread grows, members' centres sweep across P: the value at P peaks when a member's centre
+        sits exactly on P and falls to zero on both sides (panel (c)) &#8212; a non-monotone map pushed
+        through a Gaussian cloud of centres. The histogram in panel (b) skews and fattens, piling
+        against the hard T = 0 bound, and the readout's skewness leaves 0. An ensemble that is
+        Gaussian in <em>where</em> the anomaly is is emphatically non-Gaussian in <em>what the
+        value is at any fixed point</em>.
       </p>
       <p>
-        This widget is the interactive version of the figure in
-        <a href="../../../pages/research/2019.multiscale.DA/article.html#multiscale_alignment">Ying 2019,
-        &#8220;multiscale alignment&#8221;</a> &#8212; the same Rankine vortex ensemble, the same
-        conclusion: as the location spread increases, the prior error distribution deviates more from a
-        Gaussian, and the linear-Gaussian EnKF analysis becomes suboptimal. The displacement-error
-        routine used here is the one from the accompanying
-        <a href="https://github.com/mying/rankine">rankine code</a>.
+        This is the same mechanism that produced the correlation dipole in Chapter 2 &#8212; position
+        uncertainty at work &#8212; and it is exactly the situation section 2's comparison has to deal
+        with when the observation at P is assimilated.
       </p>
 
       <!-- ====================== EnKF vs particle filter ================ -->
-      <h4 id="sec-pf">2 &#183; EnKF vs particle filter on the same prior</h4>
+      <h4 id="sec-pf">2 &#183; EnKF vs particle filter</h4>
       <p>
         When the Gaussian assumptions fail, Bayes' rule is solved directly on the ensemble: the
         <strong>particle filter</strong> turns the prior members into a <em>weighted</em> sample,
         each particle reweighted by the observation likelihood p(y&#8202;|&#8202;centre). The EnKF cannot do
         that &#8212; its analysis is an affine combination of the prior members, so the posterior keeps
         the Gaussian shape of the prior. The three panels below show the 20 m/s wind-contour
-        spaghetti of the <em>same</em> vortex ensemble from section 1 &#8212; where every member's rings
-        sit &#8212; before and after assimilating one observation of the zonal wind u at P (the +): the
-        prior (blue), the EnKF analysis (red), and the particle-filter posterior (green), whose
-        members light up with their weight.
+        spaghetti of a Rankine-vortex ensemble &#8212; where every member's rings sit &#8212; before and
+        after assimilating one observation of the zonal wind u at P (the +): the prior, the EnKF
+        analysis, and the particle-filter posterior, whose members light up with their weight. Every
+        member keeps its own colour in all three panels, so its rings can be traced from prior to
+        posterior.
       </p>
       <p class="hint">
         <strong>Try it:</strong> slide L<sub>sprd</sub> up &#8212; the prior band widens, the EnKF band

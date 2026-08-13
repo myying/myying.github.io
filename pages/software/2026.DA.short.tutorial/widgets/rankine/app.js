@@ -1,30 +1,28 @@
-/* Rankine vortex — position errors break the Gaussian assumption
-   (Chapter 7 widget).
+/* Gaussian hump — position errors break the Gaussian assumption
+   (Chapter 6, section 1 widget).
 
-   Model: modified Rankine vortex as in ~/code/rankine/rankine_vortex.py
-   (gen_vortex): solid-body rotation inside the radius of maximum wind and
-   a (Rmw/r)^1.5 decay outside.  Vmax = 35 m/s, Rmw = 5 grid points, domain
-   128 x 128 grid points (1152 km at dx = 9 km).
+   Model: the same Gaussian warm blob as Chapter 2 (peak A = 8 K, width
+   SIG = 15 grid points = 135 km at dx = 9 km) on a 128 x 128 grid.
 
-   The ensemble members differ ONLY in the location of the vortex centre:
-   centre = truth centre + N(0, L_sprd) in each direction.  L_sprd is given
-   in units of the radius of maximum wind Rmw (slider range 0.1-3).  The
-   observation point P sits southeast of the truth centre (compass 135 deg),
-   just outside the radius of maximum wind, where the tangential flow is
-   still nearly maximal.  The state watched at P is the zonal wind u.
+   The ensemble members differ ONLY in the location of the hump centre:
+   centre = truth centre + N(0, L_sprd) in each direction.  L_sprd is
+   given in units of the hump width SIG (slider range 0.1-3).  The
+   observation point P sits southeast of the truth centre (compass
+   135 deg), right on the 4 K contour, and the state watched at P is the
+   temperature T there (4 K).
 
    Panels:
-     (a) the vortex ensemble — truth wind-speed field (shading) and the
-         20 m/s ring of every member (thin, coloured) vs of the truth
-         (thick); the observation point P is marked '+'.
-     (b) the error distribution at P — histogram of the members' zonal
-         wind u minus the truth value, with a Gaussian fit (dashed) through
-         the same mean and std.  At small L_sprd the error is Gaussian;
-         once L_sprd reaches ~Rmw the histogram skews and fattens.
-     (c) the mechanism — zonal wind u at P as a function of the centre
-         displacement toward P.  The map peaks as a member's core edge
-         reaches P and reverses as its centre passes P: non-monotone, so a
-         Gaussian cloud of centres does not map to a Gaussian wind at P.
+     (a) the hump ensemble — the 4 K ring of every member (thin, coloured)
+         vs of the truth (thick); the observation point P is marked '+'.
+     (b) the error distribution at P — histogram of the members'
+         temperature T minus the truth value, with a Gaussian fit (dashed)
+         through the same mean and std.  At small L_sprd the error is
+         Gaussian; once L_sprd reaches ~SIG the histogram skews hard
+         against the T = 0 bound.
+     (c) the mechanism — temperature T at P as a function of the centre
+         displacement toward P.  A bell curve peaking as the centre passes
+         P: non-monotone, so a Gaussian cloud of centres does not map to a
+         Gaussian temperature at P.
 
    Embedding-ready: root is the element with id="rankine" (falls back to
    .da-widget / document root), theme follows prefers-color-scheme via the
@@ -41,34 +39,28 @@
   const rerunBtn = $("rk-rerun");
 
   /* ------------------------------------------------------------- model */
-  const VMAX = 35, RMW = 5;            // m/s, grid points
-  const RING = 20;                     // m/s contour shown in panel (a)
+  const A = 8, SIG = 15;               // hump peak (K), width (grid points = 135 km)
+  const RING = 4;                      // K contour shown in panel (a)
   const NENS_MIN = 20, NENS_MAX = 400;
   let NENS = 100;                    // ensemble size (tunable)
   const DX = 9.0;                      // km per grid point
   const C_I = 64, C_J = 64;            // truth centre (0.5 * 128)
   const P_ANG0 = 135 * Math.PI / 180;  // default obs point: compass 135° = southeast
   const P_DIR0 = { i: Math.sin(P_ANG0), j: -Math.cos(P_ANG0) };   // (0.7071, 0.7071)
-  const R0_0 = RMW + 0.2;              // default: slightly outside the radius of max wind
+  const R0_0 = SIG * Math.sqrt(2 * Math.log(2));  // default: right on the 4 K contour
   let P_I = C_I + R0_0 * P_DIR0.i, P_J = C_J + R0_0 * P_DIR0.j;   // obs point (clickable)
   let P_DIR = P_DIR0;                  // unit vector from the truth centre toward P
   let R0 = R0_0;                       // distance truth centre -> P (grid points)
 
-  // tangential wind speed of the modified Rankine vortex
-  function vtheta(r) {
-    r = Math.max(r, 1e-6);
-    return r <= RMW ? VMAX * r / RMW : VMAX * Math.pow(RMW / r, 1.5);
+  // temperature of the Gaussian hump at (x, y) from a centre at (ci, cj)
+  function field(ci, cj, x, y) {
+    const r2 = (x - ci) * (x - ci) + (y - cj) * (y - cj);
+    return A * Math.exp(-r2 / (2 * SIG * SIG));
   }
-  // zonal wind u at (x, y) from a vortex centred at (ci, cj)
-  function uWind(ci, cj, x, y) {
-    const di = x - ci, dj = y - cj;
-    const r = Math.hypot(di, dj) || 1e-6;
-    return -vtheta(r) * dj / r;
-  }
-  let V_T = uWind(C_I, C_J, P_I, P_J);   // truth zonal wind at P
-  // radii of the RING m/s contour around a centre (analytic)
+  let V_T = field(C_I, C_J, P_I, P_J);   // truth temperature at P
+  // radius of the RING K contour around a centre (analytic)
   function ringRadii() {
-    return [RING * RMW / VMAX, RMW * Math.pow(VMAX / RING, 2 / 3)];
+    return [SIG * Math.sqrt(2 * Math.log(A / RING))];
   }
   // standard normal via Box-Muller (2 values per call)
   let _spare = null;
@@ -82,7 +74,7 @@
     return m * Math.cos(2 * Math.PI * v);
   }
 
-  let Lsprd = 3;                       // location spread (grid points)
+  let Lsprd = SIG;                     // location spread (grid points, default 1 sigma)
   let ci = new Float64Array(NENS), cj = new Float64Array(NENS);
 
   function sampleEnsemble() {
@@ -157,11 +149,11 @@
     const { margin, side, x0, y0, s } = aGeom(W, H);
 
     // wind-field shading is intentionally omitted: the panel shows only the
-    // 20 m/s contour rings of the truth (thick, white) and of every member
+    // 4 K contour rings of the truth (thick, white) and of every member
     // (thin, coloured) on the plain surface
 
-    // 20 m/s rings of the members (thin, coloured), clipped to the axes
-    const [rIn, rOut] = ringRadii();
+    // 4 K rings of the members (thin, coloured), clipped to the axes
+    const radii = ringRadii();
     ctx.save();
     ctx.beginPath();
     ctx.rect(x0, y0, side, side);
@@ -169,18 +161,17 @@
     ctx.lineWidth = 1;
     for (let m = 0; m < NENS; m++) {
       ctx.strokeStyle = hexA(memColor(m), 0.32);
-      ctx.beginPath();
-      ctx.arc(x0 + (ci[m] - (C_I - WIN)) * s, y0 + (cj[m] - (C_J - WIN)) * s, rIn * s, 0, 6.2832);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.arc(x0 + (ci[m] - (C_I - WIN)) * s, y0 + (cj[m] - (C_J - WIN)) * s, rOut * s, 0, 6.2832);
-      ctx.stroke();
+      for (const r of radii) {
+        ctx.beginPath();
+        ctx.arc(x0 + (ci[m] - (C_I - WIN)) * s, y0 + (cj[m] - (C_J - WIN)) * s, r * s, 0, 6.2832);
+        ctx.stroke();
+      }
     }
 
     // truth rings (thick)
     ctx.strokeStyle = T.ink1;
     ctx.lineWidth = 2.6;
-    for (const r of [rIn, rOut]) {
+    for (const r of radii) {
       ctx.beginPath();
       ctx.arc(x0 + WIN * s, y0 + WIN * s, r * s, 0, 6.2832);
       ctx.stroke();
@@ -241,7 +232,7 @@
     // member errors at P
     const e = new Float64Array(NENS);
     let sum = 0;
-    for (let m = 0; m < NENS; m++) { e[m] = uWind(ci[m], cj[m], P_I, P_J) - V_T; sum += e[m]; }
+    for (let m = 0; m < NENS; m++) { e[m] = field(ci[m], cj[m], P_I, P_J) - V_T; sum += e[m]; }
     const mu = sum / NENS;
     let v2 = 0, v3 = 0, v4 = 0;
     for (let m = 0; m < NENS; m++) {
@@ -252,10 +243,10 @@
     const skew = (v3 / NENS) / Math.pow(sd, 3);
     const kurt = (v4 / NENS) / Math.pow(sd, 4) - 3;
 
-    // fixed x range, anchored to the truth wind at P: e = u - u_truth always lies in
-    // [-35 - u_t, +35 - u_t] plus a margin.  Constant under Lsprd changes; re-anchors
-    // (and only then) when P is moved by clicking the map in panel (a).
-    const lo = -43 - V_T, hi = 43 - V_T;
+    // fixed x range, anchored to the truth temperature at P: e = T - T_truth always
+    // lies in [-T_t, A - T_t] plus a margin.  Constant under Lsprd changes;
+    // re-anchors (and only then) when P is moved by clicking the map in panel (a).
+    const lo = -V_T - 1.5, hi = A - V_T + 1.5;
     const NB = 48;
     const binW = (hi - lo) / NB;
     const counts = new Float64Array(NB);
@@ -342,7 +333,7 @@
       ctx.fillText(String(Math.round(v * 10) / 10), xi, margin.t + ph + 6);
     }
     ctx.textAlign = "center";
-    ctx.fillText("m/s", margin.l + pw / 2, margin.t + ph + 18);   // unit centred below the axis
+    ctx.fillText("K", margin.l + pw / 2, margin.t + ph + 18);   // unit centred below the axis
 
     // readout spans
     const f2 = (x) => (x >= 0 ? "+" : "") + x.toFixed(2);
@@ -386,7 +377,7 @@
     const margin = { l: 46, r: 12, t: 14, b: 32 };
     const pw = W - margin.l - margin.r, ph = H - margin.t - margin.b;
     const xOf = (d) => margin.l + (d - D_MIN) / (D_MAX - D_MIN) * pw;
-    const yOf = (v) => margin.t + ph - (v - (-50)) / (100) * ph;   // v in [-50, 50] — padded top leaves room for the legend box
+    const yOf = (v) => margin.t + ph - (v - (-1)) / (10) * ph;   // v in [-1, 9] — padded top leaves room for the legend box
 
     // location pdf (Gaussian, std = Lsprd) as a shaded hump on the axis
     const pdf = (d) => Math.exp(-0.5 * Math.pow(d / Lsprd, 2)) / (Lsprd * Math.sqrt(2 * Math.PI));
@@ -403,14 +394,14 @@
     ctx.closePath();
     ctx.fill();
 
-    // the map: zonal wind u at P vs centre displacement toward P
-    // (peaks as the core edge passes P, reverses as the centre passes P)
+    // the map: temperature T at P vs centre displacement toward P
+    // (peaks as the centre reaches P, falls on both sides)
     ctx.strokeStyle = T.ink1;
     ctx.lineWidth = 2;
     ctx.beginPath();
     for (let i = 0; i <= 300; i++) {
       const d = D_MIN + (D_MAX - D_MIN) * i / 300;
-      const v = uWind(C_I + d * P_DIR.i, C_J + d * P_DIR.j, P_I, P_J);
+      const v = field(C_I + d * P_DIR.i, C_J + d * P_DIR.j, P_I, P_J);
       if (i === 0) ctx.moveTo(xOf(d), yOf(v));
       else ctx.lineTo(xOf(d), yOf(v));
     }
@@ -421,7 +412,7 @@
     ctx.textAlign = "left"; ctx.textBaseline = "top";
     const truthTag = "truth";
     const ttw = ctx.measureText(truthTag).width;
-    const vL = uWind(C_I + D_MIN * P_DIR.i, C_J + D_MIN * P_DIR.j, P_I, P_J);
+    const vL = field(C_I + D_MIN * P_DIR.i, C_J + D_MIN * P_DIR.j, P_I, P_J);
     const ty = yOf(vL) - 18;
     ctx.fillStyle = hexA(T.surface1, 0.85);
     ctx.fillRect(margin.l + 4, ty, ttw + 6, 13);
@@ -433,7 +424,7 @@
     // points outside the axes range are skipped
     for (let m = 0; m < NENS; m++) {
       const d = (ci[m] - C_I) * P_DIR.i + (cj[m] - C_J) * P_DIR.j;
-      const x = xOf(d), y = yOf(uWind(ci[m], cj[m], P_I, P_J));
+      const x = xOf(d), y = yOf(field(ci[m], cj[m], P_I, P_J));
       if (x < margin.l || x > margin.l + pw || y < margin.t || y > margin.t + ph) continue;
       ctx.fillStyle = hexA(memColor(m), 0.4);
       ctx.fillRect(x - 1.2, y - 1.2, 2.4, 2.4);
@@ -454,7 +445,7 @@
     ctx.fillStyle = T.ink3;
     ctx.font = "10px system-ui, sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("centre passes P", xOf(R0), margin.t + 2);
+    ctx.fillText("centre at P — max T", xOf(R0), margin.t + 2);
 
     // axes
     ctx.strokeStyle = T.axis; ctx.lineWidth = 1;
@@ -474,7 +465,7 @@
     ctx.translate(12, margin.t + ph / 2);
     ctx.rotate(-Math.PI / 2);
     ctx.textAlign = "center";
-    ctx.fillText("zonal wind u at P (m/s)", 0, 0);
+    ctx.fillText("temperature T at P (K)", 0, 0);
     ctx.restore();
   }
 
@@ -488,7 +479,7 @@
     P_I = gi; P_J = gj;
     if (r >= 0.5) { P_DIR = { i: di / r, j: dj / r }; R0 = r; }
     else R0 = 0;                       // P on the centre: direction undefined, keep the last one
-    V_T = uWind(C_I, C_J, P_I, P_J);
+    V_T = field(C_I, C_J, P_I, P_J);
     updateObsPos();
     render();
   }
@@ -496,7 +487,7 @@
     if (!obsPosEl) return;
     const ang = (Math.atan2(P_I - C_I, -(P_J - C_J)) * 180 / Math.PI + 360) % 360;
     obsPosEl.textContent = "r = " + Math.round(R0 * DX) + " km · " + Math.round(ang)
-      + "° · u\u209C = " + V_T.toFixed(1) + " m/s";
+      + "° · T\u209C = " + V_T.toFixed(1) + " K";
   }
 
   // click on the (a) map to move P
@@ -511,8 +502,8 @@
   function render() { updateT(); renderA(); renderB(); renderC(); }
 
   sprdSlider.addEventListener("input", () => {
-    Lsprd = parseFloat(sprdSlider.value) * RMW;   // slider is in units of Rmw
-    sprdVal.innerHTML = sprdSlider.value + " R<sub>mw</sub>";
+    Lsprd = parseFloat(sprdSlider.value) * SIG;   // slider is in units of sigma
+    sprdVal.innerHTML = sprdSlider.value + " &sigma;";
     sampleEnsemble();
     render();
   });
@@ -530,8 +521,8 @@
 
   root.dataset.theme = theme;           // apply theme variables before the first render
   updateObsPos();
-  sprdSlider.value = (Lsprd / RMW).toFixed(1);   // put the slider head back at the default (0.6 Rmw)
-  sprdVal.innerHTML = (Lsprd / RMW).toFixed(1) + " R<sub>mw</sub>";
+  sprdSlider.value = (Lsprd / SIG).toFixed(1);   // put the slider head back at the default (1.0 sigma)
+  sprdVal.innerHTML = (Lsprd / SIG).toFixed(1) + " &sigma;";
   nensSlider.value = NENS;
   nensVal.textContent = NENS;
   const nensLbl = $("rk-nens-label");

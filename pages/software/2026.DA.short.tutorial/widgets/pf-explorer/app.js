@@ -1,39 +1,57 @@
 /* Particle filter vs EnKF on the Gaussian hump — Ch. 6, section 2.
    Same toy model as the section-1 widget: the Chapter 2 warm blob
-   (peak A = 8 K, width SIG = 15 grid points = 135 km), ensemble members
+   (peak A = 8 K, radius scale SIG = blob_sig = 0.1 * domain width = 5 grid
+   points = 50 km, Ch. 2's actual generate_data.py parameter), ensemble members
    that differ ONLY in the centre position (centre = truth centre +
    N(0, L_sprd)), and one observation of the temperature T at the point P
-   (the + on every panel), sitting on the 4 K contour with observed value
-   4 K and error σ_o = 1 K.
+   (the + on every panel) — the same grid offset from the truth centre as
+   Ch. 2's own observation from its blob peak (not on the 4 K contour), with
+   observed value 4 K and error σ_o (tunable, default 1 K).
 
    The three panels are 4 K contour spaghetti plots of the SAME ensemble,
-   before and after assimilating the observation, rendered exactly like
-   the Ch. 2 explorer's first panel: the truth field as the YlOrRd
-   shading, every member's 4 K contour extracted by marching squares
-   (thin, coloured), the truth contour as a haloed dark ring, the
-   highlighted member thick with its blob centre marked.  Every member
-   keeps its own Tab20 colour in all three panels, so a member's rings
-   can be traced from the prior, through the EnKF analysis, to the
-   particle filter (the member slider highlights one member; the readout
-   shows its weight):
-   - (a) prior:      every member's 4 K contour.
-   - (b) EnKF posterior: the linear-regression update of the centres on
-                     the innovation (y - T(P)): with one scalar observation
-                     the gain is the sample covariance of centre vs T over
-                     the sample variance of T plus R.  Affine in the
-                     centres, so the posterior keeps the Gaussian shape of
-                     the prior — and is biased when T(centre) is nonlinear.
+   before and after assimilating the observation, rendered like the Ch. 2
+   explorer's first panel: every member's 4 K contour extracted by marching
+   squares (thin, coloured), the truth contour as a haloed dark ring. Every
+   member keeps its own Tab20 colour in all three panels, so a member's
+   rings can be traced from the prior, through the EnKF analysis, to the
+   particle filter:
+   - (a) prior:      shading is the PRIOR ensemble MEAN field (same
+                     convention as the Ch. 3 background panel — position
+                     uncertainty averages out the blob, so the mean is
+                     broader and weaker than the truth ring).
+   - (b) EnKF posterior: shading is the EnKF-ANALYSIS ensemble mean field,
+                     on the SAME colour scale as (a) so the two are directly
+                     comparable (Ch. 3 convention again).  The analysis uses
+                     the EXACT SAME per-grid-cell stochastic EnKF formula as
+                     the Ch. 3 widget — xa_m = xb_m + K (y + eps_m - H xb_m),
+                     K = cov(field, T(P)) / (var(T(P)) + R), applied
+                     independently at every grid cell — NOT a shortcut that
+                     regresses the members' centre position and re-draws a
+                     clean Gaussian there.  Because the true state here is a
+                     rigid translation (a 2-parameter family) but the EnKF
+                     update is a per-cell linear combination, the posterior
+                     can't reproduce a clean shift: it distorts the blob
+                     (the classic position-error dipole bias) rather than
+                     sliding it — that distortion, not a moved blob, is the
+                     actual EnKF failure mode this section is about.
    - (c) PF posterior: the SAME prior particles reweighted by the
                      likelihood p(y | centre) = N(y; T(centre), R).  The
                      contours LIGHT UP with the weight: brightness and
                      line width ∝ weight, so only the members consistent
-                     with the observation survive.
+                     with the observation survive; shading is the WEIGHTED
+                     mean field (Σ w_m · field_m, same colour scale as (a)
+                     and (b)) — near-zero-weight ("dropped") particles
+                     contribute essentially nothing to it, so it visibly
+                     concentrates on wherever the surviving high-weight
+                     members sit (see the readout's N_eff for how many
+                     particles effectively remain).
 
    Controls: L_sprd (centre-position error, units of the hump width SIG),
-   N_ens (shared ensemble size), a "new ensemble" button, and a contours
-   on/off toggle (left of the member slider).  The readout reports how
-   far the centres are pulled toward the truth and how many particles
-   effectively survive (N_eff = 1/Σ w²).
+   N_ens (shared ensemble size), σ_o (observation error std, drives both the
+   EnKF gain and the PF likelihood weights), a "new ensemble" button, and a
+   contours on/off toggle.  The readout reports how far the centres are
+   pulled toward the truth and how many particles effectively survive
+   (N_eff = 1/Σ w²).
 
    Embedding-ready: root is the element with id="pf-explorer" (falls back
    to .da-widget / document root), theme follows prefers-color-scheme, and
@@ -47,24 +65,25 @@
   const cvPrior = $("pf-prior"), cvEnKF = $("pf-enkf"), cvPF = $("pf-pf");
   const sprdSlider = $("pf-sprd"), sprdVal = $("pf-sprd-val");
   const nensSlider = $("pf-nens"), nensVal = $("pf-nens-val");
+  const sigOSlider = $("pf-sigo"), sigOVal = $("pf-sigo-val");
   const rerunBtn = $("pf-rerun");
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
   /* ------------------------------------------------------------- model */
-  const A = 8, SIG = 15;               // hump peak (K), width (grid points = 135 km)
+  const A = 8, SIG = 5;                 // hump peak (K), radius scale (grid points = 50 km, Ch. 2's own scale)
   const RING = 4;                      // K contour shown in the panels
   const DX = 10.0;                      // km per grid point (the Ch. 2 setting)
   const NX = 128, NY = 128;            // grid (0.5 * 128 = 64 = truth centre)
   const C_I = 64, C_J = 64;            // truth centre
-  const P_ANG0 = 135 * Math.PI / 180;  // obs point: compass 135° = southeast
-  const P_DIR0 = { i: Math.sin(P_ANG0), j: -Math.cos(P_ANG0) };
-  const R0_0 = SIG * Math.sqrt(2 * Math.log(2));  // right on the 4 K contour
-  const P_I = C_I + R0_0 * P_DIR0.i, P_J = C_J + R0_0 * P_DIR0.j;
-  const SIG_O = 1.0;                   // observation error std, K (fixed)
+  // obs point: the exact same grid offset as Ch. 2's own observation from its
+  // blob peak (obs (28,22) minus peak (24,24) = +4,-2 grid cells; both grids
+  // use dx = 10 km, so the offset carries over directly) — same as the
+  // section-1 widget. Not on the 4 K contour (Ch. 2's own obs isn't either).
+  const P_I = C_I + 4, P_J = C_J - 2;
+  let SIG_O = 1.0;                     // observation error std, K (tunable)
 
   let NENS = 100;                     // ensemble size (tunable)
   let Lsprd = 1.5 * SIG;              // location spread, grid points (default 1.5 SIG)
-  let sel = 49;                       // highlighted member, 0-based (default #50)
   let showContours = true;            // show all member contours in the spaghetti
 
   // temperature of the Gaussian hump at (x, y) from a centre at (ci, cj)
@@ -72,8 +91,8 @@
     const r2 = (x - ci) * (x - ci) + (y - cj) * (y - cj);
     return A * Math.exp(-r2 / (2 * SIG * SIG));
   }
-  const V_T = field(C_I, C_J, P_I, P_J);          // truth temperature at P = 4 K
-  const Y_OBS = 4.0;                              // observed T at P, K (on the 4 K contour)
+  const V_T = field(C_I, C_J, P_I, P_J);          // truth temperature at P (not 4 K: P isn't on the 4 K contour)
+  const Y_OBS = 4.0;                              // observed T at P, K (differs from V_T — obs error)
 
   // member palette (Tab20-style cycle — the SAME member keeps its colour in
   // all three panels, so its contours can be traced prior → EnKF → PF)
@@ -202,9 +221,11 @@
     return "rgba(" + r + "," + g + "," + b + "," + a + ")";
   }
 
-  // 2-D field shading, same as the Ch. 2 truth panel (cropped to the map
-  // window around the truth centre)
-  function drawField(ctx, field2d) {
+  // 2-D field shading, same technique as the Ch. 2 truth panel (cropped to
+  // the map window around the truth centre); hi is the panel's own colour
+  // scale (0..hi), so the prior/EnKF mean shading and the PF truth shading
+  // can each use an appropriate range
+  function drawField(ctx, field2d, hi) {
     const off = document.createElement("canvas");
     off.width = NX; off.height = NY;
     const octx = off.getContext("2d");
@@ -212,7 +233,7 @@
     const data = img.data;
     for (let j = 0; j < NY; j++) {
       for (let i = 0; i < NX; i++) {
-        const t = clamp(field2d[j][i] / vmax, 0, 1);
+        const t = clamp(field2d[j][i] / hi, 0, 1);
         const c = lutTh[Math.round(t * 255)];
         const p = (j * NX + i) * 4;
         data[p] = c[0]; data[p + 1] = c[1]; data[p + 2] = c[2]; data[p + 3] = 255;
@@ -225,10 +246,9 @@
   }
 
   /* ------------------------------------------------------- spaghetti */
-  const WIN = 64;                       // half-window in grid points — the whole
-  // 128 x 128 domain is plotted (±640 km at dx = 10 km), like the Ch. 2
-  // panel shows all of its grid
-  const TICKS_KM = [-600, -400, -200, 0, 200, 400, 600];
+  const WIN = 25;                       // half-window in grid points — ±250 km at
+  // dx = 10 km, the same 500 x 500 km domain as Ch. 2 and the section-1 widget
+  const TICKS_KM = [-200, -100, 0, 100, 200];
   let x0c = 0, y0c = 0, sidec = 1;      // current map square (for drawField)
 
   function aGeom(W, H) {
@@ -258,16 +278,17 @@
     ctx.restore();
   }
 
-  // one spaghetti panel — rendered exactly like the Ch. 2 first panel:
-  // truth-field shading, every member's contour (styled per member), the
-  // highlighted member + blob centre, the haloed truth contour, P, axes.
+  // one spaghetti panel — rendered like the Ch. 2 first panel / the Ch. 3
+  // background-analysis panels: field shading (field2d, on scale 0..hi),
+  // every member's contour (styled per member), the haloed truth contour,
+  // P, axes.
   // styleFn(m) -> { color, alpha, lw } (return null to skip).
-  function drawEnsembleMap(cv, segs, centres, styleFn) {
+  function drawEnsembleMap(cv, segs, styleFn, field2d, hi) {
     const [ctx, W, H] = sizeCanvas(cv);
     const { margin, side, x0, y0, s } = aGeom(W, H);
     x0c = x0; y0c = y0; sidec = side;
 
-    drawField(ctx, truth2D);
+    drawField(ctx, field2d, hi);
 
     ctx.save();
     ctx.beginPath();
@@ -275,24 +296,10 @@
     ctx.clip();
     if (showContours) {
       for (let m = 0; m < NENS; m++) {
-        if (m === sel) continue;
         const st = styleFn(m);
         if (!st || st.alpha <= 0.01) continue;
         drawSegs(ctx, segs[m], st.color, st.lw, st.alpha, x0, y0, s);
       }
-    }
-    // highlighted member: thick, full opacity + blob centre dot
-    drawSegs(ctx, segs[sel], memColor(sel), 2.4, 1, x0, y0, s);
-    {
-      const cxm = x0 + (centres.ci[sel] - (C_I - WIN)) * s;
-      const cym = y0 + (centres.cj[sel] - (C_J - WIN)) * s;
-      ctx.beginPath();
-      ctx.arc(cxm, cym, 4.5, 0, 6.2832);
-      ctx.fillStyle = cssVar("--accent-fill");
-      ctx.fill();
-      ctx.lineWidth = 1.6;
-      ctx.strokeStyle = memColor(sel);
-      ctx.stroke();
     }
     // truth contour: halo + ink core so it reads on every colour
     drawSegs(ctx, truthSegs, theme === "dark" ? "#241439" : "#ffffff", 3.4, 0.95, x0, y0, s);
@@ -343,7 +350,7 @@
     ctx.fillText("km", x0 + side / 2, y0 + side + 18);
   }
 
-  function drawColorbar(cv) {
+  function drawColorbar(cv, hi) {
     const [ctx, W, H] = sizeCanvas(cv);
     for (let k = 0; k < W; k++) {
       const c = lutTh[Math.max(0, Math.min(255, Math.round((k / (W - 1)) * 255)))];
@@ -354,37 +361,17 @@
     if (lbl) {
       const f = (x) => (Math.abs(x) < 1e-9 ? "0" : x.toFixed(0)) + " K";
       lbl.querySelector(".cb-min").textContent = f(0);
-      lbl.querySelector(".cb-mid").textContent = f(vmax / 2);
-      lbl.querySelector(".cb-max").textContent = f(vmax);
+      lbl.querySelector(".cb-mid").textContent = f(hi / 2);
+      lbl.querySelector(".cb-max").textContent = f(hi);
     }
   }
 
-  /* ------------------------------------------------- the two analyses */
-  function compute() {
+  /* --------------------------------------------------- particle weights */
+  // T(P) per member + particle-filter likelihood weights (unaffected by
+  // the EnKF change below — the PF reweights the SAME prior particles)
+  function computeWeights() {
     const u = new Float64Array(NENS);
-    let ubar = 0;
-    for (let m = 0; m < NENS; m++) { u[m] = field(ci[m], cj[m], P_I, P_J); ubar += u[m]; }
-    ubar /= NENS;
-    let cIbar = 0, cJbar = 0;
-    for (let m = 0; m < NENS; m++) { cIbar += ci[m]; cJbar += cj[m]; }
-    cIbar /= NENS; cJbar /= NENS;
-
-    // EnKF: linear regression of the centres on the innovation
-    let varU = 0, covI = 0, covJ = 0;
-    for (let m = 0; m < NENS; m++) {
-      const du = u[m] - ubar, di = ci[m] - cIbar, dj = cj[m] - cJbar;
-      varU += du * du; covI += di * du; covJ += dj * du;
-    }
-    const n1 = NENS - 1, R = SIG_O * SIG_O;
-    varU /= n1; covI /= n1; covJ /= n1;
-    const KI = covI / (varU + R), KJ = covJ / (varU + R);
-    const ai = new Float64Array(NENS), aj = new Float64Array(NENS);
-    for (let m = 0; m < NENS; m++) {
-      ai[m] = ci[m] + KI * (Y_OBS - u[m]);
-      aj[m] = cj[m] + KJ * (Y_OBS - u[m]);
-    }
-
-    // particle filter: likelihood weights
+    for (let m = 0; m < NENS; m++) u[m] = field(ci[m], cj[m], P_I, P_J);
     const w = new Float64Array(NENS);
     let wsum = 0;
     for (let m = 0; m < NENS; m++) {
@@ -399,25 +386,36 @@
       if (w[m] > wmax) wmax = w[m];
     }
     const neff = 1 / w2;
-
-    // how far each ensemble's centres sit from the truth centre (rms, grid pts)
-    let rmsP = 0, rmsE = 0, rmsW = 0;
+    let rmsP = 0, rmsW = 0;
     for (let m = 0; m < NENS; m++) {
-      const dp = Math.hypot(ci[m] - C_I, cj[m] - C_J);
-      const de = Math.hypot(ai[m] - C_I, aj[m] - C_J);
-      rmsP += dp * dp; rmsE += de * de; rmsW += w[m] * dp * dp;
+      const dp2 = (ci[m] - C_I) * (ci[m] - C_I) + (cj[m] - C_J) * (cj[m] - C_J);
+      rmsP += dp2; rmsW += w[m] * dp2;
     }
     rmsP = Math.sqrt(rmsP / NENS);
-    rmsE = Math.sqrt(rmsE / NENS);
     rmsW = Math.sqrt(rmsW);
-
-    return { u, ai, aj, w, neff, wmax, rmsP, rmsE, rmsW };
+    return { u, w, neff, wmax, rmsP, rmsW };
   }
 
   // ---- precompute the prior's and the EnKF analysis's member contours
-  // (marching squares on each member's field — recomputed on resample)
+  // (marching squares — recomputed on resample), plus the three
+  // ensemble-MEAN fields used for the panel shading (Ch. 3 convention: mean
+  // field + member contours + truth ring). The EnKF analysis is the SAME
+  // per-grid-cell stochastic formula as the Ch. 3 widget (perturbed obs):
+  //   xa_m[cell] = xb_m[cell] + K[cell] (y + eps_m - H xb_m),
+  //   K[cell] = cov(field[cell], H xb) / (var(H xb) + R)
+  // applied independently at every cell — it does NOT move the members'
+  // centres, so the analysis fields are in general no longer clean Gaussian
+  // humps (see the header comment). The PF panel's "mean" is the WEIGHTED
+  // mean (Σ w_m · field_m) of the (unmoved) prior fields: dead
+  // (near-zero-weight) particles contribute essentially nothing to it, so
+  // it visibly concentrates around wherever the surviving members sit.
   let priorSegs = new Array(NENS), enkfSegs = new Array(NENS);
-  const mf = new Float64Array(NX * NY);
+  let priorMean2D = truth2D, enkfMean2D = truth2D, pfMean2D = truth2D;   // placeholders until the first buildContours()
+  let priorMeanHi = vmax, enkfMeanHi = vmax, pfMeanHi = vmax;
+  let stats = null;   // last computeWeights() + rmsE, cached for render()'s readout
+  const mf = new Float64Array(NX * NY), af = new Float64Array(NX * NY);
+  const priorSum = new Float64Array(NX * NY), enkfSum = new Float64Array(NX * NY), pfSum = new Float64Array(NX * NY);
+  const meanF = new Float64Array(NX * NY), covF = new Float64Array(NX * NY);
   function memberField(cx, cy) {
     for (let j = 0; j < NY; j++) {
       for (let i = 0; i < NX; i++) {
@@ -426,16 +424,77 @@
       }
     }
   }
+  function to2D(flat) {
+    const out = new Array(NY);
+    for (let j = 0; j < NY; j++) {
+      const row = new Float64Array(NX);
+      for (let i = 0; i < NX; i++) row[i] = flat[j * NX + i];
+      out[j] = row;
+    }
+    return out;
+  }
   function buildContours() {
-    const c = compute();
+    const wc = computeWeights();
+    const hxb = wc.u;
+    let hxbMean = 0;
+    for (let m = 0; m < NENS; m++) hxbMean += hxb[m];
+    hxbMean /= NENS;
+    let varB = 0;
+    for (let m = 0; m < NENS; m++) { const d = hxb[m] - hxbMean; varB += d * d; }
+    varB /= (NENS - 1);
+
+    // pass 1: prior member fields + contours, prior mean field, PF weighted mean
     priorSegs = new Array(NENS);
-    enkfSegs = new Array(NENS);
+    priorSum.fill(0);
+    pfSum.fill(0);
     for (let m = 0; m < NENS; m++) {
       memberField(ci[m], cj[m]);
       priorSegs[m] = contourSegs(mf);
-      memberField(c.ai[m], c.aj[m]);
-      enkfSegs[m] = contourSegs(mf);
+      for (let p = 0; p < NX * NY; p++) { priorSum[p] += mf[p]; pfSum[p] += wc.w[m] * mf[p]; }
     }
+    for (let p = 0; p < NX * NY; p++) meanF[p] = priorSum[p] / NENS;
+
+    // pass 2: per-cell covariance of the prior field with H xb = T(P) —
+    // P_bHᵀ, the same quantity the Ch. 3 widget calls covF
+    covF.fill(0);
+    for (let m = 0; m < NENS; m++) {
+      memberField(ci[m], cj[m]);
+      const dHxb = hxb[m] - hxbMean;
+      for (let p = 0; p < NX * NY; p++) covF[p] += (mf[p] - meanF[p]) * dHxb;
+    }
+    const R = SIG_O * SIG_O, denom = varB + R;
+    for (let p = 0; p < NX * NY; p++) covF[p] /= (NENS - 1);
+
+    // pass 3: per-member analysis field xa_m = xb_m + K (y + eps_m - Hxb_m),
+    // its contour, its contribution to the analysis mean, and its contour
+    // centroid (for the rms centre-distance readout — the analysis field
+    // has no explicit "centre" parameter any more)
+    enkfSegs = new Array(NENS);
+    enkfSum.fill(0);
+    let rmsE = 0;
+    const sqrtR = Math.sqrt(R);
+    for (let m = 0; m < NENS; m++) {
+      memberField(ci[m], cj[m]);
+      const inc = Y_OBS + obsZ[m] * sqrtR - hxb[m];
+      for (let p = 0; p < NX * NY; p++) { af[p] = mf[p] + covF[p] / denom * inc; enkfSum[p] += af[p]; }
+      const segs = contourSegs(af);
+      enkfSegs[m] = segs;
+      let sx = 0, sy = 0, n = 0;
+      for (let k = 0; k < segs.length; k++) { sx += segs[k][0] + segs[k][2]; sy += segs[k][1] + segs[k][3]; n += 2; }
+      const cxm = n ? sx / n : ci[m], cym = n ? sy / n : cj[m];
+      rmsE += (cxm - C_I) * (cxm - C_I) + (cym - C_J) * (cym - C_J);
+    }
+    rmsE = Math.sqrt(rmsE / NENS);
+    stats = { w: wc.w, neff: wc.neff, wmax: wc.wmax, rmsP: wc.rmsP, rmsW: wc.rmsW, rmsE };
+
+    for (let p = 0; p < NX * NY; p++) enkfSum[p] /= NENS;   // pfSum is already a weighted average (weights sum to 1)
+    priorMean2D = to2D(meanF);
+    enkfMean2D = to2D(enkfSum);
+    pfMean2D = to2D(pfSum);
+    // fixed 0..8 K scale (the truth peak) across all three panels, so the
+    // mean fields stay directly comparable (same convention as the Ch. 3
+    // background/analysis panels) and the colourbar never rescales
+    priorMeanHi = enkfMeanHi = pfMeanHi = vmax;
   }
 
   // standard normal via Box-Muller (2 values per call)
@@ -451,10 +510,12 @@
   }
 
   let ci = new Float64Array(NENS), cj = new Float64Array(NENS);
+  let obsZ = new Float64Array(NENS);   // perturbed-obs unit normals (Ch. 3's stochastic EnKF)
   function sampleEnsemble() {
     for (let m = 0; m < NENS; m++) {
       ci[m] = C_I + gauss() * Lsprd;
       cj[m] = C_J + gauss() * Lsprd;
+      obsZ[m] = gauss();
     }
   }
 
@@ -463,35 +524,36 @@
     updateT();
     const th2 = makeLUT(LUT_THERMAL[theme]);
     lutTh.splice(0, lutTh.length, ...th2);
-    const c = compute();
+    const c = stats;   // cached by the last buildContours() — doesn't change between renders
 
-    // panel (a): prior — every member coloured, equally dim
-    drawEnsembleMap(cvPrior, priorSegs, { ci, cj }, (m) => ({ color: memColor(m), alpha: 0.42, lw: 1 }));
+    // panel (a): prior — every member coloured, equally dim; shading = prior mean
+    drawEnsembleMap(cvPrior, priorSegs, (m) => ({ color: memColor(m), alpha: 0.42, lw: 1 }),
+      priorMean2D, priorMeanHi);
 
-    // panel (b): EnKF analysis
-    drawEnsembleMap(cvEnKF, enkfSegs, { ci: c.ai, cj: c.aj }, (m) => ({ color: memColor(m), alpha: 0.55, lw: 1 }));
+    // panel (b): EnKF analysis; shading = analysis mean, same scale as (a)
+    drawEnsembleMap(cvEnKF, enkfSegs, (m) => ({ color: memColor(m), alpha: 0.55, lw: 1 }),
+      enkfMean2D, enkfMeanHi);
 
-    // panel (c): PF posterior — brightness AND width ∝ weight ("light up")
-    drawEnsembleMap(cvPF, priorSegs, { ci, cj }, (m) => ({
+    // panel (c): PF posterior — brightness AND width ∝ weight ("light up");
+    // shading is the weighted mean of the (unmoved) prior fields
+    drawEnsembleMap(cvPF, priorSegs, (m) => ({
       color: memColor(m),
       alpha: 0.08 + 0.92 * (c.w[m] / c.wmax),
       lw: 1 + 1.7 * (c.w[m] / c.wmax),
-    }));
+    }), pfMean2D, pfMeanHi);
 
-    drawColorbar($("cb-prior"));
-    drawColorbar($("cb-enkf"));
-    drawColorbar($("cb-pf"));
+    drawColorbar($("cb-prior"), priorMeanHi);
+    drawColorbar($("cb-enkf"), enkfMeanHi);
+    drawColorbar($("cb-pf"), pfMeanHi);
 
     // readout
     const km = (g) => (g * DX).toFixed(0);
-    const wsel = c.w[sel] * 100;
-    const wTxt = wsel < 0.05 ? "\u22480%" : wsel.toFixed(1) + "%";
     $("pf-readout").innerHTML =
       `obs T(P) = <strong>${Y_OBS.toFixed(1)} K</strong> (&sigma;<sub>o</sub> = ${SIG_O.toFixed(1)}) ` +
       `&#183; centre distance from truth (rms): prior <strong>${km(c.rmsP)} km</strong> ` +
       `&rarr; EnKF <strong>${km(c.rmsE)} km</strong> &#183; PF (weighted) <strong>${km(c.rmsW)} km</strong> ` +
       `&#183; N<sub>eff</sub> = <strong>${c.neff.toFixed(0)}</strong> of ${NENS} ` +
-      `&#183; member <strong>${sel + 1}</strong> w <strong>${wTxt}</strong> (max <strong>${(c.wmax * 100).toFixed(1)}%</strong>)`;
+      `&#183; max particle weight <strong>${(c.wmax * 100).toFixed(1)}%</strong>`;
   }
 
   function resample() {
@@ -510,18 +572,17 @@
     nensVal.textContent = NENS;
     ci = new Float64Array(NENS);
     cj = new Float64Array(NENS);
-    sel = Math.min(sel, NENS - 1);
-    selSlider.max = NENS;
-    selSlider.value = sel + 1;
-    selVal.textContent = sel + 1;
+    obsZ = new Float64Array(NENS);
     resample();
   });
-  const selSlider = $("pf-sel"), selVal = $("pf-sel-val");
-  selSlider.addEventListener("input", () => {
-    sel = clamp(parseInt(selSlider.value, 10) || 1, 1, NENS) - 1;
-    selVal.textContent = sel + 1;
-    render();
-  });
+  if (sigOSlider) {
+    sigOSlider.addEventListener("input", () => {
+      SIG_O = clamp(parseFloat(sigOSlider.value) || 1, 0.2, 4);
+      sigOVal.textContent = SIG_O.toFixed(2);
+      buildContours();   // EnKF gain and PF weights both depend on SIG_O
+      render();
+    });
+  }
   rerunBtn.addEventListener("click", resample);
   const contoursBtn = $("pf-contours");
   if (contoursBtn) {
@@ -538,9 +599,7 @@
   sprdVal.innerHTML = (Lsprd / SIG).toFixed(1) + " &sigma;";
   nensSlider.value = NENS;
   nensVal.textContent = NENS;
-  selSlider.max = NENS;
-  selSlider.value = sel + 1;
-  selVal.textContent = sel + 1;
+  if (sigOSlider) { sigOSlider.value = SIG_O; sigOVal.textContent = SIG_O.toFixed(2); }
   sampleEnsemble();
   buildContours();
   render();

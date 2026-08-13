@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="../../../style.css">
 <link rel="stylesheet" href="chapters.css">
 <link rel="stylesheet" href="widgets/position-error/style.css?v=27">
-<link rel="stylesheet" href="widgets/pf-explorer/style.css">
+<link rel="stylesheet" href="widgets/pf-explorer/style.css?v=5">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <!-- Global site tag (gtag.js) - Google Analytics -->
@@ -169,19 +169,19 @@
         the Gaussian shape of the prior. The three panels below show the 4 K contour
         spaghetti of the <em>same</em> Gaussian hump ensemble as section 1 &#8212; where every member's
         rings sit &#8212; before and after assimilating one observation of the temperature T at P (the
-        +): the prior, the EnKF analysis, and the particle-filter posterior, whose members light
-        up with their weight. The observed value is 4 K &#8212; right on the 4 K contour &#8212; with error
-        &sigma;<sub>o</sub> = 1 K. Every member keeps its own colour in all three panels, so its rings
-        can be traced from prior to posterior.
+        +, same grid offset from the truth centre as Chapter 2's own observation &#8212; not on the
+        4&#8201;K contour): the prior, the EnKF analysis, and the particle-filter posterior, whose
+        members light up with their weight. The observed value is 4 K, with error
+        &sigma;<sub>o</sub> (tunable, default 1 K). Every member keeps its own colour in all three
+        panels, so its rings can be traced from prior to posterior.
       </p>
       <p class="hint">
         <strong>Try it:</strong> slide L<sub>sprd</sub> up &#8212; the prior band widens, the EnKF band
         only tightens where the regression points, and the particle filter lights up just the
-        members whose rings are consistent with the observation. Walk the <em>member</em> slider to
-        trace one member's rings through all three panels (its colour is the same everywhere) and
-        read its particle-filter weight. Watch the readout: the weighted centre distance shows how
-        far the posterior is pulled toward the truth, and N<sub>eff</sub> = 1/&Sigma;w<sub>m</sub><sup>2</sup>
-        collapses as the observation becomes unlikely under the prior. N<sub>ens</sub> changes how
+        members whose rings are consistent with the observation. Watch the readout: the weighted
+        centre distance shows how far the posterior is pulled toward the truth, and
+        N<sub>eff</sub> = 1/&Sigma;w<sub>m</sub><sup>2</sup> collapses as the observation becomes
+        unlikely under the prior. N<sub>ens</sub> changes how
         many contours the filters share.
       </p>
 
@@ -194,17 +194,17 @@
               <!-- three spaghetti panels: prior | EnKF | particle filter. -->
               <div class="panel-grid">
                 <section class="panel">
-                  <h2 class="panel-title">Prior</h2>
+                  <h2 class="panel-title">Prior mean T + 4 K contours</h2>
                   <canvas class="map" id="pf-prior"></canvas>
                   <div class="colorbar"><canvas id="cb-prior"></canvas><div class="cb-labels"><span class="cb-min"></span><span class="cb-mid"></span><span class="cb-max"></span></div></div>
                 </section>
                 <section class="panel">
-                  <h2 class="panel-title">EnKF posterior</h2>
+                  <h2 class="panel-title">EnKF-analysis mean T + 4 K contours</h2>
                   <canvas class="map" id="pf-enkf"></canvas>
                   <div class="colorbar"><canvas id="cb-enkf"></canvas><div class="cb-labels"><span class="cb-min"></span><span class="cb-mid"></span><span class="cb-max"></span></div></div>
                 </section>
                 <section class="panel">
-                  <h2 class="panel-title">PF posterior <span class="ctl-note">(brightness &#8733; weight)</span></h2>
+                  <h2 class="panel-title">PF-posterior weighted mean T + 4 K contours</h2>
                   <canvas class="map" id="pf-pf"></canvas>
                   <div class="colorbar"><canvas id="cb-pf"></canvas><div class="cb-labels"><span class="cb-min"></span><span class="cb-mid"></span><span class="cb-max"></span></div></div>
                 </section>
@@ -213,30 +213,24 @@
           </div>
 
           <div class="controls">
-            <div class="ctl-group" data-color="member">
-              <h4 class="ctl-title">Location spread <span class="ctl-note">centre position error, in units of R<sub>mw</sub></span></h4>
-              <label class="ctl-row">
-                <span class="ctl-label">L<sub>sprd</sub></span>
-                <input type="range" id="pf-sprd" min="0.1" max="3" step="0.1" value="1.5">
-                <span class="ctl-val" id="pf-sprd-val"></span>
-              </label>
-              <label class="ctl-row">
-                <span class="ctl-label">N<sub>ens</sub></span>
-                <input type="range" id="pf-nens" min="20" max="400" step="10" value="100">
-                <span class="ctl-val" id="pf-nens-val"></span>
-              </label>
-              <button class="ctl-btn" id="pf-rerun" title="draw a new prior ensemble">&#8635; new ensemble</button>
+            <div class="ctl">
+              <label for="pf-sprd">location spread <em>L<sub>sprd</sub></em></label>
+              <input type="range" id="pf-sprd" min="0.1" max="3" step="0.1" value="1.5">
+              <span class="ctl-val" id="pf-sprd-val"></span>
             </div>
-            <div class="ctl-group" data-color="sel">
-              <h4 class="ctl-title">Member highlight <span class="ctl-note">trace one member through the three ensembles</span></h4>
-              <div class="ctl-flex">
-                <button class="ctl-btn ctl-btn-sm" id="pf-contours" aria-pressed="true" title="show / hide the ensemble contours">Contours: on</button>
-                <label class="ctl-row">
-                  <span class="ctl-label">member</span>
-                  <input type="range" id="pf-sel" min="1" max="100" step="1" value="50">
-                  <span class="ctl-val" id="pf-sel-val">50</span>
-                </label>
-              </div>
+            <div class="ctl">
+              <label for="pf-nens">N<sub>ens</sub></label>
+              <input type="range" id="pf-nens" min="20" max="400" step="10" value="100">
+              <span class="ctl-val" id="pf-nens-val"></span>
+            </div>
+            <div class="ctl">
+              <label for="pf-sigo">obs error <em>&sigma;<sub>o</sub></em> (K)</label>
+              <input type="range" id="pf-sigo" min="0.2" max="4" step="0.1" value="1">
+              <span class="ctl-val" id="pf-sigo-val">1.00</span>
+            </div>
+            <div class="ctl ctl-buttons">
+              <button class="ctl-btn" id="pf-contours" aria-pressed="true" title="show / hide the ensemble contours">Contours: on</button>
+              <button class="ctl-btn" id="pf-rerun" title="draw a new prior ensemble">&#8635; new ensemble</button>
             </div>
           </div>
 
@@ -245,7 +239,7 @@
           <ul class="legend">
             <li><span class="mark truth"></span> truth &#183; 4 K contour</li>
             <li><span class="mark member"></span> members</li>
-            <li><span class="mark sel"></span> highlighted member</li>
+            <li class="legend-note">panel (c): brightness &amp; line width &#8733; particle weight</li>
           </ul>
         </main>
 
@@ -253,13 +247,21 @@
 
       <p>
         <strong>Reading the panels.</strong> <b>(a)</b> The prior: every member's 4 K rings around
-        its centre &#8212; a wide band of where the 4 K line could be. <b>(b)</b> The EnKF
-        analysis: the centres have been moved by the linear regression on the innovation, but the
-        ensemble is still a Gaussian cloud &#8212; the band barely changes, and with a large spread the
-        regression can even push members the wrong way (the readout's centre distance can go up).
-        <b>(c)</b> The particle filter: the <em>same</em> prior members, reweighted by the observation
-        likelihood &#8212; the rings light up only where the observed temperature is plausible, and the
-        readout's N<sub>eff</sub> shows how few particles effectively survive.
+        its centre &#8212; a wide band of where the 4 K line could be; the shading is the ensemble
+        <em>mean</em> field, broader and weaker than the truth ring since position uncertainty
+        averages the blob out (same convention as Chapter 3's background panel). <b>(b)</b> The EnKF
+        analysis: the SAME per-grid-cell formula as Chapter 3, applied independently at every cell
+        &#8212; it does not move any member's centre, so instead of sliding the rings tighten and
+        distort into the classic position-error dipole shape (the readout's centre distance can even
+        go up: a linear per-cell update cannot represent a rigid shift); the shading is the analysis
+        mean, on the same colour scale as (a) so the two are directly comparable. <b>(c)</b> The
+        particle filter: the <em>same</em> prior members, reweighted by the
+        observation likelihood &#8212; the rings light up only where the observed temperature is
+        plausible, and the shading is the <em>weighted</em> mean (&Sigma; w<sub>m</sub>&#183;field<sub>m</sub>,
+        same colour scale as (a)/(b)): near-zero-weight particles contribute essentially nothing to
+        it, so it concentrates on wherever the surviving members sit &#8212; a direct picture of
+        importance-sampling degeneracy, which the readout's N<sub>eff</sub> quantifies as how few
+        particles effectively survive.
       </p>
 
       <p class="planned-ref">
@@ -272,6 +274,6 @@
 
   <script src="../../../footer.js"></script>
   <script src="widgets/position-error/app.js?v=19"></script>
-  <script src="widgets/pf-explorer/app.js"></script>
+  <script src="widgets/pf-explorer/app.js?v=9"></script>
 </body>
 </html>

@@ -54,16 +54,13 @@
 /* ---------------------------------------------------------- panel grid */
 #pf-explorer .workspace { display: flex; gap: 14px; }
 #pf-explorer .panels-wrap { flex: 1; min-width: 0; }
+/* auto-fit with a minimum panel width: wraps down to fewer columns (to 1)
+   as soon as a panel would otherwise be squeezed below that width, instead
+   of jumping straight to 3-across at a fixed breakpoint */
 #pf-explorer .panel-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 14px;
-}
-@media (min-width: 600px) and (max-width: 899px) {
-  #pf-explorer .panel-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-}
-@media (min-width: 900px) {
-  #pf-explorer .panel-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 #pf-explorer .panel {
   min-width: 0;
@@ -103,61 +100,52 @@
 }
 
 /* -------------------------------------------------------------- controls */
+/* always a single column (vertical stack), same outer width as the
+   panel-grid above it (both are direct, unpadded children of .viz-root);
+   each .ctl is itself a label/slider/value grid with a fixed label column,
+   so every slider's track lines up with its neighbours. */
 #pf-explorer .controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 12px 20px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
   margin: 14px 0 0;
-}
-#pf-explorer .ctl-group {
-  flex: 1 1 280px;
+  padding: 14px 18px;
   background: var(--surface-1);
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 12px 14px 10px;
   box-shadow: var(--shadow);
 }
-#pf-explorer .ctl-group[data-color="member"] { --ctl-accent: var(--series-amber); }
-#pf-explorer .ctl-group[data-color="sel"]   { --ctl-accent: var(--series-pf); }
-#pf-explorer .ctl-title {
-  margin: 0;
-  font-size: 0.82rem;
-  font-weight: 650;
-  color: var(--ink-1);
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-#pf-explorer .ctl-note { font-size: 0.7rem; font-weight: 500; color: var(--ink-3); }
-#pf-explorer .ctl-row {
+#pf-explorer .ctl {
   display: grid;
-  grid-template-columns: 52px 1fr 64px;
+  grid-template-columns: 128px 1fr 46px;
   align-items: center;
-  gap: 8px;
-  margin-top: 9px;
-  font-size: 0.75rem;
+  gap: 9px;
+  font-size: 0.82rem;
   color: var(--ink-2);
 }
-#pf-explorer .ctl-row input[type="range"] {
+#pf-explorer .ctl label { white-space: nowrap; }
+#pf-explorer .ctl em { font-style: italic; color: var(--ink-1); }
+#pf-explorer .ctl input[type="range"] {
   width: 100%;
   margin: 0;
-  accent-color: var(--ctl-accent);
+  accent-color: var(--series-amber);
   cursor: pointer;
 }
-#pf-explorer #pf-nens { accent-color: var(--series-blue); }
+#pf-explorer .ctl input#pf-nens { accent-color: var(--series-blue); }
+#pf-explorer .ctl input#pf-sigo { accent-color: var(--series-pf); }
 #pf-explorer .ctl-val {
   text-align: right;
-  font-variant-numeric: tabular-nums;
+  font-weight: 650;
   color: var(--ink-1);
-  font-weight: 600;
-  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+#pf-explorer .ctl-buttons {
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 #pf-explorer .ctl-btn {
-  width: 100%;
-  margin-top: 9px;
   padding: 9px 12px;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
   color: var(--ink-1);
   background: var(--surface-1);
@@ -165,28 +153,14 @@
   border-radius: 9px;
   cursor: pointer;
   box-shadow: var(--shadow);
-}
-#pf-explorer .ctl-btn:hover { border-color: var(--series-amber); color: var(--series-amber); }
-
-/* member-highlight group: contours toggle to the left of the member slider */
-#pf-explorer .ctl-flex {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px 12px;
-  margin-top: 9px;
-}
-#pf-explorer .ctl-flex .ctl-row { flex: 1 1 190px; margin-top: 0; }
-#pf-explorer .ctl-btn-sm {
-  width: auto;
-  margin-top: 0;
-  padding: 8px 12px;
-  font-size: 0.75rem;
   white-space: nowrap;
 }
-#pf-explorer .ctl-btn-sm[aria-pressed="false"] {
-  color: var(--ink-3);
-  border-color: var(--axis);
+#pf-explorer .ctl-btn[aria-pressed="false"] { color: var(--ink-3); border-color: var(--axis); }
+#pf-explorer .ctl-btn:hover { border-color: var(--series-amber); color: var(--series-amber); }
+@media (max-width: 420px) {
+  #pf-explorer .ctl { grid-template-columns: 1fr; }
+  #pf-explorer .ctl-val { text-align: left; }
+  #pf-explorer .ctl-buttons { grid-template-columns: 1fr; }
 }
 
 /* -------------------------------------------------------------- readout */
@@ -215,6 +189,7 @@
   color: var(--ink-2);
 }
 #pf-explorer .legend li { display: flex; align-items: center; gap: 7px; }
+#pf-explorer .legend li.legend-note { color: var(--ink-3); }
 #pf-explorer .mark { display: inline-block; flex: 0 0 auto; }
 #pf-explorer .mark.truth { width: 18px; height: 3px; background: var(--series-ink); border-radius: 1px; }
 #pf-explorer .mark.member { width: 18px; height: 2px;

@@ -163,12 +163,13 @@
         <strong>particle filter</strong> turns the prior members into a <em>weighted</em> sample,
         each particle reweighted by the observation likelihood p(y&#8202;|&#8202;centre). The EnKF cannot do
         that &#8212; its analysis is an affine combination of the prior members, so the posterior keeps
-        the Gaussian shape of the prior. The three panels below show the 20 m/s wind-contour
-        spaghetti of a Rankine-vortex ensemble &#8212; where every member's rings sit &#8212; before and
-        after assimilating one observation of the zonal wind u at P (the +): the prior, the EnKF
-        analysis, and the particle-filter posterior, whose members light up with their weight. Every
-        member keeps its own colour in all three panels, so its rings can be traced from prior to
-        posterior.
+        the Gaussian shape of the prior. The three panels below show the 4 K contour
+        spaghetti of the <em>same</em> Gaussian hump ensemble as section 1 &#8212; where every member's
+        rings sit &#8212; before and after assimilating one observation of the temperature T at P (the
+        +): the prior, the EnKF analysis, and the particle-filter posterior, whose members light
+        up with their weight. The observed value is 4 K &#8212; right on the 4 K contour &#8212; with error
+        &sigma;<sub>o</sub> = 1 K. Every member keeps its own colour in all three panels, so its rings
+        can be traced from prior to posterior.
       </p>
       <p class="hint">
         <strong>Try it:</strong> slide L<sub>sprd</sub> up &#8212; the prior band widens, the EnKF band
@@ -233,7 +234,7 @@
           <p class="readout" id="pf-readout" role="status"></p>
 
           <ul class="legend">
-            <li><span class="mark truth"></span> truth 20 m/s rings</li>
+            <li><span class="mark truth"></span> truth 4 K rings</li>
             <li><span class="mark member"></span> member rings (same colour in all three panels)</li>
             <li><span class="mark sel"></span> selected member</li>
             <li><span class="mark obs">+</span> obs P</li>
@@ -243,14 +244,14 @@
       </div>
 
       <p>
-        <strong>Reading the panels.</strong> <b>(a)</b> The prior: every member's 20 m/s rings around
-        its centre &#8212; a wide band of where the storm's core edge could be. <b>(b)</b> The EnKF
+        <strong>Reading the panels.</strong> <b>(a)</b> The prior: every member's 4 K rings around
+        its centre &#8212; a wide band of where the 4 K line could be. <b>(b)</b> The EnKF
         analysis: the centres have been moved by the linear regression on the innovation, but the
-        ensemble is still a Gaussian cloud &#8212; the band tightens only slightly and cannot
-        concentrate on the members that actually fit the observation. <b>(c)</b> The particle
-        filter: the <em>same</em> prior members, reweighted by the observation likelihood &#8212; the
-        rings light up only where the observed wind is plausible, and the readout's
-        N<sub>eff</sub> shows how few particles effectively survive.
+        ensemble is still a Gaussian cloud &#8212; the band barely changes, and with a large spread the
+        regression can even push members the wrong way (the readout's centre distance can go up).
+        <b>(c)</b> The particle filter: the <em>same</em> prior members, reweighted by the observation
+        likelihood &#8212; the rings light up only where the observed temperature is plausible, and the
+        readout's N<sub>eff</sub> shows how few particles effectively survive.
       </p>
 
       <p class="planned-ref">

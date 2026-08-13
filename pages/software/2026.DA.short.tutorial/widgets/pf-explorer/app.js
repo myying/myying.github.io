@@ -1,34 +1,33 @@
-/* Particle filter vs EnKF on the Rankine vortex — Ch. 6, section 2.
-   Same toy model as the rankine widget (section 1): a modified Rankine
-   vortex, ensemble members that differ ONLY in the centre position
-   (centre = truth centre + N(0, L_sprd)), and one observation of the
-   zonal wind u at the point P (the + on every panel).
+/* Particle filter vs EnKF on the Gaussian hump — Ch. 6, section 2.
+   Same toy model as the section-1 widget: the Chapter 2 warm blob
+   (peak A = 8 K, width SIG = 15 grid points = 135 km), ensemble members
+   that differ ONLY in the centre position (centre = truth centre +
+   N(0, L_sprd)), and one observation of the temperature T at the point P
+   (the + on every panel), sitting on the 4 K contour with observed value
+   4 K and error σ_o = 1 K.
 
-   The three panels are 20 m/s wind-contour spaghetti plots of the SAME
-   ensemble, before and after assimilating the observation.  Every member
-   keeps its own Tab20 colour in all three panels, so a member's rings can
-   be traced from the prior, through the EnKF analysis, to the particle
-   filter (the member slider highlights one member; the readout shows its
-   weight):
-   - (a) prior:      every member's 20 m/s rings around its centre.
+   The three panels are 4 K contour spaghetti plots of the SAME ensemble,
+   before and after assimilating the observation.  Every member keeps its
+   own Tab20 colour in all three panels, so a member's rings can be traced
+   from the prior, through the EnKF analysis, to the particle filter (the
+   member slider highlights one member; the readout shows its weight):
+   - (a) prior:      every member's 4 K rings around its centre.
    - (b) EnKF posterior: the linear-regression update of the centres on
-                     the innovation (y - u(P)): with one scalar observation
-                     the gain is the sample covariance of centre vs u over
-                     the sample variance of u plus R.  Affine in the
+                     the innovation (y - T(P)): with one scalar observation
+                     the gain is the sample covariance of centre vs T over
+                     the sample variance of T plus R.  Affine in the
                      centres, so the posterior keeps the Gaussian shape of
-                     the prior — and is biased when u(centre) is nonlinear.
+                     the prior — and is biased when T(centre) is nonlinear.
    - (c) PF posterior: the SAME prior particles reweighted by the
-                     likelihood p(y | centre) = N(y; u(centre), R).  The
+                     likelihood p(y | centre) = N(y; T(centre), R).  The
                      rings LIGHT UP with the weight: brightness and line
                      width ∝ weight, so only the members consistent with
                      the observation survive.
 
-   Controls: L_sprd (centre-position error, units of R_mw), N_ens (shared
-   ensemble size), and a "new ensemble" button.  The observation value is
-   fixed at truth + 3σ_o — a deliberately unlikely realization that exposes
-   the filters' differences — and the readout reports how far the centres
-   are pulled toward the truth and how many particles effectively survive
-   (N_eff = 1/Σ w²).
+   Controls: L_sprd (centre-position error, units of the hump width SIG),
+   N_ens (shared ensemble size), and a "new ensemble" button.  The
+   readout reports how far the centres are pulled toward the truth and
+   how many particles effectively survive (N_eff = 1/Σ w²).
 
    Embedding-ready: root is the element with id="pf-explorer" (falls back
    to .da-widget / document root), theme follows prefers-color-scheme, and
@@ -45,43 +44,37 @@
   const rerunBtn = $("pf-rerun");
 
   /* ------------------------------------------------------------- model */
-  const VMAX = 35, RMW = 5;            // m/s, grid points (same as rankine)
+  const A = 8, SIG = 15;               // hump peak (K), width (grid points = 135 km)
+  const RING = 4;                      // K contour shown in the panels
   const DX = 9.0;                      // km per grid point
   const C_I = 64, C_J = 64;            // truth centre (0.5 * 128)
   const P_ANG0 = 135 * Math.PI / 180;  // obs point: compass 135° = southeast
   const P_DIR0 = { i: Math.sin(P_ANG0), j: -Math.cos(P_ANG0) };
-  const R0_0 = RMW + 0.2;              // slightly outside the radius of max wind
+  const R0_0 = SIG * Math.sqrt(2 * Math.log(2));  // right on the 4 K contour
   const P_I = C_I + R0_0 * P_DIR0.i, P_J = C_J + R0_0 * P_DIR0.j;
-  const SIG_O = 2.0;                   // observation error std, m/s (fixed)
+  const SIG_O = 1.0;                   // observation error std, K (fixed)
 
   let NENS = 100;                     // ensemble size (tunable)
-  let Lsprd = 1.5 * RMW;              // location spread, grid points (default 1.5 Rmw)
+  let Lsprd = 1.5 * SIG;              // location spread, grid points (default 1.5 SIG)
   let sel = 49;                       // highlighted member, 0-based (default #50)
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
-  // tangential wind speed of the modified Rankine vortex
-  function vtheta(r) {
-    r = Math.max(r, 1e-6);
-    return r <= RMW ? VMAX * r / RMW : VMAX * Math.pow(RMW / r, 1.5);
+  // temperature of the Gaussian hump at (x, y) from a centre at (ci, cj)
+  function field(ci, cj, x, y) {
+    const r2 = (x - ci) * (x - ci) + (y - cj) * (y - cj);
+    return A * Math.exp(-r2 / (2 * SIG * SIG));
   }
-  // zonal wind u at (x, y) from a vortex centred at (ci, cj)
-  function uWind(ci, cj, x, y) {
-    const di = x - ci, dj = y - cj;
-    const r = Math.hypot(di, dj) || 1e-6;
-    return -vtheta(r) * dj / r;
-  }
-  const V_T = uWind(C_I, C_J, P_I, P_J);          // truth zonal wind at P
-  const Y_OBS = V_T + 3 * SIG_O;                  // observed u at P (a 3σ_o outlier)
+  const V_T = field(C_I, C_J, P_I, P_J);          // truth temperature at P = 4 K
+  const Y_OBS = 4.0;                              // observed T at P, K (on the 4 K contour)
 
   // member palette (Tab20-style cycle — the SAME member keeps its colour in
   // all three panels, so its rings can be traced prior → EnKF → PF)
   const MEM_COLORS = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
     "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"];
   const memColor = (m) => MEM_COLORS[m % MEM_COLORS.length];
-  // radii of the 20 m/s contour around a centre (analytic: one inside Rmw,
-  // one outside — see the rankine widget)
+  // radius of the RING K contour around a centre (analytic)
   function ringRadii() {
-    return [20 * RMW / VMAX, RMW * Math.pow(VMAX / 20, 2 / 3)];
+    return [SIG * Math.sqrt(2 * Math.log(A / RING))];
   }
 
   // standard normal via Box-Muller (2 values per call)
@@ -146,7 +139,7 @@
   function compute() {
     const u = new Float64Array(NENS);
     let ubar = 0;
-    for (let m = 0; m < NENS; m++) { u[m] = uWind(ci[m], cj[m], P_I, P_J); ubar += u[m]; }
+    for (let m = 0; m < NENS; m++) { u[m] = field(ci[m], cj[m], P_I, P_J); ubar += u[m]; }
     ubar /= NENS;
     let cIbar = 0, cJbar = 0;
     for (let m = 0; m < NENS; m++) { cIbar += ci[m]; cJbar += cj[m]; }
@@ -198,9 +191,9 @@
   }
 
   /* ------------------------------------------------------- spaghetti */
-  const WIN = 22;                       // half-window in grid points — the true
-  // vortex (20 m/s ring, radius ~7.3 gp) then spans the central 1/9 of the map
-  const TICKS_KM = [-180, -90, 0, 90, 180];
+  const WIN = 53;                       // half-window in grid points — the true
+  // 4 K ring (radius ~17.7 gp) then spans the central 1/9 of the map
+  const TICKS_KM = [-360, -180, 0, 180, 360];
 
   function aGeom(W, H) {
     const margin = { l: 46, r: 12, t: 14, b: 32 };
@@ -211,7 +204,7 @@
     return { margin, side, x0, y0: margin.t, s: side / (2 * WIN) };
   }
 
-  // one spaghetti panel: every member's 20 m/s rings (styled per member), the
+  // one spaghetti panel: every member's 4 K rings (styled per member), the
   // highlighted member on top, then the truth rings, the observation point P
   // and the axes.  styleFn(m) -> { color, alpha, lw } (return null to skip).
   function drawEnsembleMap(cv, centres, styleFn) {
@@ -337,7 +330,7 @@
     const wsel = c.w[sel] * 100;
     const wTxt = wsel < 0.05 ? "\u22480%" : wsel.toFixed(1) + "%";
     $("pf-readout").innerHTML =
-      `obs u(P) = <strong>${Y_OBS.toFixed(1)} m/s</strong> (&sigma;<sub>o</sub> = ${SIG_O.toFixed(1)}) ` +
+      `obs T(P) = <strong>${Y_OBS.toFixed(1)} K</strong> (&sigma;<sub>o</sub> = ${SIG_O.toFixed(1)}) ` +
       `&#183; centre distance from truth (rms): prior <strong>${km(c.rmsP)} km</strong> ` +
       `&rarr; EnKF <strong>${km(c.rmsE)} km</strong> &#183; PF (weighted) <strong>${km(c.rmsW)} km</strong> ` +
       `&#183; N<sub>eff</sub> = <strong>${c.neff.toFixed(0)}</strong> of ${NENS} ` +
@@ -345,8 +338,8 @@
   }
 
   sprdSlider.addEventListener("input", () => {
-    Lsprd = parseFloat(sprdSlider.value) * RMW;   // slider is in units of Rmw
-    sprdVal.innerHTML = sprdSlider.value + " R<sub>mw</sub>";
+    Lsprd = parseFloat(sprdSlider.value) * SIG;   // slider is in units of sigma
+    sprdVal.innerHTML = sprdSlider.value + " &sigma;";
     sampleEnsemble();
     render();
   });
@@ -371,8 +364,8 @@
   rerunBtn.addEventListener("click", () => { sampleEnsemble(); render(); });
 
   root.dataset.theme = theme;           // apply theme variables before the first render
-  sprdSlider.value = (Lsprd / RMW).toFixed(1);
-  sprdVal.innerHTML = (Lsprd / RMW).toFixed(1) + " R<sub>mw</sub>";
+  sprdSlider.value = (Lsprd / SIG).toFixed(1);   // put the slider head back at the default (1.5 sigma)
+  sprdVal.innerHTML = (Lsprd / SIG).toFixed(1) + " &sigma;";
   nensSlider.value = NENS;
   nensVal.textContent = NENS;
   selSlider.max = NENS;

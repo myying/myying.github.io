@@ -192,9 +192,9 @@
   }
 
   /* ------------------------------------------------------- spaghetti */
-  const WIN = 28;                       // half-window in grid points (±252 km) —
-  // the same map extent as the Ch. 2 explorer (±250 km) for a consistent view
-  const TICKS_KM = [-200, -100, 0, 100, 200];
+  const WIN = 30;                       // half-window in grid points (±270 km) —
+  // the same extent as the section-1 widget: ticks in km from −270 to 270
+  const TICKS_KM = [-270, -180, -90, 0, 90, 180, 270];
 
   function aGeom(W, H) {
     const margin = { l: 46, r: 12, t: 14, b: 32 };

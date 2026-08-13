@@ -192,9 +192,9 @@
   }
 
   /* ------------------------------------------------------- spaghetti */
-  const WIN = 53;                       // half-window in grid points — the true
-  // 4 K ring (radius ~17.7 gp) then spans the central 1/9 of the map
-  const TICKS_KM = [-360, -180, 0, 180, 360];
+  const WIN = 28;                       // half-window in grid points (±252 km) —
+  // the same map extent as the Ch. 2 explorer (±250 km) for a consistent view
+  const TICKS_KM = [-200, -100, 0, 100, 200];
 
   function aGeom(W, H) {
     const margin = { l: 46, r: 12, t: 14, b: 32 };

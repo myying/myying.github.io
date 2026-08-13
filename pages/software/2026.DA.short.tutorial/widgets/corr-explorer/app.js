@@ -112,15 +112,10 @@
       rmax = Math.max(rmax, Math.abs(truthT[j][i]));
   const vmax = Math.ceil(rmax);
 
-  // scatter range: fixed once from all ensemble values, so axes stay stable
-  let smax = Math.abs(obsEns[0]);
-  for (let j = 0; j < ny; j++) {
-    for (let i = 0; i < nx; i++) {
-      const row = ensT[j][i];
-      for (let m = 0; m < nens; m++) smax = Math.max(smax, Math.abs(row[m]));
-    }
-  }
-  const srange = Math.ceil(smax * 1.05 / 5) * 5;
+  // scatter range: a fixed window [-2, 10] K — every state and observation
+  // value lies in [0, 8] (the truth blob peaks at ~7.9 K), so the axes stay
+  // stable and the cloud fills the plot (zoomed compared with the full range)
+  const S_LO = -2, S_HI = 10;
 
   // ----------------------------------------------------------- state
   let si = 33, sj = 18;                  // (i, j) of the state marker
@@ -334,13 +329,13 @@
     const { ctx, w, h } = fit;
     const mL = 40, mR = 12, mT = 10, mB = 30;
     const pw = w - mL - mR, ph = h - mT - mB;
-    const X = (v) => mL + ((v + srange) / (2 * srange)) * pw;
-    const Y = (v) => mT + ((srange - v) / (2 * srange)) * ph;
+    const X = (v) => mL + ((v - S_LO) / (S_HI - S_LO)) * pw;
+    const Y = (v) => mT + ((S_HI - v) / (S_HI - S_LO)) * ph;
 
-    // axes + grid
+    // axes + grid (0..10 every 2 K)
     ctx.strokeStyle = cssVar("--line");
     ctx.lineWidth = 1;
-    for (const t of [-srange, -srange / 2, 0, srange / 2, srange]) {
+    for (const t of [0, 2, 4, 6, 8, 10]) {
       ctx.beginPath(); ctx.moveTo(X(t), mT); ctx.lineTo(X(t), mT + ph); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(mL, Y(t)); ctx.lineTo(mL + pw, Y(t)); ctx.stroke();
     }
@@ -351,9 +346,9 @@
     ctx.font = "9px system-ui, sans-serif";
     ctx.fillStyle = cssVar("--ink-3");
     ctx.textAlign = "center";
-    for (const t of [-srange, 0, srange]) {
-      ctx.fillText(Math.round(t), X(t), mT + ph + 12);
-      ctx.fillText(Math.round(t), mL - 5, Y(t) + 3);
+    for (const t of [0, 2, 4, 6, 8, 10]) {
+      ctx.fillText(t, X(t), mT + ph + 12);
+      ctx.fillText(t, mL - 5, Y(t) + 3);
     }
     ctx.textAlign = "center";
     ctx.fillStyle = cssVar("--ink-2");

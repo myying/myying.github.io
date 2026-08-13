@@ -102,6 +102,7 @@
   // stable while the sliders move
   const AX_LO = -2, AX_HI = 10;
   const AX_TICKS = [0, 2, 4, 6, 8, 10];
+  const SC_M = { l: 42, r: 12, t: 10, b: 30 };   // scatter plot margins (CSS px)
 
   // ----------------------------------------------------------- state
   let si = 33, sj = 18;                  // (i, j) of the state marker
@@ -359,7 +360,7 @@
     const fit = fitCanvas(cv);
     if (!fit) return;
     const { ctx, w, h } = fit;
-    const mL = 42, mR = 12, mT = 10, mB = 30;
+    const mL = SC_M.l, mR = SC_M.r, mT = SC_M.t, mB = SC_M.b;
     const pw = w - mL - mR, ph = h - mT - mB;
     const X = (v) => mL + ((v - AX_LO) / (AX_HI - AX_LO)) * pw;
     const Y = (v) => mT + ((AX_HI - v) / (AX_HI - AX_LO)) * ph;
@@ -610,13 +611,48 @@
   function hideTooltip() { tip.style.display = "none"; }
 
   // ----------------------------------------------------------------- init
+  // select a member (slider or scatter click) — highlights its 4 K contour
+  // (both panels), its blob centres and its update arrow in the scatter
   const memEl = $("mem-slider"), memVal = $("mem-val");
+  function setSel(m) {
+    sel = clamp(m, 0, nens - 1);
+    if (memEl) { memEl.value = sel + 1; memVal.textContent = sel + 1; }
+    render();
+  }
   if (memEl) {
     memEl.value = sel + 1;
     memEl.addEventListener("input", () => {
-      sel = clamp(parseInt(memEl.value, 10) || 1, 1, nens) - 1;
-      memVal.textContent = sel + 1;
-      render();
+      setSel((parseInt(memEl.value, 10) || 1) - 1);
+    });
+  }
+  // click on the scatter to select the nearest member (background or analysis
+  // point — the same member's two dots), driving the slider + highlights
+  const scatCv = $("scat");
+  if (scatCv) {
+    scatCv.addEventListener("click", (e) => {
+      const rect = scatCv.getBoundingClientRect();
+      const cx = e.clientX - rect.left, cy = e.clientY - rect.top;
+      const pw = rect.width - SC_M.l - SC_M.r, ph = rect.height - SC_M.t - SC_M.b;
+      if (pw <= 0 || ph <= 0) return;
+      const X = (v) => SC_M.l + ((v - AX_LO) / (AX_HI - AX_LO)) * pw;
+      const Y = (v) => SC_M.t + ((AX_HI - v) / (AX_HI - AX_LO)) * ph;
+      const R = sigO * sigO, denom = varB + R, sq = Math.sqrt(R);
+      const Kobs = varB / denom, Kcell = covF[sj * nx + si] / denom;
+      let best = -1, bd = 25 * 25;          // click within 25 CSS px of a dot
+      for (let m = 0; m < nens; m++) {
+        const inc = obs.val + obsZ[m] * sq - hxb[m];
+        const xb = X(hxb[m]), yb = Y(ensT[sj][si][m]);
+        if (isFinite(xb) && isFinite(yb)) {
+          const dx = xb - cx, dy = yb - cy, d2 = dx * dx + dy * dy;
+          if (d2 < bd) { bd = d2; best = m; }
+        }
+        const xa = X(hxb[m] + Kobs * inc), ya = Y(ensT[sj][si][m] + Kcell * inc);
+        if (isFinite(xa) && isFinite(ya)) {
+          const dx = xa - cx, dy = ya - cy, d2 = dx * dx + dy * dy;
+          if (d2 < bd) { bd = d2; best = m; }
+        }
+      }
+      if (best >= 0) setSel(best);
     });
   }
   const sigEl = $("sig-o"), sigVal = $("sig-o-val");

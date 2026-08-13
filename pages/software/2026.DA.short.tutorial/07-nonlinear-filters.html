@@ -177,10 +177,12 @@
       <p class="hint">
         <strong>Try it:</strong> slide L<sub>sprd</sub> up &#8212; the prior band widens, the EnKF band
         only tightens where the regression points, and the particle filter lights up just the
-        members whose rings are consistent with the observation. Watch the readout: the weighted
-        centre distance shows how far the posterior is pulled toward the truth, and
-        N<sub>eff</sub> = 1/&Sigma;w<sub>m</sub><sup>2</sup> collapses as the observation becomes
-        unlikely under the prior. N<sub>ens</sub> changes how many contours the filters share.
+        members whose rings are consistent with the observation. Walk the <em>member</em> slider to
+        trace one member's rings through all three panels (its colour is the same everywhere) and
+        read its particle-filter weight. Watch the readout: the weighted centre distance shows how
+        far the posterior is pulled toward the truth, and N<sub>eff</sub> = 1/&Sigma;w<sub>m</sub><sup>2</sup>
+        collapses as the observation becomes unlikely under the prior. N<sub>ens</sub> changes how
+        many contours the filters share.
       </p>
 
       <div class="da-widget" id="pf-explorer">
@@ -212,7 +214,7 @@
               <h4 class="ctl-title">Location spread <span class="ctl-note">centre position error, in units of R<sub>mw</sub></span></h4>
               <label class="ctl-row">
                 <span class="ctl-label">L<sub>sprd</sub></span>
-                <input type="range" id="pf-sprd" min="0.1" max="3" step="0.1" value="1">
+                <input type="range" id="pf-sprd" min="0.1" max="3" step="0.1" value="1.5">
                 <span class="ctl-val" id="pf-sprd-val"></span>
               </label>
               <label class="ctl-row">
@@ -222,15 +224,22 @@
               </label>
               <button class="ctl-btn" id="pf-rerun" title="draw a new prior ensemble">&#8635; new ensemble</button>
             </div>
+            <div class="ctl-group" data-color="sel">
+              <h4 class="ctl-title">Member highlight <span class="ctl-note">trace one member through the three ensembles</span></h4>
+              <label class="ctl-row">
+                <span class="ctl-label">member</span>
+                <input type="range" id="pf-sel" min="1" max="100" step="1" value="50">
+                <span class="ctl-val" id="pf-sel-val">50</span>
+              </label>
+            </div>
           </div>
 
           <p class="readout" id="pf-readout" role="status"></p>
 
           <ul class="legend">
             <li><span class="mark truth"></span> truth 20 m/s rings</li>
-            <li><span class="mark prior"></span> prior members</li>
-            <li><span class="mark enkf"></span> EnKF posterior</li>
-            <li><span class="mark pf"></span> PF posterior (brightness &#8733; weight)</li>
+            <li><span class="mark member"></span> member rings (same colour in all three panels)</li>
+            <li><span class="mark sel"></span> selected member</li>
             <li><span class="mark obs">+</span> obs P</li>
           </ul>
         </main>

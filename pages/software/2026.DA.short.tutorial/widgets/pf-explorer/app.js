@@ -5,7 +5,11 @@
    zonal wind u at the point P (the + on every panel).
 
    The three panels are 20 m/s wind-contour spaghetti plots of the SAME
-   ensemble, before and after assimilating the observation:
+   ensemble, before and after assimilating the observation.  Every member
+   keeps its own Tab20 colour in all three panels, so a member's rings can
+   be traced from the prior, through the EnKF analysis, to the particle
+   filter (the member slider highlights one member; the readout shows its
+   weight):
    - (a) prior:      every member's 20 m/s rings around its centre.
    - (b) EnKF posterior: the linear-regression update of the centres on
                      the innovation (y - u(P)): with one scalar observation
@@ -15,9 +19,9 @@
                      the prior — and is biased when u(centre) is nonlinear.
    - (c) PF posterior: the SAME prior particles reweighted by the
                      likelihood p(y | centre) = N(y; u(centre), R).  The
-                     rings LIGHT UP with the weight: brightness ∝ weight,
-                     so only the members consistent with the observation
-                     survive.
+                     rings LIGHT UP with the weight: brightness and line
+                     width ∝ weight, so only the members consistent with
+                     the observation survive.
 
    Controls: L_sprd (centre-position error, units of R_mw), N_ens (shared
    ensemble size), and a "new ensemble" button.  The observation value is
@@ -51,7 +55,9 @@
   const SIG_O = 2.0;                   // observation error std, m/s (fixed)
 
   let NENS = 100;                     // ensemble size (tunable)
-  let Lsprd = RMW;                    // location spread, grid points (default 1 Rmw)
+  let Lsprd = 1.5 * RMW;              // location spread, grid points (default 1.5 Rmw)
+  let sel = 49;                       // highlighted member, 0-based (default #50)
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
   // tangential wind speed of the modified Rankine vortex
   function vtheta(r) {
@@ -66,6 +72,12 @@
   }
   const V_T = uWind(C_I, C_J, P_I, P_J);          // truth zonal wind at P
   const Y_OBS = V_T + 3 * SIG_O;                  // observed u at P (a 3σ_o outlier)
+
+  // member palette (Tab20-style cycle — the SAME member keeps its colour in
+  // all three panels, so its rings can be traced prior → EnKF → PF)
+  const MEM_COLORS = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
+    "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"];
+  const memColor = (m) => MEM_COLORS[m % MEM_COLORS.length];
   // radii of the 20 m/s contour around a centre (analytic: one inside Rmw,
   // one outside — see the rankine widget)
   function ringRadii() {
@@ -198,9 +210,10 @@
     return { margin, side, x0, y0: margin.t, s: side / (2 * WIN) };
   }
 
-  // one spaghetti panel: every member's 20 m/s rings, then the truth rings,
-  // the observation point P, and the axes
-  function drawEnsembleMap(cv, centres, alphas, color, lw) {
+  // one spaghetti panel: every member's 20 m/s rings (styled per member), the
+  // highlighted member on top, then the truth rings, the observation point P
+  // and the axes.  styleFn(m) -> { color, alpha, lw } (return null to skip).
+  function drawEnsembleMap(cv, centres, styleFn) {
     const [ctx, W, H] = sizeCanvas(cv);
     const { margin, side, x0, y0, s } = aGeom(W, H);
     const [rIn, rOut] = ringRadii();
@@ -209,12 +222,35 @@
     ctx.beginPath();
     ctx.rect(x0, y0, side, side);
     ctx.clip();
-    ctx.lineWidth = lw;
     for (let m = 0; m < NENS; m++) {
+      if (m === sel) continue;
+      const st = styleFn(m);
+      if (!st || st.alpha <= 0.01) continue;
       const cx = x0 + (centres.ci[m] - (C_I - WIN)) * s;
       const cy = y0 + (centres.cj[m] - (C_J - WIN)) * s;
-      const a = alphas[m];
-      ctx.strokeStyle = hexA(color, a);
+      ctx.strokeStyle = hexA(st.color, st.alpha);
+      ctx.lineWidth = st.lw;
+      ctx.beginPath();
+      ctx.arc(cx, cy, rIn * s, 0, 6.2832);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(cx, cy, rOut * s, 0, 6.2832);
+      ctx.stroke();
+    }
+    // the highlighted member: white halo + thick ring in its colour
+    {
+      const cx = x0 + (centres.ci[sel] - (C_I - WIN)) * s;
+      const cy = y0 + (centres.cj[sel] - (C_J - WIN)) * s;
+      ctx.strokeStyle = hexA(T.surface1, 0.9);
+      ctx.lineWidth = 6.5;
+      ctx.beginPath();
+      ctx.arc(cx, cy, rIn * s, 0, 6.2832);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(cx, cy, rOut * s, 0, 6.2832);
+      ctx.stroke();
+      ctx.strokeStyle = memColor(sel);
+      ctx.lineWidth = 3.2;
       ctx.beginPath();
       ctx.arc(cx, cy, rIn * s, 0, 6.2832);
       ctx.stroke();
@@ -282,27 +318,29 @@
     updateT();
     const c = compute();
 
-    // panel (a): prior — every member equally dim
-    const aPrior = new Float64Array(NENS).fill(0.4);
-    drawEnsembleMap(cvPrior, { ci, cj }, aPrior, T.blue, 1);
+    // panel (a): prior — every member coloured, equally dim
+    drawEnsembleMap(cvPrior, { ci, cj }, (m) => ({ color: memColor(m), alpha: 0.42, lw: 1 }));
 
     // panel (b): EnKF analysis
-    const aEnKF = new Float64Array(NENS).fill(0.55);
-    drawEnsembleMap(cvEnKF, { ci: c.ai, cj: c.aj }, aEnKF, T.red, 1);
+    drawEnsembleMap(cvEnKF, { ci: c.ai, cj: c.aj }, (m) => ({ color: memColor(m), alpha: 0.55, lw: 1 }));
 
-    // panel (c): PF posterior — brightness ∝ weight (the members "light up")
-    const aPF = new Float64Array(NENS);
-    for (let m = 0; m < NENS; m++) aPF[m] = 0.08 + 0.92 * (c.w[m] / c.wmax);
-    drawEnsembleMap(cvPF, { ci, cj }, aPF, T.pf, 1);
+    // panel (c): PF posterior — brightness AND width ∝ weight ("light up")
+    drawEnsembleMap(cvPF, { ci, cj }, (m) => ({
+      color: memColor(m),
+      alpha: 0.08 + 0.92 * (c.w[m] / c.wmax),
+      lw: 1 + 1.7 * (c.w[m] / c.wmax),
+    }));
 
     // readout
     const km = (g) => (g * DX).toFixed(0);
+    const wsel = c.w[sel] * 100;
+    const wTxt = wsel < 0.05 ? "\u22480%" : wsel.toFixed(1) + "%";
     $("pf-readout").innerHTML =
       `obs u(P) = <strong>${Y_OBS.toFixed(1)} m/s</strong> (&sigma;<sub>o</sub> = ${SIG_O.toFixed(1)}) ` +
       `&#183; centre distance from truth (rms): prior <strong>${km(c.rmsP)} km</strong> ` +
       `&rarr; EnKF <strong>${km(c.rmsE)} km</strong> &#183; PF (weighted) <strong>${km(c.rmsW)} km</strong> ` +
       `&#183; N<sub>eff</sub> = <strong>${c.neff.toFixed(0)}</strong> of ${NENS} ` +
-      `&#183; max w <strong>${(c.wmax * 100).toFixed(1)}%</strong>`;
+      `&#183; member <strong>${sel + 1}</strong> w <strong>${wTxt}</strong> (max <strong>${(c.wmax * 100).toFixed(1)}%</strong>)`;
   }
 
   sprdSlider.addEventListener("input", () => {
@@ -317,6 +355,16 @@
     ci = new Float64Array(NENS);
     cj = new Float64Array(NENS);
     sampleEnsemble();
+    sel = Math.min(sel, NENS - 1);
+    selSlider.max = NENS;
+    selSlider.value = sel + 1;
+    selVal.textContent = sel + 1;
+    render();
+  });
+  const selSlider = $("pf-sel"), selVal = $("pf-sel-val");
+  selSlider.addEventListener("input", () => {
+    sel = clamp(parseInt(selSlider.value, 10) || 1, 1, NENS) - 1;
+    selVal.textContent = sel + 1;
     render();
   });
   rerunBtn.addEventListener("click", () => { sampleEnsemble(); render(); });
@@ -326,6 +374,9 @@
   sprdVal.innerHTML = (Lsprd / RMW).toFixed(1) + " R<sub>mw</sub>";
   nensSlider.value = NENS;
   nensVal.textContent = NENS;
+  selSlider.max = NENS;
+  selSlider.value = sel + 1;
+  selVal.textContent = sel + 1;
   sampleEnsemble();
   render();
 

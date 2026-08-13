@@ -107,6 +107,7 @@
   box-shadow: var(--shadow);
 }
 #pf-explorer .ctl-group[data-color="member"] { --ctl-accent: var(--series-amber); }
+#pf-explorer .ctl-group[data-color="sel"]   { --ctl-accent: var(--series-pf); }
 #pf-explorer .ctl-title {
   margin: 0;
   font-size: 0.82rem;
@@ -183,6 +184,10 @@
 #pf-explorer .legend li { display: flex; align-items: center; gap: 7px; }
 #pf-explorer .mark { display: inline-block; flex: 0 0 auto; }
 #pf-explorer .mark.truth { width: 18px; height: 3px; background: var(--series-ink); border-radius: 1px; }
+#pf-explorer .mark.member { width: 18px; height: 2px;
+  background: linear-gradient(90deg, #1f77b4, #ff7f0e, #2ca02c, #d62728, #9467bd, #17becf);
+  border-radius: 1px; }
+#pf-explorer .mark.sel   { width: 18px; height: 4px; background: #ff7f0e; border-radius: 1px; }
 #pf-explorer .mark.prior { width: 18px; height: 2px; background: var(--series-blue); border-radius: 1px; }
 #pf-explorer .mark.enkf  { width: 18px; height: 2px; background: var(--series-red); border-radius: 1px; }
 #pf-explorer .mark.pf    { width: 18px; height: 2px; background: var(--series-pf); border-radius: 1px; }

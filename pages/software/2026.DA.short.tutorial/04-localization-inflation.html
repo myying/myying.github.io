@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="chapters.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="widgets/cov-explorer/style.css">
+<link rel="stylesheet" href="widgets/inflation-explorer/style.css">
 
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-148955805-2"></script>
@@ -160,7 +161,7 @@
         3.0 K&#178; there). That sampling noise is exactly what localization removes.
       </p>
 
-      <h3>Localization: the fix for sampling noise</h3>
+      <h4 id="sec-loc">1 &#183; Localization: the fix for sampling noise</h4>
       <p>
         Toggle <b>localize</b> on: the sample covariance map is multiplied, point by point, by the
         <strong>Gaspari&#8211;Cohn</strong> compact-support kernel &#8212; weight 1 at the observation, a smooth
@@ -172,12 +173,90 @@
         sample map &#8212; that is the price of killing sampling noise. Slide <em>R</em> down to localize more
         aggressively, or toggle localization off to see the raw sample.
       </p>
+      <h4 id="sec-infl">2 &#183; Inflation: the fix for missing spread</h4>
       <p>
-        <b>Inflation</b> is the other knob: multiplying the ensemble perturbations by a factor
-        slightly above 1 widens the sample spread, compensating for the variance lost to sampling
-        error &#8212; and, together with localization, keeps the filter from collapsing onto a wrong
-        analysis. It is not part of this widget, but it acts on the same diagonal of the covariance
-        matrix that you see here as the peak at the observation.
+        Localization fixes a <em>spatial</em> problem — sampling noise far from the observation.
+        Inflation fixes a different one: Chapter 3 section 2 showed that a perfect, deterministic
+        model has nothing to replenish spread — harmless there, since the mean always tracks the
+        truth exactly regardless. This is the exact same cycling, 3x3 nine-station storm-tracking
+        widget, still with a perfectly deterministic truth, but with one change: the ensemble's
+        forecast assumes a <em>systematic bias</em> in the storm's mean velocity — every member is
+        advected noticeably <em>slower</em> than the truth actually moves (about two-thirds
+        speed), cycle after cycle, forever.
+        With nothing to replenish spread, the analysis stays confidently — and wrongly — certain
+        about where the storm is, while the ensemble mean keeps falling further behind.
+        <strong>Inflation</strong> is the fix, and here it's the simplest possible kind: after
+        every analysis, every member's position gets its own independent random kick — a
+        <strong>position perturbation</strong>, standard deviation in km — literally the same
+        mechanism as the per-cycle gustiness Chapter 3 could have had, just applied after the
+        analysis instead of during the forecast. The bigger the perturbation, the more spread
+        survives each cycle for the Kalman gain to work with, which is exactly what a persistent
+        bias needs.
+      </p>
+      <p class="hint">
+        <strong>Try it:</strong> hit <em>run</em> with the perturbation at 0 km (no inflation) and
+        watch the storm's forecast systematically lag behind — the ensemble mean trails further
+        and further off the truth track, spread collapses to nearly nothing, and the rms error
+        (red) climbs and stays high, because the ensemble has no bias problem it can see, only one
+        it keeps causing. Reset, raise the perturbation toward 5&#8211;8 km, and run again: the
+        larger spread gives the analysis more leverage to correct the bias each cycle, and the
+        ensemble mean settles in close behind the truth. Push it well past that and it gets worse
+        again — more random kick just means more spread, not more accuracy.
+      </p>
+
+      <!-- ================= Inflation Explorer ================ -->
+      <div class="da-widget" id="inflation-explorer">
+
+        <main class="viz-root">
+
+          <div class="workspace">
+            <div class="panels-wrap">
+              <div class="panel-grid">
+                <section class="panel">
+                  <h2 class="panel-title">Storm track</h2>
+                  <canvas class="map" id="infl-map"></canvas>
+                </section>
+                <section class="panel">
+                  <h2 class="panel-title">Ensemble spread vs. rms error</h2>
+                  <canvas class="ts" id="infl-ts"></canvas>
+                </section>
+              </div>
+            </div>
+          </div>
+
+          <div class="controls">
+            <div class="ctl">
+              <label for="infl-perturb">position perturbation (km)</label>
+              <input type="range" id="infl-perturb" min="0" max="25" step="1" value="0">
+              <span class="ctl-val" id="infl-perturb-val">0</span>
+            </div>
+            <div class="ctl ctl-buttons">
+              <button class="ctl-btn" id="infl-run" aria-pressed="false" title="run automatically">&#9654; run</button>
+              <button class="ctl-btn" id="infl-reset" title="reset the ensemble and history">&#8635; reset</button>
+            </div>
+          </div>
+
+          <p class="readout" id="infl-readout" role="status"></p>
+
+          <ul class="legend">
+            <li><span class="mark truth"></span> truth track</li>
+            <li><span class="mark member"></span> members</li>
+            <li><span class="mark mean"></span> ensemble mean</li>
+            <li><span class="mark obs">+</span> stations</li>
+            <li><span class="mark spread"></span> spread</li>
+            <li><span class="mark rmse"></span> rms error</li>
+          </ul>
+        </main>
+
+      </div>
+      <!-- ================= end widget ===================================== -->
+
+      <p>
+        This position perturbation is a single dial standing in for a whole family of inflation
+        schemes — real systems use several variants (multiplicative scaling, relaxation to prior
+        perturbations, additive noise like this widget's), and the right one depends on what's
+        actually wrong. The mechanism is always the same, though: put back some of the spread the
+        analysis removes, so the ensemble's confidence stays honest about how wrong it actually is.
       </p>
       <p class="planned-ref">&#8594; Evensen et al., <i>Data Assimilation Fundamentals</i> (2022), Ch 10 &#8212; localization and inflation; Gaspari &amp; Cohn (1999), <i>QJRMS</i> 125, 723&#8211;757.</p>
 
@@ -195,5 +274,6 @@
 
   <script src="../../../footer.js"></script>
   <script src="widgets/cov-explorer/app.js"></script>
+  <script src="widgets/inflation-explorer/app.js"></script>
 </body>
 </html>

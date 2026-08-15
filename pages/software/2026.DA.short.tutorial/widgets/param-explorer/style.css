@@ -1,0 +1,186 @@
+/* Cycling EnKF explorer (Ch. 3, §2) — embedding stylesheet. Scoped to
+   #param-explorer; custom properties live on the wrapper. Two panels (storm
+   track map, spread-vs-RMSE time series) side by side (phone: stacked),
+   a single flat vertically-stacked controls box, and a readout — the same
+   visual language as the Ch. 6 §2 (pf-explorer) widget.
+*/
+#param-explorer {
+  --surface-1:      #fcfcfb;
+  --surface-2:      #f9f9f7;
+  --ink-1:          #0b0b0b;
+  --ink-2:          #52514e;
+  --ink-3:          #898781;
+  --border:         rgba(11,11,11,0.10);
+  --axis:           #c3c2b7;
+  --series-ink:     #0b0b0b;
+  --series-blue:    #2b7bba;
+  --series-red:     #e34948;
+  --series-amber:   #eda100;
+  --series-pf:      #2ca02c;
+  --accent-fill:    #ffffff;
+  --shadow:         0 1px 2px rgba(11,11,11,0.06), 0 4px 16px rgba(11,11,11,0.05);
+}
+#param-explorer[data-theme="dark"] {
+  --surface-1:      #1a1a19;
+  --surface-2:      #0d0d0d;
+  --ink-1:          #ffffff;
+  --ink-2:          #c3c2b7;
+  --ink-3:          #898781;
+  --border:         rgba(255,255,255,0.10);
+  --axis:           #4d4d49;
+  --series-ink:     #ffffff;
+  --series-blue:    #6fb3e8;
+  --series-red:     #e66767;
+  --series-amber:   #e0a61d;
+  --series-pf:      #52c94f;
+  --accent-fill:    #1a1a19;
+  --shadow:         0 1px 2px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.35);
+}
+
+#param-explorer, #param-explorer * { box-sizing: border-box; }
+#param-explorer {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--surface-2);
+  color: var(--ink-1);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  margin: 20px 0 8px;
+}
+#param-explorer .viz-root { max-width: 1180px; margin: 0 auto; padding: 22px 22px 26px; }
+
+/* ---------------------------------------------------------- panel grid */
+#param-explorer .workspace { display: flex; gap: 14px; }
+#param-explorer .panels-wrap { flex: 1; min-width: 0; }
+#param-explorer .panel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+#param-explorer .panel {
+  min-width: 0;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 12px 10px;
+  box-shadow: var(--shadow);
+}
+#param-explorer .panel-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-2);
+  margin: 0 0 8px;
+  letter-spacing: 0.01em;
+  text-align: center;
+}
+#param-explorer canvas.map,
+#param-explorer canvas.ts {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  aspect-ratio: 1 / 1;
+  border-radius: 8px;
+  background: var(--surface-1);
+  cursor: default;
+}
+
+/* -------------------------------------------------------------- controls */
+/* single always-vertical flat box, same width as the panel row (both are
+   direct, unpadded children of .viz-root) */
+#param-explorer .controls {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin: 14px 0 0;
+  padding: 14px 18px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+}
+#param-explorer .ctl {
+  display: grid;
+  grid-template-columns: 128px 1fr 46px;
+  align-items: center;
+  gap: 9px;
+  font-size: 0.82rem;
+  color: var(--ink-2);
+}
+#param-explorer .ctl label { white-space: nowrap; }
+#param-explorer .ctl em { font-style: italic; color: var(--ink-1); }
+#param-explorer .ctl input[type="range"] {
+  width: 100%;
+  margin: 0;
+  accent-color: var(--series-amber);
+  cursor: pointer;
+}
+#param-explorer .ctl input#param-nens { accent-color: var(--series-blue); }
+#param-explorer .ctl-val {
+  text-align: right;
+  font-weight: 650;
+  color: var(--ink-1);
+  font-variant-numeric: tabular-nums;
+}
+#param-explorer .ctl-buttons { grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+#param-explorer .ctl-btn {
+  padding: 9px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-1);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  white-space: nowrap;
+}
+#param-explorer .ctl-btn[aria-pressed="true"] { color: var(--series-pf); border-color: var(--series-pf); }
+#param-explorer .ctl-btn:hover { border-color: var(--series-amber); color: var(--series-amber); }
+@media (max-width: 420px) {
+  #param-explorer .ctl { grid-template-columns: 1fr; }
+  #param-explorer .ctl-val { text-align: left; }
+  #param-explorer .ctl-buttons { grid-template-columns: 1fr; }
+}
+
+/* -------------------------------------------------------------- readout */
+#param-explorer .readout {
+  margin: 14px 0 8px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-1);
+  font-size: 0.85rem;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  box-shadow: var(--shadow);
+}
+#param-explorer .readout strong { color: var(--ink-1); font-weight: 650; }
+
+/* --------------------------------------------------------------- legend */
+#param-explorer .legend {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+  font-size: 0.78rem;
+  color: var(--ink-2);
+}
+#param-explorer .legend li { display: flex; align-items: center; gap: 7px; }
+#param-explorer .legend li.legend-note { color: var(--ink-3); }
+#param-explorer .mark { display: inline-block; flex: 0 0 auto; }
+#param-explorer .mark.truth  { width: 18px; height: 3px; background: var(--series-ink); border-radius: 1px; }
+#param-explorer .mark.member { width: 10px; height: 10px; border-radius: 50%; background: var(--series-blue); opacity: 0.6; }
+#param-explorer .mark.mean   { width: 10px; height: 10px; border-radius: 50%; background: var(--series-amber); }
+#param-explorer .mark.spread { height: 0; width: 16px; border-top: 2px dashed var(--series-blue); }
+#param-explorer .mark.rmse   { height: 0; width: 16px; border-top: 2px solid var(--series-red); }
+#param-explorer .mark.truespeed { height: 0; width: 16px; border-top: 2px dashed var(--series-ink); }
+#param-explorer .mark.memspeed  { height: 0; width: 16px; border-top: 1px solid #17becf; opacity: 0.75; }
+#param-explorer .mark.estspeed  { height: 0; width: 16px; border-top: 3px solid var(--series-blue); }
+#param-explorer .mark.obs {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 13px; height: 13px; border-radius: 3px;
+  background: #101010; color: #ffffff; font-size: 10px; font-weight: 700; line-height: 1;
+}

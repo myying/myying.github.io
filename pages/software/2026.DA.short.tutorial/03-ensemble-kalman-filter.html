@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="chapters.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="widgets/enkf-explorer/style.css">
+<link rel="stylesheet" href="widgets/cycle-explorer/style.css">
 
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-148955805-2"></script>
@@ -48,6 +49,8 @@
       </nav>
 
       <h3>The ensemble Kalman filter</h3>
+
+      <h4 id="sec-enkf">1 &#183; A single analysis step</h4>
       <p>
         From the scalar precision-weighted average of Chapter 1 to the full state vector: the best
         linear unbiased estimate is a matrix update,
@@ -167,6 +170,81 @@
         and the EnKF update.
       </p>
 
+      <!-- ====================== cycling EnKF widget ==================== -->
+      <h4 id="sec-cycle">2 &#183; Cycling the filter</h4>
+      <p>
+        Real data assimilation is not one analysis — it is a loop: forecast, observe, analyze,
+        repeat. The same warm blob from Chapter 2 becomes a storm here, drifting at a constant,
+        <em>perfectly known</em> velocity — the simplest possible dynamical system, no noise
+        anywhere — across a domain that wraps at the edges, so it keeps cycling past a network of
+        3&times;3 network of nine fixed ground stations forever. Each cycle observes every station in turn and applies
+        the exact same update as section 1 above to each — but now to a low-dimensional state, the
+        storm's centre (c<sub>x</sub>, c<sub>y</sub>), so the vector Kalman update is exact, not a
+        shortcut.
+      </p>
+      <p class="hint">
+        <strong>Try it:</strong> hit <em>run</em> and watch the right-hand panel: the ensemble
+        spread (blue) shrinks every cycle, while the error against the truth (red) stays near
+        zero — the model is perfect, so the mean is always right even once spread collapses.
+        Nothing here regrows the spread the analysis keeps removing. Is that a problem? With a
+        perfect model, no. Chapter 4 changes exactly one thing about this setup and watches it
+        become one.
+      </p>
+
+      <!-- ================= Cycling EnKF Explorer ================ -->
+      <div class="da-widget" id="cycle-explorer">
+
+        <main class="viz-root">
+
+          <div class="workspace">
+            <div class="panels-wrap">
+              <div class="panel-grid">
+                <section class="panel">
+                  <h2 class="panel-title">Storm track</h2>
+                  <canvas class="map" id="cyc-map"></canvas>
+                </section>
+                <section class="panel">
+                  <h2 class="panel-title">Ensemble spread vs. rms error</h2>
+                  <canvas class="ts" id="cyc-ts"></canvas>
+                </section>
+              </div>
+            </div>
+          </div>
+
+          <div class="controls">
+            <div class="ctl ctl-buttons">
+              <button class="ctl-btn" id="cyc-run" aria-pressed="false" title="run automatically">&#9654; run</button>
+              <button class="ctl-btn" id="cyc-reset" title="reset the ensemble and history">&#8635; reset</button>
+            </div>
+          </div>
+
+          <p class="readout" id="cyc-readout" role="status"></p>
+
+          <ul class="legend">
+            <li><span class="mark truth"></span> truth track</li>
+            <li><span class="mark member"></span> members</li>
+            <li><span class="mark mean"></span> ensemble mean</li>
+            <li><span class="mark obs">+</span> stations</li>
+            <li><span class="mark spread"></span> spread</li>
+            <li><span class="mark rmse"></span> rms error</li>
+          </ul>
+        </main>
+
+      </div>
+      <!-- ================= end widget ===================================== -->
+
+      <p>
+        Watch the readout as the cycles pile up: spread keeps falling — 10s of km, then a handful,
+        then a fraction — while the rms error sits at zero throughout. That gap between a
+        confident-looking (small-spread) ensemble and an actually-correct one is invisible here
+        only because the model has no error to reveal it.
+      </p>
+
+      <p class="planned-ref">
+        &#8594; Evensen et al., <i>Data Assimilation Fundamentals</i> (2022), Ch 6, 8 &#8212; linear analysis
+        and the EnKF update.
+      </p>
+
       <nav class="widget-nav widget-nav-bottom">
         <a href="toc.html" class="nav-home"><i class="fa fa-arrow-up" aria-hidden="true"></i> Table of Contents</a>
         <span class="nav-page">
@@ -182,5 +260,6 @@
   <script src="../../../footer.js"></script>
   <script src="widgets/enkf-explorer/data.js"></script>
   <script src="widgets/enkf-explorer/app.js"></script>
+  <script src="widgets/cycle-explorer/app.js"></script>
 </body>
 </html>

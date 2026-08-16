@@ -8,6 +8,7 @@
 #widget-page { display: block; max-width: 1180px; margin: 0 auto; }
 #widget-page h3 { font-size: 17px; margin: 28px 0 8px; }
 #widget-page code { overflow-wrap: break-word; }
+#widget-page mjx-container[display="true"] { overflow-x: auto; overflow-y: hidden; max-width: 100%; }
 
 .hint { font-size: 0.85rem; color: var(--text-muted); margin: 6px 0 0; }
 

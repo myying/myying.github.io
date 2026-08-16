@@ -27,8 +27,16 @@
 </script>
 
 <!-- MathJax -->
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']]
+    }
+  };
+</script>
 <script type="text/javascript" async
-  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_CHTML">
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js">
 </script>
 
 <title>Ch 3 · Challenges from dynamical systems — DA Interactive Tutorials</title>
@@ -161,14 +169,6 @@
 
       </div>
 
-      <p>
-        Panel (b) shows the whole story: error grows exponentially at first, then
-        <strong>saturates</strong> once it reaches the model's natural variability — beyond that
-        point, the forecast is no better than a random guess. Notice that spread tracks error
-        closely: the ensemble's confidence is honest here, because it was built to match exactly
-        this kind of error.
-      </p>
-
       <!-- ================================================================== -->
       <h3 id="sec-vort3d">2 &#183; A real process: rapid intensification in the vort3d hurricane model</h3>
       <p>
@@ -189,16 +189,6 @@
         <iframe src="vort3d-demo.html?embed=1&v=4" title="vort3d uncertainty demo"
                 loading="lazy"></iframe>
       </div>
-
-      <p class="vort3d-caption">
-        <b>Row 1</b> &mdash; track, intensity, and size for 20 forecasts; dashed line is the
-        ensemble mean. <b>Row 2</b> &mdash; the selected forecast's wind-speed map and a
-        cross-section through the storm, at the chosen time.
-      </p>
-      <p>
-        <i>Next:</i> Chapter 6 looks at <a href="06-nonlinear-filters.html">nonlinear filters</a> —
-        analysis schemes built for exactly the non-Gaussian cases seen here.
-      </p>
 
       <nav class="widget-nav widget-nav-bottom">
         <a href="toc.html" class="nav-home"><i class="fa fa-arrow-up" aria-hidden="true"></i> Table of Contents</a>

@@ -23,8 +23,16 @@
 </script>
 
 <!-- MathJax -->
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']]
+    }
+  };
+</script>
 <script type="text/javascript" async
-  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_CHTML">
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js">
 </script>
 
 <title>Data Assimilation Interactive Tutorials · Yue (Michael) Ying</title>
@@ -52,11 +60,21 @@
 
       <h4 id="sec-enkf">1 &#183; A single analysis step</h4>
       <p>
-        Chapter 1's weighted average, done for a whole field: each ensemble member is nudged
-        toward the observation by the same gain,
-        x<sub>a</sub> = x<sub>b</sub> + K(y &#8722; Hx<sub>b</sub>). This widget applies that update,
-        live, to Chapter 2's exact ensemble and observation — the correlation map you saw there
-        <em>is</em> the update pattern K.
+        Chapter 1's weighted average, done for a whole field. Each ensemble member $m$ is nudged
+        toward the observation $y$ by the same gain $K$:
+      </p>
+      <p style="text-align:center;">
+        $$x_a^{(m)} = x_b^{(m)} + K\big(y - H x_b^{(m)}\big), \qquad
+          K = \dfrac{\text{Cov}(Hx_b,\, x_b)}{\text{Var}(Hx_b) + \sigma_o^2}$$
+      </p>
+      <p>
+        $H$ picks out the observed quantity from the state ($Hx_b$ is the background at the
+        observation location); $y - Hx_b^{(m)}$ is that member's innovation — how far its
+        forecast is from the observation. $K$ is a vector, one gain value per grid point: this is
+        exactly Chapter 2's covariance map, divided by the observed variable's own variance plus
+        the observation error variance $\sigma_o^2$. This widget applies that update, live, to
+        Chapter 2's exact ensemble and observation — the covariance map you saw there <em>is</em>
+        the numerator of $K$.
       </p>
       <p class="hint">
         <strong>Try it:</strong> drag <em>obs error</em> — small &sigma;<sub>o</sub> trusts the
@@ -122,14 +140,6 @@
 
       </div>
       <!-- ================= end widget ===================================== -->
-
-      <h3>Reading the panels</h3>
-      <p>
-        <b>Background</b> — the forecast ensemble, loose around the truth ring. <b>Analysis</b> —
-        every member after the update, pulled toward the observation; the band tightens more the
-        smaller &sigma;<sub>o</sub> is. <b>Scatter</b> — background points (aqua) moving to
-        analysis points (red); the arrow shows one member's move.
-      </p>
 
       <!-- ====================== cycling EnKF widget ==================== -->
       <h4 id="sec-cycle">2 &#183; Cycling the filter</h4>

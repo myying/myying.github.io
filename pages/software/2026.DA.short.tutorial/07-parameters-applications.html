@@ -22,8 +22,16 @@
 </script>
 
 <!-- MathJax -->
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']]
+    }
+  };
+</script>
 <script type="text/javascript" async
-  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_CHTML">
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js">
 </script>
 
 <title>Data Assimilation Interactive Tutorials · Yue (Michael) Ying</title>
@@ -117,14 +125,6 @@
       </div>
       <!-- ================= end widget ===================================== -->
 
-      <h3>Reading the panels</h3>
-      <p>
-        <b>Storm track</b> — member dots, ensemble mean, and the true track. The spread here comes
-        entirely from members still disagreeing about velocity. <b>Drift speed</b> — each member's
-        estimated speed as a thin line, narrowing toward the true speed (dashed) as evidence
-        accumulates. <b>Spread vs. rms error</b> — the same honesty check as Chapters 3–4, for
-        position.
-      </p>
       <p>
         This is the whole idea of state augmentation: any unknown quantity can ride along in the
         state vector and get estimated the same way as the state itself — model parameters, bias

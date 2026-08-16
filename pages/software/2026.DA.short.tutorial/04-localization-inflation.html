@@ -23,8 +23,16 @@
 </script>
 
 <!-- MathJax -->
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']]
+    }
+  };
+</script>
 <script type="text/javascript" async
-  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_CHTML">
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js">
 </script>
 
 <title>Data Assimilation Interactive Tutorials · Yue (Michael) Ying</title>
@@ -49,11 +57,13 @@
       </nav>
 
       <h3>Localization and inflation</h3>
+
+      <h4 id="sec-loc">1 &#183; Localization: the fix for sampling noise</h4>
       <p>
         A small ensemble estimates covariance noisily. This widget shows the ensemble's estimate
-        next to the true covariance, so you can see the noise directly — and a
-        <strong>localization</strong> knob that cleans it up by zeroing out covariance beyond a
-        chosen radius.
+        next to the true covariance, so you can see the noise directly. With <b>localize</b> on,
+        the sample covariance is tapered to exactly zero beyond radius <em>R</em> — keeping the
+        reliable signal near the observation and discarding the noisy far field, real or not.
       </p>
       <p class="hint">
         <strong>Try it:</strong> drag the observation, and slide the ensemble size down to see the
@@ -120,21 +130,6 @@
       </div>
       <!-- ================= end widget ===================================== -->
 
-      <h3>Reading the panels</h3>
-      <p>
-        <b>Left</b> — the truth field; the red circle is the observation, drag it anywhere.
-        <b>Middle</b> — the true covariance, known exactly here. <b>Right</b> — what the ensemble
-        estimates, on the same colour scale. Small <em>n</em> makes the right panel noisy and
-        blobby compared to the middle one — that's sampling error, and it's what localization
-        cleans up.
-      </p>
-
-      <h4 id="sec-loc">1 &#183; Localization: the fix for sampling noise</h4>
-      <p>
-        With <b>localize</b> on, the sample covariance is tapered to exactly zero beyond radius
-        <em>R</em> — keeping the reliable signal near the observation and discarding the noisy
-        far field, real or not.
-      </p>
       <h4 id="sec-infl">2 &#183; Inflation: the fix for missing spread</h4>
       <p>
         Localization fixes noise in space. Inflation fixes a different problem: an ensemble that's

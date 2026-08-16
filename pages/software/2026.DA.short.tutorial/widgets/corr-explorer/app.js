@@ -35,6 +35,37 @@
   const kx = nx - 1, ky = ny - 1;
   const LKM = D.meta.Lx / 1e3;             // domain width, km
 
+  // ------------------------------------------- covariance = std_x·std_y·corr
+  // corrT (from data.js) is Corr(Obs T, State T) at every grid point. The
+  // ensemble std of the observed variable is a single number (obs location is
+  // fixed); the ensemble std of the state varies by grid point. Multiplying
+  // corr by both stds turns the correlation map into a covariance map — the
+  // quantity the Kalman gain actually uses (K = Cov / (Var_state_obs + Var_o)).
+  function stdOf(arr) {
+    let s = 0;
+    for (let m = 0; m < arr.length; m++) s += arr[m];
+    const mean = s / arr.length;
+    let v = 0;
+    for (let m = 0; m < arr.length; m++) v += (arr[m] - mean) * (arr[m] - mean);
+    return Math.sqrt(v / arr.length);
+  }
+  const stdObs = stdOf(obsEns);
+  const stdState = new Array(ny);
+  const covT = new Array(ny);
+  for (let j = 0; j < ny; j++) {
+    stdState[j] = new Array(nx);
+    covT[j] = new Array(nx);
+    for (let i = 0; i < nx; i++) {
+      stdState[j][i] = stdOf(ensT[j][i]);
+      covT[j][i] = corrT[j][i] * stdObs * stdState[j][i];
+    }
+  }
+  let covmax = 0;
+  for (let j = 0; j < ny; j++)
+    for (let i = 0; i < nx; i++)
+      covmax = Math.max(covmax, Math.abs(covT[j][i]));
+  covmax = Math.max(0.1, Math.ceil(covmax * 10) / 10);   // round up to 0.1 K²
+
   // ------------------------------------------------------------- theme
   // Follows the browser's light/dark preference (no manual toggle in the
   // embedded layout).
@@ -419,27 +450,30 @@
     lutTh.splice(0, lutTh.length, ...th2);
 
     // truth map (sequential YlOrRd, 0..vmax + 4 K contours) /
-    // corr map (diverging, -1..1)
+    // covariance map (diverging, -covmax..covmax)
     drawTruthMap($("map-truth"));
-    drawMap($("map-corr"), corrT, -1, 1, lut);
+    drawMap($("map-cov"), covT, -covmax, covmax, lut);
     drawColorbar($("cb-truth"), 0, vmax, lutTh, true);
-    drawColorbar($("cb-corr"), -1, 1, lut, false);
+    drawColorbar($("cb-cov"), -covmax, covmax, lut, false);
 
     // scatter panel
     let r = corrT[sj][si];
     if (!isFinite(r)) r = 0;      // defensive: a degenerate correlation (0/0)
                                   // would otherwise print "r = NaN"
+    let cov = covT[sj][si];
+    if (!isFinite(cov)) cov = 0;
     const ensVals = ensT[sj][si];
     drawScatter($("scat"), ensVals || [], truthT[sj][si], r, "T");
-    $("t-scat").textContent = "r = " + r.toFixed(2);
+    $("t-scat").textContent = "cov = " + cov.toFixed(2) + " K² (r = " + r.toFixed(2) + ")";
 
-    const sgn = (x) => (Math.abs(x) < 0.5 ? "0" : (x > 0 ? "+" : "\u2212") + Math.abs(x).toFixed(0));
+    const sgn = (x) => (Math.abs(x) < 0.5 ? "0" : (x > 0 ? "+" : "−") + Math.abs(x).toFixed(0));
     const dx = (memberCentres[2 * sel] - 0.5) * LKM;
     const dy = (memberCentres[2 * sel + 1] - 0.5) * LKM;
     $("readout").innerHTML =
       `State <strong>(i, j) = (${si}, ${sj})</strong> · ` +
       `truth T = <strong>${truthT[sj][si].toFixed(1)}</strong> K · ` +
-      `corr(obs T, state T) = <strong>${r.toFixed(2)}</strong><br>` +
+      `cov(obs T, state T) = <strong>${cov.toFixed(2)}</strong> K&sup2; ` +
+      `= &sigma;<sub>obs</sub>&sigma;<sub>state</sub>&rho; = ${stdObs.toFixed(2)} &times; ${stdState[sj][si].toFixed(2)} &times; ${r.toFixed(2)}<br>` +
       `member <strong>${sel + 1}</strong> · blob centre <strong>(${sgn(dx)}, ${sgn(dy)}) km</strong> from truth · ` +
       `T(m) at (i, j) = <strong>${(ensVals[sel] || 0).toFixed(1)}</strong> K`;
   }
@@ -497,7 +531,7 @@
   }
 
   // click / drag on any map to move the state marker
-  for (const id of ["map-truth", "map-corr"]) {
+  for (const id of ["map-truth", "map-cov"]) {
     const cv = $(id);
     let dragging = false;
     const move = (e) => {
@@ -531,7 +565,7 @@
     tip.innerHTML =
       `<strong>(${i}, ${j})</strong>` +
       ` · T = ${truthT[j][i].toFixed(2)} K` +
-      ` · corr = ${corrT[j][i].toFixed(2)}`;
+      ` · cov = ${covT[j][i].toFixed(2)} K²`;
     tip.style.display = "block";
     const pad = 14;
     let lx = cx + pad, ly = cy + pad;
@@ -591,7 +625,7 @@
     // Also observe each canvas: a phone browser may lay the canvases out only
     // after the first render (below-the-fold first paint), and only a size
     // change on the canvas itself reliably triggers the redraw.
-    for (const id of ["map-truth", "map-corr", "scat"]) ro.observe($(id));
+    for (const id of ["map-truth", "map-cov", "scat"]) ro.observe($(id));
   }
   // On some mobile browsers the first render can run before the stylesheet
   // layout settles (canvases still 0-sized); try again once more on the next

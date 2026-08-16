@@ -23,8 +23,16 @@
 </script>
 
 <!-- MathJax -->
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']]
+    }
+  };
+</script>
 <script type="text/javascript" async
-  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_CHTML">
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js">
 </script>
 
 <title>Data Assimilation Interactive Tutorials · Yue (Michael) Ying</title>
@@ -55,13 +63,24 @@
       </p>
 
       <!-- ====================== Gaussian hump widget ================== -->
-      <h4 id="sec-position-error">1 &#183; Position errors break the Gaussian assumption</h4>
+      <h4 id="sec-position-error">1 &#183; Nonlinearity breaks Gaussian assumption</h4>
       <p>
-        A warm blob whose members only differ in where it's centred — spread L<sub>sprd</sub>
-        controls how much. We watch the temperature at a fixed point P. Click P to move it, or a
-        dot in panel (c) to highlight that member. At small spread, the value at P is roughly
-        Gaussian; once the spread is large enough that members' centres sweep past P, the
-        distribution skews hard and stops looking Gaussian at all.
+        Every filter so far leaned on one fact: a Gaussian pushed through a <em>linear</em> map is
+        still Gaussian. That's why Chapter 1's product-of-Gaussians trick worked exactly. Push a
+        Gaussian through a <em>nonlinear</em> map $y = f(x)$ instead, and $y$ is generally no longer
+        Gaussian — it can pile up unevenly on one side (skewed) or grow heavier or lighter tails
+        (over- or under-kurtotic) than a bell curve with the same mean and variance.
+      </p>
+      <p>
+        Position error is a clean example of exactly this. A warm blob's <em>centre</em> $x$ is
+        Gaussian-distributed (spread L<sub>sprd</sub> controls how much) — but the quantity a
+        thermometer at a fixed point P actually measures is $y = f(x) = T(\lvert x - x_P\rvert)$,
+        the blob's temperature profile evaluated at P's distance from the centre. That's a
+        non-monotone, nonlinear function of $x$ (it peaks when the centre lands on P and falls off
+        both ways), so even though $x$ is perfectly Gaussian, $y$ is not. Click P to move it, or a
+        dot in panel (c) to highlight that member. Panel (b)'s readout tracks skew and kurtosis —
+        near zero and near 3 respectively for a Gaussian — as a quick check of how far $y$ has
+        drifted from Gaussian at the current spread.
       </p>
 
       <div class="da-widget" id="position-error">
@@ -143,11 +162,41 @@
       <!-- ====================== EnKF vs particle filter ================ -->
       <h4 id="sec-pf">2 &#183; EnKF vs particle filter</h4>
       <p>
-        The <strong>particle filter</strong> reweights each prior member by how well it matches
-        the observation, instead of shifting members like the EnKF does. Since it never assumes a
-        Gaussian shape, it can handle the skewed prior from section 1. The three panels below show
-        the same ensemble before and after assimilating one observation at P: the prior, the EnKF
-        analysis, and the particle-filter posterior (members light up by their weight).
+        The EnKF's update, $x_a^{(m)} = x_b^{(m)} + K(y - Hx_b^{(m)})$, only ever <em>shifts</em>
+        each member by the same gain $K$ — it can reshape a Gaussian, but not turn it into
+        something skewed. The <strong>particle filter</strong> takes a different approach: leave
+        every prior member $x_b^{(m)}$ where it is, and instead attach it an <strong>importance
+        weight</strong> — how consistent that member is with the observation, from the observation
+        likelihood:
+      </p>
+      <p style="text-align:center;">
+        $$\tilde w_m = p\big(y \mid x_b^{(m)}\big) = \exp\!\left(-\dfrac{\big(y - Hx_b^{(m)}\big)^2}{2\sigma_o^2}\right),
+          \qquad w_m = \dfrac{\tilde w_m}{\sum_{m'=1}^{N} \tilde w_{m'}}$$
+      </p>
+      <p>
+        Normalizing so the weights sum to one turns them into a discrete posterior: the analysis
+        is the weighted particle cloud $\{x_b^{(m)}, w_m\}$ itself, with weighted mean
+        $\bar x_a = \sum_m w_m\, x_b^{(m)}$. Since no Gaussian shape is assumed anywhere in this
+        step, the weights can land however the likelihood says — including on a skewed prior like
+        section 1's, which is exactly where the EnKF's shift-only update struggles.
+      </p>
+      <p>
+        The catch is <strong>weight collapse</strong>: if only a few members sit near the
+        observation, those few get almost all the weight and the rest become deadweight. The
+        standard diagnostic is the effective sample size,
+      </p>
+      <p style="text-align:center;">
+        $$N_{\text{eff}} = \dfrac{1}{\sum_{m=1}^{N} w_m^2}$$
+      </p>
+      <p>
+        which ranges from 1 (one particle has all the weight) to $N$ (all weights equal). Small
+        $N_{\text{eff}}$ relative to $N$ means most particles are contributing nothing — the
+        classic failure mode of particle filters in high dimensions.
+      </p>
+      <p>
+        The three panels below show the same ensemble before and after assimilating one
+        observation at P: the prior, the EnKF analysis, and the particle-filter posterior
+        (members light up by their weight $w_m$).
       </p>
       <p class="hint">
         <strong>Try it:</strong> slide L<sub>sprd</sub> up — the EnKF only tightens where a linear
@@ -221,15 +270,6 @@
         </main>
 
       </div>
-
-      <p>
-        <strong>Reading the panels.</strong> <b>(a)</b> The prior: a wide band of rings, the
-        possible positions. <b>(b)</b> The EnKF: the same update as Chapter 3, applied per grid
-        cell — it can only tighten the band, not slide it, so it distorts instead of shifting.
-        <b>(c)</b> The particle filter: the same members, but only the ones consistent with the
-        observation light up — a direct picture of how few particles actually matter, which
-        N<sub>eff</sub> in the readout quantifies.
-      </p>
 
       <p class="planned-ref">
         Suggested reading: Evensen et al., <i>Data Assimilation Fundamentals</i> (2022), Ch 9;

@@ -23,8 +23,16 @@
 </script>
 
 <!-- MathJax -->
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']]
+    }
+  };
+</script>
 <script type="text/javascript" async
-  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_CHTML">
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js">
 </script>
 
 <title>Data Assimilation Interactive Tutorials · Yue (Michael) Ying</title>
@@ -49,17 +57,45 @@
 
       <p>
         Data assimilation combines a <strong>forecast</strong> with an <strong>observation</strong> to
-        get the <strong>analysis</strong> — the best estimate, with its own uncertainty. For Gaussian
-        inputs, Bayes' rule gives a simple closed form. This page shows that rule in one variable,
-        then two.
+        get the <strong>analysis</strong> — the best estimate, with its own uncertainty. Treat the
+        true state $x$ as a random variable: before the observation, our belief about it is the
+        <strong>prior</strong> $p(x)$, i.e. the forecast pdf. The observation $y$ carries information
+        about $x$ through the <strong>likelihood</strong> $p(y \mid x)$ — how probable that
+        observation would be for each possible $x$. Bayes' rule combines the two into the
+        <strong>posterior</strong>, our updated belief after seeing $y$:
+      </p>
+      <p style="text-align:center;">
+        $$p(x \mid y) \;=\; \dfrac{p(y \mid x)\, p(x)}{p(y)} \;\propto\; p(y \mid x)\, p(x)$$
+      </p>
+      <p>
+        $p(y)$ is just a normalizing constant — it doesn't depend on $x$ — so the posterior is
+        <em>proportional to</em> prior &times; likelihood; normalizing it to integrate to one gives the
+        analysis pdf. This holds for any distributions. The special property of Gaussians is that
+        this product is itself Gaussian, with a closed-form mean and variance — no numerical
+        integration needed. That's what makes Bayes' rule practical for DA at scale: Kalman filters,
+        ensemble Kalman filters, and 3D/4D-Var all lean on this Gaussian closure in one form or
+        another. This page shows that closed form in one variable, then two.
       </p>
 
       <!-- ================================================================== -->
       <h3 id="sec-1d">1-D: one variable — the analysis as a weighted average</h3>
       <p>
-        One variable, one observation. The forecast is a Gaussian $N(\mu_b, \sigma_b^2)$; the
-        observation is $N(y, \sigma_o^2)$. The analysis is their weighted average, weighted by
-        certainty — the more precise input pulls harder.
+        One variable, one observation. The prior is $p(x) = N(\mu_b, \sigma_b^2)$; the likelihood,
+        as a function of $x$ for the fixed observed value $y$, is $p(y \mid x) = N(x; y, \sigma_o^2)$
+        — i.e. observation error is Gaussian, so this looks like a Gaussian centred at $y$ when
+        plotted against $x$. Multiplying the two Gaussians and normalizing (Bayes' rule above) gives
+        another Gaussian, the posterior $p(x \mid y) = N(\mu_a, \sigma_a^2)$, with
+      </p>
+      <p style="text-align:center;">
+        $$\mu_a = \mu_b + \dfrac{\sigma_b^2}{\sigma_b^2+\sigma_o^2}(y-\mu_b), \qquad
+          \dfrac{1}{\sigma_a^2} = \dfrac{1}{\sigma_b^2} + \dfrac{1}{\sigma_o^2}$$
+      </p>
+      <p>
+        The mean $\mu_a$ is a precision-weighted average of $\mu_b$ and $y$ — the more precise
+        input (smaller $\sigma$) pulls harder. The posterior variance $\sigma_a^2$ combines the two
+        precisions ($1/\sigma^2$) additively, which is why $\sigma_a$ is always smaller than either
+        $\sigma_b$ or $\sigma_o$: combining two independent pieces of information can only sharpen
+        the estimate.
       </p>
       <p class="hint">
         <strong>Try it:</strong> drag the sliders to set the prior (mean and std) and the observation
@@ -126,20 +162,6 @@
 
       </div>
       <!-- ================= end 1-D widget ================================ -->
-
-      <h3>Reading the panels — 1-D</h3>
-      <p>
-        <b>Prior</b> (blue) — the forecast, centred at $\mu_b$ with spread $\sigma_b$. Wider means
-        less certain. <b>Observation</b> (amber) — centred on $y$, with spread $\sigma_o$ set by
-        instrument error. <b>Posterior</b> (red) — the analysis: always narrower than both inputs,
-        and pulled toward whichever one is more precise.
-      </p>
-      <p>
-        The dashed curve, when the toggle is on, is the raw product of the two curves before
-        rescaling — the posterior is just that product, normalized to integrate to one. That's
-        the whole idea; every DA method (Kalman filter, EnKF, 3D-Var) computes this same thing,
-        just at higher dimension.
-      </p>
 
       <hr class="part-divider" />
 
@@ -237,23 +259,6 @@
 
       </div>
       <!-- ================= end 2-D widget ================================ -->
-
-      <h3>Reading the panels — 2-D</h3>
-      <p>
-        The ellipses are the joint distribution at 1, 2, 3&sigma;; their tilt is the correlation
-        $\rho$. The amber band is the observation of $y$ only. The red ellipses are the posterior:
-        with $\rho = 0.6$, they shrink a lot in $y$ and noticeably in $x$ too — that's information
-        leaking across the correlation.
-      </p>
-      <p>
-        The side panels show each variable's own distribution before (blue) and after (red).
-        The key point: <em>$x$'s distribution sharpens even though $x$ was never observed</em>.
-        Drag $\rho$ to 0 and that effect disappears — the blue and red $x$-curves become identical.
-      </p>
-      <p>
-        <i>Next:</i> Chapter 2 scales this same idea up to a 2-D field — one observation, correlated
-        with every grid point, seen through an ensemble.
-      </p>
 
       <nav class="widget-nav widget-nav-bottom">
         <a href="toc.html" class="nav-home"><i class="fa fa-arrow-up" aria-hidden="true"></i> Table of Contents</a>

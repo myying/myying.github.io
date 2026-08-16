@@ -3,8 +3,8 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="Yue (Michael) Ying — Data Assimilation Interactive Tutorials, Part 1: Observation–State Correlation Explorer">
-<meta name="keywords" content="data assimilation, ensemble, correlation, tutorial, NEDAS">
+<meta name="description" content="Yue (Michael) Ying — Data Assimilation Interactive Tutorials, Part 1: Observation–State Covariance Explorer">
+<meta name="keywords" content="data assimilation, ensemble, covariance, correlation, tutorial, NEDAS">
 <meta name="author" content="Yue Ying">
 
 <link rel="stylesheet" href="../../../style.css">
@@ -22,8 +22,16 @@
 </script>
 
 <!-- MathJax -->
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']]
+    }
+  };
+</script>
 <script type="text/javascript" async
-  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_CHTML">
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js">
 </script>
 
 <title>Data Assimilation Interactive Tutorials · Yue (Michael) Ying</title>
@@ -42,21 +50,33 @@
         <a href="toc.html" class="nav-home"><i class="fa fa-arrow-up" aria-hidden="true"></i> Table of Contents</a>
         <span class="nav-page">
           <a class="nav-arrow" href="01-bayes-gaussians.html" aria-label="Previous chapter"><i class="fa fa-arrow-left" aria-hidden="true"></i><span class="nav-label">Previous</span></a>
-          <span class="nav-current"><span class="nav-short"><i class="fa fa-book" aria-hidden="true"></i> Ch 2</span><span class="nav-long">Ch 2 &#183; Observation&#8211;State Correlation Explorer</span></span>
+          <span class="nav-current"><span class="nav-short"><i class="fa fa-book" aria-hidden="true"></i> Ch 2</span><span class="nav-long">Ch 2 &#183; Observation&#8211;State Covariance Explorer</span></span>
           <a class="nav-arrow" href="03-ensemble-kalman-filter.html" aria-label="Next chapter"><span class="nav-label">Next</span><i class="fa fa-arrow-right" aria-hidden="true"></i></a>
         </span>
       </nav>
 
-      <h3>Observation–State Correlation Explorer</h3>
+      <h3>Observation–State Covariance Explorer</h3>
       <p>
         A single temperature observation (red circle) sits on a 2-D field. The ensemble tells us
-        how that observation correlates with every other grid point — the quantity ensemble DA
-        runs on. Here, each member is the same warm blob with its centre nudged to a different
-        spot, so its 4 K contour traces out a ring of coloured circles.
+        how that observation <strong>covaries</strong> with every other grid point — the quantity
+        ensemble DA actually runs on. Covariance combines two things: how correlated two variables
+        are, and how much each one varies on its own.
+      </p>
+      <p style="text-align:center;">
+        $$\text{Cov}(x,y) \;=\; \sigma_x\, \sigma_y\, \rho(x,y)$$
+      </p>
+      <p>
+        Here $x$ is the observed variable (temperature at the red circle), $y$ is the state at
+        some other grid point, $\sigma_x$ and $\sigma_y$ are their ensemble spreads, and
+        $\rho(x,y)$ is the correlation between them (in $[-1,1]$). Correlation alone says how
+        tightly two variables move together, but not by how much — multiplying by both standard
+        deviations rescales that into physical units (K² here). Here, each ensemble member is the
+        same warm blob with its centre nudged to a different spot, so its 4 K contour traces out a
+        ring of coloured circles.
       </p>
       <p class="hint">
         <strong>Try it:</strong> click a dot in the scatter to highlight that member, or click/drag
-        on a map to move the black state marker — the correlation map and scatter update live.
+        on a map to move the black state marker — the covariance map and scatter update live.
       </p>
 
       <!-- ================= Observation–State Correlation Explorer ============= -->
@@ -75,9 +95,9 @@
                   <div class="colorbar"><canvas id="cb-truth"></canvas><div class="cb-labels"><span class="cb-min"></span><span class="cb-mid"></span><span class="cb-max"></span></div></div>
                 </section>
                 <section class="panel">
-                  <h2 class="panel-title">Corr(Obs T, State T)</h2>
-                  <canvas class="map" id="map-corr"></canvas>
-                  <div class="colorbar"><canvas id="cb-corr"></canvas><div class="cb-labels"><span class="cb-min"></span><span class="cb-mid"></span><span class="cb-max"></span></div></div>
+                  <h2 class="panel-title">Cov(Obs T, State T)</h2>
+                  <canvas class="map" id="map-cov"></canvas>
+                  <div class="colorbar"><canvas id="cb-cov"></canvas><div class="cb-labels"><span class="cb-min"></span><span class="cb-mid"></span><span class="cb-max"></span></div></div>
                 </section>
                 <section class="panel">
                   <h2 class="panel-title" id="t-scat">r = —</h2>
@@ -114,28 +134,11 @@
       </div>
       <!-- ================= end widget ========================================= -->
 
-      <h3>Reading the panels</h3>
-      <p>
-        <b>Left</b> — the true field, plus every member's 4 K contour. Since only the blob's
-        position varies between members, the contours form a band of displaced rings. Click a dot
-        in the scatter to highlight one member; drag the black square to move the state marker.
-      </p>
-      <p>
-        <b>Middle</b> — the correlation between the observation and every grid point, estimated
-        from the ensemble. It's a dipole: strongly positive right at the observation, negative on
-        the far side of the blob — position uncertainty naturally produces that negative lobe.
-      </p>
-      <p>
-        <b>Right</b> — the same information as a scatter: each dot is one member's observed value
-        (x) vs. its value at the marker (y). The slope of that cloud <em>is</em> the correlation.
-        Move the marker across the dipole and watch the slope flip sign.
-      </p>
-
       <nav class="widget-nav widget-nav-bottom">
         <a href="toc.html" class="nav-home"><i class="fa fa-arrow-up" aria-hidden="true"></i> Table of Contents</a>
         <span class="nav-page">
           <a class="nav-arrow" href="01-bayes-gaussians.html" aria-label="Previous chapter"><i class="fa fa-arrow-left" aria-hidden="true"></i><span class="nav-label">Previous</span></a>
-          <span class="nav-current"><span class="nav-short"><i class="fa fa-book" aria-hidden="true"></i> Ch 2</span><span class="nav-long">Ch 2 &#183; Observation&#8211;State Correlation Explorer</span></span>
+          <span class="nav-current"><span class="nav-short"><i class="fa fa-book" aria-hidden="true"></i> Ch 2</span><span class="nav-long">Ch 2 &#183; Observation&#8211;State Covariance Explorer</span></span>
           <a class="nav-arrow" href="03-ensemble-kalman-filter.html" aria-label="Next chapter"><span class="nav-label">Next</span><i class="fa fa-arrow-right" aria-hidden="true"></i></a>
         </span>
       </nav>

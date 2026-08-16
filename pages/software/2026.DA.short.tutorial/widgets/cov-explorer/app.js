@@ -1,3 +1,4 @@
+// © Yue Ying, CC BY 4.0 — https://myying.github.io/pages/software/2026.DA.short.tutorial/toc.html
 /* Sample Covariance Explorer — Ch. 6 (Localization and inflation).
    Live counterpart of the Ch. 2 Observation–State Correlation Explorer,
    simplified and re-targeted at localization:

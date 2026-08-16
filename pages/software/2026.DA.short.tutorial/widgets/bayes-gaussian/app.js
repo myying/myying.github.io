@@ -1,3 +1,4 @@
+// © Yue Ying, CC BY 4.0 — https://myying.github.io/pages/software/2026.DA.short.tutorial/toc.html
 /* Bayesian Gaussian — "The data assimilation problem" (Chapter 1 widget).
 
    Scalar Bayes' rule for Gaussians:  posterior ∝ prior × likelihood.

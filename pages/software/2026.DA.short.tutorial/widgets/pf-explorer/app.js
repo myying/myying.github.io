@@ -1,3 +1,4 @@
+// © Yue Ying, CC BY 4.0 — https://myying.github.io/pages/software/2026.DA.short.tutorial/toc.html
 /* Particle filter vs EnKF on the Gaussian hump — Ch. 6, section 2.
    Same toy model as the section-1 widget: the Chapter 2 warm blob
    (peak A = 8 K, radius scale SIG = blob_sig = 0.1 * domain width = 5 grid

@@ -1,3 +1,4 @@
+// © Yue Ying, CC BY 4.0 — https://myying.github.io/pages/software/2026.DA.short.tutorial/toc.html
 /* Cycling the EnKF — Ch. 3, section 2.
 
    The same warm blob as Chapter 2/6 (peak A = 8 K, radius scale SIG = 50 km,

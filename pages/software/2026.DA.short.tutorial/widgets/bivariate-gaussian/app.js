@@ -1,3 +1,4 @@
+// © Yue Ying, CC BY 4.0 — https://myying.github.io/pages/software/2026.DA.short.tutorial/toc.html
 /* Bivariate Gaussian — "Uncertainty and error covariance" (Chapter 2 widget).
 
    Bayes' rule for two variables, with one of them observed. The prior is a

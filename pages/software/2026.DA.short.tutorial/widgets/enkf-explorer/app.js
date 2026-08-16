@@ -1,3 +1,4 @@
+// © Yue Ying, CC BY 4.0 — https://myying.github.io/pages/software/2026.DA.short.tutorial/toc.html
 /* Ensemble Kalman Filter Explorer — Ch. 3.
    The same synthetic experiment as Ch. 2 (same ensemble, same observation)
    now goes through the analysis step. The widget performs the stochastic

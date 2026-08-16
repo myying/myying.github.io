@@ -1,3 +1,4 @@
+// © Yue Ying, CC BY 4.0 — https://myying.github.io/pages/software/2026.DA.short.tutorial/toc.html
 /* Observation–State Correlation Explorer
    Web port of notebook 1.step_by_step_with_vort2d_case.ipynb, §
    "Visualize the error distribution and correlation" (plot_corr_map).

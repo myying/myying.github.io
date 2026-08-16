@@ -1,3 +1,4 @@
+// © Yue Ying, CC BY 4.0 — https://myying.github.io/pages/software/2026.DA.short.tutorial/toc.html
 /* Parameter estimation — Ch. 7.
 
    The same cycling, 3x3 nine-station storm-tracking EnKF as Ch. 3 (same

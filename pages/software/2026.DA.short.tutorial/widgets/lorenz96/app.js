@@ -1,3 +1,4 @@
+// © Yue Ying, CC BY 4.0 — https://myying.github.io/pages/software/2026.DA.short.tutorial/toc.html
 /* Lorenz-96 chaos & predictability — "Challenges from dynamical systems"
    (Chapter 3 widget).
 

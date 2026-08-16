@@ -1,3 +1,4 @@
+// © Yue Ying, CC BY 4.0 — https://myying.github.io/pages/software/2026.DA.short.tutorial/toc.html
 /* Gaussian hump — position errors break the Gaussian assumption
    (Chapter 6, section 1 widget).
 

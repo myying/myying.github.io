@@ -1,3 +1,4 @@
+// © Yue Ying, CC BY 4.0 — https://myying.github.io/pages/software/2026.DA.short.tutorial/toc.html
 // Embedded bundle (metadata + timeseries) so the page also works when opened
 // directly from disk (file://), where fetch() is blocked.
 window.VORT3D_BUNDLE = {

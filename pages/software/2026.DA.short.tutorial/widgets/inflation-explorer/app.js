@@ -1,3 +1,4 @@
+// © Yue Ying, CC BY 4.0 — https://myying.github.io/pages/software/2026.DA.short.tutorial/toc.html
 /* Inflation — Ch. 4, section 2.
 
    The same cycling storm-tracking EnKF as Ch. 3 section 2 (same warm blob,

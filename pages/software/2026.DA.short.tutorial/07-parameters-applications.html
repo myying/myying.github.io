@@ -48,39 +48,17 @@
 
       <h3>Parameter estimation</h3>
       <p>
-        Every widget so far has estimated <em>state</em> — a temperature field, a storm's position.
-        The same machinery estimates <strong>parameters</strong> too, just by putting them in the
-        state vector: this is the same cycling, 3x3 nine-station storm-tracking EnKF as Chapter 3,
-        with the same perfectly deterministic truth (constant, exactly known velocity, no jitter),
-        augmented with the one thing that widget assumed was known outright — the storm's
-        velocity. State = (c<sub>x</sub>, c<sub>y</sub>, u, v). Velocity has no dynamics of its own —
-        the forecast step just carries each member's own guess forward unchanged — so the only way
-        it ever moves is through the analysis, via whatever cross-covariance builds up between "my
-        velocity" and "the temperature I'd see at each station". Nothing here ever observes velocity
-        directly. There's no bias-correcting inflation control: velocity here is a genuinely static,
-        unknown quantity, so letting its spread shrink as evidence accumulates is mostly the right
-        behavior. But not entirely: a small "background" perturbation is still applied to velocity
-        after every analysis (0.05 km/cycle). Without it, once velocity spread fully collapses the
-        Kalman gain vanishes too, and an early unlucky sample can occasionally leave the estimate
-        permanently stuck away from the truth with nothing left to correct it — tried and confirmed
-        numerically. The small background nudge keeps a sliver of spread alive so that can't
-        happen, without being large enough to stop the estimate from actually converging. Position
-        gets <em>no</em> perturbation at all — unlike Chapter 4, it doesn't need one here: with
-        velocity now being estimated, position tracking relies entirely on each member's own
-        estimated velocity to correct its trajectory (confirmed numerically: adding position
-        perturbation back didn't meaningfully help, so it's left out). An
-        <strong>Estimation: on/off</strong> toggle lets you freeze velocity at whatever it currently
-        is — no analysis update, no perturbation — to see what the widget looks like without any
-        parameter estimation happening at all.
+        Everything so far has estimated <em>state</em> — a field, a storm's position. The same
+        machinery can estimate <strong>parameters</strong> too, just by adding them to the state
+        vector. This is Chapter 3's storm-tracking widget again, but now the storm's velocity is
+        also unknown, estimated purely from how well each member's guess matches the observations
+        over time.
       </p>
       <p class="hint">
-        <strong>Try it:</strong> the members start with a rough first guess, biased a bit
-        <em>low</em> (mean speed 4 km/cycle, true speed ~9.5), plus spread wider than the guess. Hit
-        <em>run</em> and watch the "drift speed" panel: dozens of thin cyan member lines start
-        scattered around that low first guess, then narrow together into a cluster that climbs
-        toward the dashed true-speed line — the thicker blue ensemble-mean line runs through the
-        middle of that cluster. Then try toggling <strong>Estimation</strong> off mid-run: the
-        cluster stops narrowing and just drifts along at whatever speed it was frozen at.
+        <strong>Try it:</strong> members start with a rough, low guess for speed. Hit <em>run</em>
+        and watch the drift-speed panel: the scattered member lines narrow and climb toward the
+        true speed as evidence accumulates. Toggle <strong>estimation</strong> off mid-run to freeze
+        it and see the difference.
       </p>
 
       <!-- ================= Parameter Estimation Explorer ================ -->
@@ -108,8 +86,14 @@
           </div>
 
           <div class="controls">
+            <div class="ctl ctl-toggle">
+              <label class="switch">
+                <input type="checkbox" id="param-est" checked>
+                <span class="switch-slider" aria-hidden="true"></span>
+                <span class="switch-label">estimation</span>
+              </label>
+            </div>
             <div class="ctl ctl-buttons">
-              <button class="ctl-btn" id="param-est" aria-pressed="true" title="turn parameter estimation on/off">Estimation: on</button>
               <button class="ctl-btn" id="param-run" aria-pressed="false" title="run automatically">&#9654; run</button>
               <button class="ctl-btn" id="param-reset" title="reset the ensemble and history">&#8635; reset</button>
             </div>
@@ -135,44 +119,20 @@
 
       <h3>Reading the panels</h3>
       <p>
-        <b>1 &#183; The storm track</b> — the map is identical to Chapter 4's: member dots, the
-        ensemble mean, and the truth's actual track and 4 K footprint. Unlike Chapter 4, the member
-        cluster here isn't held open by any position perturbation — its spread comes entirely from
-        how much the members still disagree about the storm's velocity. The velocity estimate
-        itself isn't drawn on this map — see the drift-speed panel for that — but it's what pulls
-        the member dots into closer and closer agreement with the truth as observations accumulate,
-        because a member whose velocity has been carrying it toward the observed temperatures is,
-        on average, a member whose velocity estimate deserves to survive.
+        <b>Storm track</b> — member dots, ensemble mean, and the true track. The spread here comes
+        entirely from members still disagreeing about velocity. <b>Drift speed</b> — each member's
+        estimated speed as a thin line, narrowing toward the true speed (dashed) as evidence
+        accumulates. <b>Spread vs. rms error</b> — the same honesty check as Chapters 3–4, for
+        position.
       </p>
       <p>
-        <b>2 &#183; Drift speed</b> — the most direct view of convergence: every member's own
-        estimated speed |(u, v)| is a thin cyan line, so the whole ensemble reads as a cluster of
-        trajectories, with a thicker blue line for the ensemble mean running through its middle.
-        They start clustered around the low first guess and, as observations accumulate, climb and
-        narrow sharply toward the dashed true-speed line — with no perturbation reinflating
-        velocity, the cluster genuinely collapses onto a single answer rather than lingering as a
-        visible spread. Toggle <strong>Estimation</strong> off and the cluster freezes wherever it
-        was instead of continuing to narrow.
-      </p>
-      <p>
-        <b>3 &#183; Ensemble spread vs. rms error</b> — the same position spread-vs-error pattern as
-        Chapters 3 and 4: spread (blue) and rms error (red), both for the storm's position, not
-        velocity — velocity's own convergence already has a clearer picture in panel 2. If they
-        track each other reasonably well, the filter is honest about its own uncertainty in
-        <em>where</em> the storm is, even while it's still learning <em>how fast</em> it moves.
-      </p>
-      <p>
-        This is state augmentation, in full: any quantity you can write a forecast step (even a
-        trivial "unchanged") and an observation operator for can ride along in the state vector and
-        get estimated the same way — model parameters, bias corrections, boundary forcing. It is
-        also the same idea behind the NEDAS tutorials' real applications, and behind the question
-        that opened this whole series: how much can you actually know about a system you can only
-        watch through a handful of point observations?
+        This is the whole idea of state augmentation: any unknown quantity can ride along in the
+        state vector and get estimated the same way as the state itself — model parameters, bias
+        corrections, and more.
       </p>
 
       <p class="planned-ref">
-        &#8594; Evensen et al., <i>Data Assimilation Fundamentals</i> (2022), Ch 19&#8211;23 &#8212; parameter
-        estimation and examples.
+        Suggested reading: Evensen et al., <i>Data Assimilation Fundamentals</i> (2022), Ch 19&#8211;23.
       </p>
 
       <nav class="widget-nav widget-nav-bottom">

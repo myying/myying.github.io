@@ -584,10 +584,9 @@
   runBtn.addEventListener("click", () => setRunning(!running));
   resetBtn.addEventListener("click", () => { setRunning(false); resetAll(); });
 
-  estBtn.addEventListener("click", () => {
-    ESTIMATE_VEL = !ESTIMATE_VEL;
-    estBtn.textContent = ESTIMATE_VEL ? "Estimation: on" : "Estimation: off";
-    estBtn.setAttribute("aria-pressed", String(ESTIMATE_VEL));
+  estBtn.checked = ESTIMATE_VEL;
+  estBtn.addEventListener("change", () => {
+    ESTIMATE_VEL = estBtn.checked;
   });
 
   root.dataset.theme = theme;

@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="../../../style.css">
 <link rel="stylesheet" href="chapters.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="widgets/corr-explorer/style.css">
+<link rel="stylesheet" href="widgets/corr-explorer/style.css?v=2">
 
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-148955805-2"></script>
@@ -49,20 +49,14 @@
 
       <h3>Observation–State Correlation Explorer</h3>
       <p>
-        A single <strong>temperature</strong> observation (red circle) is assimilated from a
-        smooth 2-D field. The ensemble gives an <em>estimate</em> of how that observation
-        correlates with the temperature state at every grid point — the core quantity of
-        covariance-based data assimilation, reduced to a single variable so the idea is
-        unmistakable. The left panel shows where the uncertainty comes from: the ensemble
-        perturbs only the blob's <em>position</em> (std 50 km), so every member's 4 K contour
-        (where T = 4 K) is the same circle displaced somewhere else — a band of coloured rings.
-        The correlation map turns that position uncertainty into the covariance the filter uses.
+        A single temperature observation (red circle) sits on a 2-D field. The ensemble tells us
+        how that observation correlates with every other grid point — the quantity ensemble DA
+        runs on. Here, each member is the same warm blob with its centre nudged to a different
+        spot, so its 4 K contour traces out a ring of coloured circles.
       </p>
       <p class="hint">
-        <strong>Try it:</strong> drag the member slider to walk through the members — the
-        selected member's 4 K contour lights up, its blob centre is marked, and its point is
-        ringed in the scatter — and click or drag on a map to move the black state marker: the
-        correlation map and the scatter respond live.
+        <strong>Try it:</strong> click a dot in the scatter to highlight that member, or click/drag
+        on a map to move the black state marker — the correlation map and scatter update live.
       </p>
 
       <!-- ================= Observation–State Correlation Explorer ============= -->
@@ -94,11 +88,12 @@
           </div>
 
           <div class="controls">
-            <button class="ctl-btn" id="cont-members" aria-pressed="true" title="show / hide the ensemble members">Members: on</button>
-            <div class="ctl">
-              <label for="cont-mem">member <em>m</em></label>
-              <input type="range" id="cont-mem" min="1" max="100" step="1" value="50">
-              <span class="ctl-val" id="cont-mem-val">50</span>
+            <div class="ctl-toggle-row">
+              <label class="switch">
+                <input type="checkbox" id="cont-members" checked>
+                <span class="switch-slider" aria-hidden="true"></span>
+                <span class="switch-label">member contours</span>
+              </label>
             </div>
           </div>
 
@@ -121,30 +116,19 @@
 
       <h3>Reading the panels</h3>
       <p>
-        <b>1 &#183; The truth field and the 4 K contours</b> — the &#8220;answer key&#8221; we are trying to
-        estimate from sparse observations: a single warm blob (peak &#8776; 7.9 K, radius scale 100 km)
-        on a 50&#215;50 grid with 10 km cells. Its 4 K contour is the dark ring at radius &#8776; 59 km.
-        Every member&#8217;s blob centre is displaced by up to ~100 km, so its 4 K contour is the same
-        ring shifted somewhere else — the band of thin coloured rings is the position
-        uncertainty. The slider walks through the members: the selected ring thickens, its blob
-        centre is marked, and its point is ringed in the scatter. The black square marks the
-        state location <code>(i, j)</code> you are inspecting.
+        <b>Left</b> — the true field, plus every member's 4 K contour. Since only the blob's
+        position varies between members, the contours form a band of displaced rings. Click a dot
+        in the scatter to highlight one member; drag the black square to move the state marker.
       </p>
       <p>
-        <b>2 &#183; The correlation map</b> — how the observation covaries with the state at every grid
-        point, estimated from the 100-member ensemble. The ensemble perturbs only the blob&#8217;s
-        position (std 50 km), so the pattern is a clean dipole: <b>+0.98</b> right at the observation,
-        <b>&#8722;0.64</b> on the far side, fading with distance. Position uncertainty is the classic
-        mechanism that produces strong <em>negative</em> correlation.
+        <b>Middle</b> — the correlation between the observation and every grid point, estimated
+        from the ensemble. It's a dipole: strongly positive right at the observation, negative on
+        the far side of the blob — position uncertainty naturally produces that negative lobe.
       </p>
       <p>
-        <b>3 &#183; The scatter</b> — the joint distribution of the observation ensemble (x) and the
-        state ensemble at the marker (y). Each dot is one member; the ringed dot is the member
-        selected by the slider — where its 4 K contour sits in panel 1 decides where it falls
-        here: a member whose blob is shifted toward the marker reads warmer at the state
-        location, one shifted away reads colder. The amber line is the observed value, the ink
-        line the truth. Move the marker across the dipole and watch the slope — and the
-        reported <code>r</code> — flip sign.
+        <b>Right</b> — the same information as a scatter: each dot is one member's observed value
+        (x) vs. its value at the marker (y). The slope of that cloud <em>is</em> the correlation.
+        Move the marker across the dipole and watch the slope flip sign.
       </p>
 
       <nav class="widget-nav widget-nav-bottom">
@@ -161,6 +145,6 @@
 
   <script src="../../../footer.js"></script>
   <script src="widgets/corr-explorer/data.js"></script>
-  <script src="widgets/corr-explorer/app.js"></script>
+  <script src="widgets/corr-explorer/app.js?v=2"></script>
 </body>
 </html>

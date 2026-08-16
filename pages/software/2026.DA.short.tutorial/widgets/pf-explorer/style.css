@@ -54,13 +54,23 @@
 /* ---------------------------------------------------------- panel grid */
 #pf-explorer .workspace { display: flex; gap: 14px; }
 #pf-explorer .panels-wrap { flex: 1; min-width: 0; }
-/* auto-fit with a minimum panel width: wraps down to fewer columns (to 1)
-   as soon as a panel would otherwise be squeezed below that width, instead
-   of jumping straight to 3-across at a fixed breakpoint */
+/* mobile-first stack; medium: prior panel alone on row 1 (centred), EnKF +
+   particle filter share row 2; wide: all three in one row */
 #pf-explorer .panel-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
+}
+@media (min-width: 600px) and (max-width: 899px) {
+  #pf-explorer .panel-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #pf-explorer .panel:first-child {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: calc(50% - 7px);
+  }
+}
+@media (min-width: 900px) {
+  #pf-explorer .panel-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 #pf-explorer .panel {
   min-width: 0;
@@ -100,14 +110,19 @@
 }
 
 /* -------------------------------------------------------------- controls */
-/* always a single column (vertical stack), same outer width as the
-   panel-grid above it (both are direct, unpadded children of .viz-root);
-   each .ctl is itself a label/slider/value grid with a fixed label column,
-   so every slider's track lines up with its neighbours. */
+/* same outer width as the panel-grid above it (both are direct, unpadded
+   children of .viz-root). Two rows: the contours toggle + rerun button
+   always sit on their own line at the top (clear of the sliders), and the
+   sliders are grouped in their own boxed sub-panel below. */
 #pf-explorer .controls {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
+  display: flex;
+  flex-direction: column;   /* this page also loads position-error/style.css, whose
+                                .da-widget .controls sets flex-direction: column —
+                                pf-explorer's root shares the .da-widget class, so
+                                this is also set explicitly rather than relying on
+                                specificity to keep it that way */
+  gap: 14px;
+  width: auto;
   margin: 14px 0 0;
   padding: 14px 18px;
   background: var(--surface-1);
@@ -115,11 +130,24 @@
   border-radius: 10px;
   box-shadow: var(--shadow);
 }
+/* the sliders' own boxed sub-panel */
+#pf-explorer .ctl-sliders {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 20px;
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+/* one line per slider: math-notation label | slider | value — compact
+   fixed-width chips so several fit per row */
 #pf-explorer .ctl {
+  flex: 0 0 190px;
   display: grid;
-  grid-template-columns: 128px 1fr 46px;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 9px;
+  column-gap: 8px;
   font-size: 0.82rem;
   color: var(--ink-2);
 }
@@ -138,12 +166,11 @@
   font-weight: 650;
   color: var(--ink-1);
   font-variant-numeric: tabular-nums;
-}
-#pf-explorer .ctl-buttons {
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  white-space: nowrap;
 }
 #pf-explorer .ctl-btn {
+  width: auto;   /* position-error/style.css's .da-widget .ctl-btn sets width:100% —
+                    override explicitly since .da-widget is shared across widgets */
   padding: 9px 12px;
   font-size: 0.78rem;
   font-weight: 600;
@@ -155,12 +182,50 @@
   box-shadow: var(--shadow);
   white-space: nowrap;
 }
-#pf-explorer .ctl-btn[aria-pressed="false"] { color: var(--ink-3); border-color: var(--axis); }
 #pf-explorer .ctl-btn:hover { border-color: var(--series-amber); color: var(--series-amber); }
+/* contours switch + rerun button: always their own row, above the sliders */
+#pf-explorer .ctl-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+#pf-explorer .switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+#pf-explorer .switch input { position: absolute; opacity: 0; pointer-events: none; }
+#pf-explorer .switch-slider {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  border-radius: 10px;
+  background: var(--axis);
+  transition: background 0.2s ease;
+}
+#pf-explorer .switch-slider::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+  transition: transform 0.2s ease;
+}
+#pf-explorer .switch input:checked + .switch-slider { background: var(--series-pf); }
+#pf-explorer .switch input:checked + .switch-slider::after { transform: translateX(16px); }
+#pf-explorer .switch-label { font-size: 0.82rem; color: var(--ink-2); }
 @media (max-width: 420px) {
-  #pf-explorer .ctl { grid-template-columns: 1fr; }
-  #pf-explorer .ctl-val { text-align: left; }
-  #pf-explorer .ctl-buttons { grid-template-columns: 1fr; }
+  #pf-explorer .ctl { flex-basis: 100%; }
+  #pf-explorer .ctl-toggle-row { flex-direction: column; align-items: stretch; }
 }
 
 /* -------------------------------------------------------------- readout */

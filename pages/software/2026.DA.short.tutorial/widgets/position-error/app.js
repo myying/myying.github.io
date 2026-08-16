@@ -331,7 +331,7 @@
     for (let b = 0; b < NB; b++) {
       const bx = margin.l + b * binW / (hi - lo) * pw;
       const bw = Math.max(1, binW / (hi - lo) * pw - 1);
-      const bh = (counts[b] / cmax) * ph * 0.72;   // y-range padded: top ~28% stays free for the legend box
+      const bh = (counts[b] / cmax) * ph * 0.6;    // y-range padded: top ~40% stays free for the legend box
       ctx.fillStyle = theme === "dark" ? hexA(T.amber, 0.5) : hexA(T.amber, 0.32);
       ctx.fillRect(bx, margin.t + ph - bh, bw, bh);
     }
@@ -350,7 +350,7 @@
       let s = 0;
       for (let m = 0; m < NENS; m++) { const z = (x - e[m]) / h; s += Math.exp(-0.5 * z * z); }
       const f = s / (NENS * h * k2p);
-      const cy = margin.t + ph - (f * binW * NENS) / cmax * ph * 0.72;
+      const cy = margin.t + ph - (f * binW * NENS) / cmax * ph * 0.6;
       if (i === 0) ctx.moveTo(margin.l + (x - lo) / (hi - lo) * pw, cy);
       else ctx.lineTo(margin.l + (x - lo) / (hi - lo) * pw, cy);
     }
@@ -362,7 +362,7 @@
     ctx.setLineDash([5, 4]);
     ctx.beginPath();
     const yOf = (x) => margin.t + ph - (Math.exp(-0.5 * Math.pow((x - mu) / sd, 2)) /
-      (sd * Math.sqrt(2 * Math.PI)) * binW * NENS) / cmax * ph * 0.72;
+      (sd * Math.sqrt(2 * Math.PI)) * binW * NENS) / cmax * ph * 0.6;
     for (let i = 0; i <= 120; i++) {
       const x = lo + (hi - lo) * i / 120;
       const y = yOf(x);
@@ -449,7 +449,9 @@
   function cGeom(W, H) {
     const pw = W - C_MARGIN.l - C_MARGIN.r, ph = H - C_MARGIN.t - C_MARGIN.b;
     const xOf = (d) => C_MARGIN.l + (d - D_MIN) / (D_MAX - D_MIN) * pw;
-    const yOf = (v) => C_MARGIN.t + ph - (v - (-1)) / (10) * ph;
+    // y-range padded well above the field's peak (A = 8 K) so the legend box
+    // has clear room at the top of the panel, same convention as panel (b)
+    const yOf = (v) => C_MARGIN.t + ph - (v - (-1)) / (13) * ph;
     return { margin: C_MARGIN, pw, ph, xOf, yOf };
   }
 

@@ -48,22 +48,18 @@
       </nav>
 
       <p>
-        Data assimilation combines a <strong>model forecast</strong> (the prior) with an
-        <strong>observation</strong> to produce the <strong>analysis</strong> (the posterior) — the best
-        estimate of the state and its uncertainty. When the inputs are Gaussian, Bayes' rule
-        has a closed form: the posterior is the pointwise product of the pdfs, rescaled so it
-        integrates to one. This page shows that rule in one and two variables. Everything else
-        (matrices, grid points, ensemble members) is stripped away; the two figures below are
-        the whole of linear-Gaussian analysis.
+        Data assimilation combines a <strong>forecast</strong> with an <strong>observation</strong> to
+        get the <strong>analysis</strong> — the best estimate, with its own uncertainty. For Gaussian
+        inputs, Bayes' rule gives a simple closed form. This page shows that rule in one variable,
+        then two.
       </p>
 
       <!-- ================================================================== -->
       <h3 id="sec-1d">1-D: one variable — the analysis as a weighted average</h3>
       <p>
-        The simplest version of the problem: one variable, one observation of it. The prior is
-        the forecast pdf $N(\mu_b, \sigma_b^2)$; the observation likelihood is
-        $N(y, \sigma_o^2)$; Bayes' rule returns the posterior $N(\mu_a, \sigma_a^2)$, whose mean
-        is a precision-weighted average of prior mean and observation.
+        One variable, one observation. The forecast is a Gaussian $N(\mu_b, \sigma_b^2)$; the
+        observation is $N(y, \sigma_o^2)$. The analysis is their weighted average, weighted by
+        certainty — the more precise input pulls harder.
       </p>
       <p class="hint">
         <strong>Try it:</strong> drag the sliders to set the prior (mean and std) and the observation
@@ -133,33 +129,16 @@
 
       <h3>Reading the panels — 1-D</h3>
       <p>
-        <b>1 &#183; The prior</b> — the model forecast as a probability density $N(\mu_b, \sigma_b^2)$:
-        the best guess sits at the centre, and $\sigma_b$ measures forecast uncertainty. A wider
-        pdf is a more uncertain forecast. Slide $\sigma_b$ and watch both the shape and the
-        posterior respond.
+        <b>Prior</b> (blue) — the forecast, centred at $\mu_b$ with spread $\sigma_b$. Wider means
+        less certain. <b>Observation</b> (amber) — centred on $y$, with spread $\sigma_o$ set by
+        instrument error. <b>Posterior</b> (red) — the analysis: always narrower than both inputs,
+        and pulled toward whichever one is more precise.
       </p>
       <p>
-        <b>2 &#183; The observation likelihood</b> — the likelihood of observing the value $y$ given
-        that the true state is $x$. It is centred on the observation, with width $\sigma_o$ set by
-        the observation error: a precise instrument gives a narrow, tall likelihood; an imprecise
-        one a wide, flat one.
-      </p>
-      <p>
-        <b>3 &#183; The posterior</b> — the analysis. Bayes' rule
-        $p(x \mid y) \propto p(x) \cdot \ell(y \mid x)$; for two Gaussians it is the Gaussian
-        $N(\mu_a, \sigma_a^2)$ with precision-weighted mean
-        $\mu_a = (\mu_b/\sigma_b^2 + y/\sigma_o^2) / (1/\sigma_b^2 + 1/\sigma_o^2)$ and
-        $\sigma_a = 1/\sqrt{1/\sigma_b^2 + 1/\sigma_o^2}$. The posterior is always <em>narrower</em>
-        than both inputs — combining information reduces uncertainty — and its mean is pulled toward
-        the more certain one. With the default settings, the precise observation (small $\sigma_o$)
-        drags the posterior mean to 0.96, far from the prior's 0.
-      </p>
-      <p>
-        <b>4 &#183; The product curve</b> — with the toggle on, the dashed violet curve is the raw
-        pointwise product $p(x) \cdot \ell(y \mid x)$, before normalization. The red posterior is
-        exactly this curve divided by its integral. This is the whole of linear-Gaussian data
-        assimilation in one figure: the Kalman filter, the ensemble Kalman filter, and 3D-Var all
-        compute this same posterior, in different coordinates and at higher dimension.
+        The dashed curve, when the toggle is on, is the raw product of the two curves before
+        rescaling — the posterior is just that product, normalized to integrate to one. That's
+        the whole idea; every DA method (Kalman filter, EnKF, 3D-Var) computes this same thing,
+        just at higher dimension.
       </p>
 
       <hr class="part-divider" />
@@ -167,13 +146,10 @@
       <!-- ================================================================== -->
       <h3 id="sec-2d">2-D: two variables, one observed</h3>
       <p>
-        The 1-D example was a single variable; data assimilation operates on whole states, and the
-        bridge from one variable to many is the <strong>covariance</strong> — how errors at
-        different variables relate to each other. This is the two-variable version of the same
-        Bayes' rule: a bivariate Gaussian prior, an observation of <em>y only</em> — and yet
-        <em>x</em>'s posterior tightens as well, purely through the correlation. The main panel
-        shows the joint pdf as covariance ellipses; the side panels show what each variable looks
-        like on its own: its <strong>marginal</strong> pdf.
+        Real states have many variables, linked by <strong>covariance</strong> — how error in one
+        relates to error in another. Here, only $y$ is observed, but if $x$ and $y$ are correlated,
+        observing $y$ sharpens $x$ too. The main panel shows the joint distribution as ellipses; the
+        side panels show each variable on its own.
       </p>
       <p class="hint">
         <strong>Try it:</strong> drag the correlation slider &rho; to zero — the observation of
@@ -264,39 +240,19 @@
 
       <h3>Reading the panels — 2-D</h3>
       <p>
-        <b>1 &#183; The joint pdf</b> — the prior $p(x,y) = \mathcal{N}\!\left(
-        \begin{bmatrix}\mu_x\\ \mu_y\end{bmatrix},
-        \begin{bmatrix}\sigma_x^2 & \rho\,\sigma_x\sigma_y\\ \rho\,\sigma_x\sigma_y & \sigma_y^2\end{bmatrix}
-        \right)$ drawn as its covariance ellipses at 1, 2 and 3&sigma;. The ellipse axes are the
-        standard deviations; the <em>tilt</em> is the correlation $\rho$. Rotate $\rho$ and watch
-        the ellipses lean — that tilt is the whole mechanism of this section.
+        The ellipses are the joint distribution at 1, 2, 3&sigma;; their tilt is the correlation
+        $\rho$. The amber band is the observation of $y$ only. The red ellipses are the posterior:
+        with $\rho = 0.6$, they shrink a lot in $y$ and noticeably in $x$ too — that's information
+        leaking across the correlation.
       </p>
       <p>
-        <b>2 &#183; The observation</b> — the amber band at $y \pm \sigma_o$: the observation
-        constrains $y$ only and carries no information about $x$ directly. Its likelihood
-        $N(y, \sigma_o^2)$ is a one-dimensional curve, shown in the right-hand marginal.
+        The side panels show each variable's own distribution before (blue) and after (red).
+        The key point: <em>$x$'s distribution sharpens even though $x$ was never observed</em>.
+        Drag $\rho$ to 0 and that effect disappears — the blue and red $x$-curves become identical.
       </p>
       <p>
-        <b>3 &#183; The posterior</b> — the same Bayes' rule as in the 1-D section, in two
-        dimensions. With the default settings the red ellipses shrink dramatically in $y$
-        ($\sigma_y$: 1.20 &rarr; 0.38) and modestly in $x$ ($\sigma_x$: 1.20 &rarr; 0.99) — the
-        correlation $\rho = 0.6$ lets the observation of $y$ sharpen $x$ too. The posterior mean is
-        pulled toward the observation, and even the correlation itself changes ($\rho$: 0.60 &rarr;
-        0.23). In information form, $\Lambda_a = \Lambda_b + H^\top R^{-1} H$ with
-        $H = [0\ 1]$: the observation simply adds precision to $y$, and the covariance couples
-        the rest.
-      </p>
-      <p>
-        <b>4 &#183; The marginals</b> — the side panels integrate out the other variable,
-        $p(x) = \int p(x,y)\,dy$: what each variable alone looks like, before (blue, dashed)
-        and after (red) assimilation. This is the key point: <em>observing $y$ sharpens the
-        marginal of $x$ even though $x$ is unobserved</em>, with the effect proportional to
-        $\rho$. Slide $\rho$ to 0 and the red and blue $x$-curves become identical.
-      </p>
-      <p>
-        <i>Next:</i> Chapter 2 — the <a href="02-observation-state-correlation.html">Observation&#8211;State Correlation Explorer</a> —
-        scales this same picture up to a 2-D temperature field: the correlation between one
-        observation and every grid point, seen through an ensemble.
+        <i>Next:</i> Chapter 2 scales this same idea up to a 2-D field — one observation, correlated
+        with every grid point, seen through an ensemble.
       </p>
 
       <nav class="widget-nav widget-nav-bottom">

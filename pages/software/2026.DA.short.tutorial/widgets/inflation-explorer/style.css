@@ -53,10 +53,21 @@
 /* ---------------------------------------------------------- panel grid */
 #inflation-explorer .workspace { display: flex; gap: 14px; }
 #inflation-explorer .panels-wrap { flex: 1; min-width: 0; }
+/* 2 panels — one row by default (no need for the 3-panel first-row/
+   second-row split); stack only once the row gets too narrow to read */
 #inflation-explorer .panel-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
+}
+/* this page also loads cov-explorer/style.css, whose 3-panel .da-widget
+   .panel:first-child rule (spans + centres the first panel at 600–899px)
+   would otherwise leak in here too, since this widget's root shares the
+   .da-widget class — reset explicitly so 2 panels always share one row
+   until they actually need to stack */
+#inflation-explorer .panel:first-child { grid-column: auto; justify-self: stretch; width: auto; }
+@media (max-width: 599px) {
+  #inflation-explorer .panel-grid { grid-template-columns: minmax(0, 1fr); }
 }
 #inflation-explorer .panel {
   min-width: 0;
@@ -101,7 +112,8 @@
 }
 #inflation-explorer .ctl {
   display: grid;
-  grid-template-columns: 128px 1fr 46px;
+  grid-template-columns: auto 1fr auto;
+  max-width: 260px;   /* short label now — no need for the slider to stretch full-width */
   align-items: center;
   gap: 9px;
   font-size: 0.82rem;
@@ -135,11 +147,10 @@
   box-shadow: var(--shadow);
   white-space: nowrap;
 }
-#inflation-explorer .ctl-btn[aria-pressed="true"] { color: var(--series-pf); border-color: var(--series-pf); }
+#inflation-explorer .ctl-btn[aria-pressed="true"] { background: var(--series-pf); border-color: var(--series-pf); color: #fff; }
 #inflation-explorer .ctl-btn:hover { border-color: var(--series-amber); color: var(--series-amber); }
+#inflation-explorer .ctl-btn[aria-pressed="true"]:hover { background: var(--series-pf); border-color: var(--series-pf); color: #fff; }
 @media (max-width: 420px) {
-  #inflation-explorer .ctl { grid-template-columns: 1fr; }
-  #inflation-explorer .ctl-val { text-align: left; }
   #inflation-explorer .ctl-buttons { grid-template-columns: 1fr; }
 }
 

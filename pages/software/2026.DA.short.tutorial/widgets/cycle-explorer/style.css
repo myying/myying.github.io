@@ -53,10 +53,21 @@
 /* ---------------------------------------------------------- panel grid */
 #cycle-explorer .workspace { display: flex; gap: 14px; }
 #cycle-explorer .panels-wrap { flex: 1; min-width: 0; }
+/* 2 panels — one row by default (no need for the 3-panel first-row/
+   second-row split); stack only once the row gets too narrow to read */
 #cycle-explorer .panel-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
+}
+/* this page also loads enkf-explorer/style.css, whose 3-panel .da-widget
+   .panel:first-child rule (spans + centres the first panel at 600–899px)
+   would otherwise leak in here too, since this widget's root shares the
+   .da-widget class — reset explicitly so 2 panels always share one row
+   until they actually need to stack */
+#cycle-explorer .panel:first-child { grid-column: auto; justify-self: stretch; width: auto; }
+@media (max-width: 599px) {
+  #cycle-explorer .panel-grid { grid-template-columns: minmax(0, 1fr); }
 }
 #cycle-explorer .panel {
   min-width: 0;
@@ -135,8 +146,9 @@
   box-shadow: var(--shadow);
   white-space: nowrap;
 }
-#cycle-explorer .ctl-btn[aria-pressed="true"] { color: var(--series-pf); border-color: var(--series-pf); }
+#cycle-explorer .ctl-btn[aria-pressed="true"] { background: var(--series-pf); border-color: var(--series-pf); color: #fff; }
 #cycle-explorer .ctl-btn:hover { border-color: var(--series-amber); color: var(--series-amber); }
+#cycle-explorer .ctl-btn[aria-pressed="true"]:hover { background: var(--series-pf); border-color: var(--series-pf); color: #fff; }
 @media (max-width: 420px) {
   #cycle-explorer .ctl { grid-template-columns: 1fr; }
   #cycle-explorer .ctl-val { text-align: left; }

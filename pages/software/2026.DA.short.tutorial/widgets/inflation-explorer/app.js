@@ -433,12 +433,12 @@
 
   perturbSlider.addEventListener("input", () => {
     PERTURB = clamp(parseFloat(perturbSlider.value) || 0, 0, 25);
-    perturbVal.textContent = PERTURB.toFixed(0);
+    perturbVal.textContent = PERTURB.toFixed(0) + " km";
     render();
   });
 
   root.dataset.theme = theme;
-  perturbSlider.value = PERTURB; perturbVal.textContent = PERTURB.toFixed(0);
+  perturbSlider.value = PERTURB; perturbVal.textContent = PERTURB.toFixed(0) + " km";
   resetAll();
 
   const ro = new ResizeObserver(render);

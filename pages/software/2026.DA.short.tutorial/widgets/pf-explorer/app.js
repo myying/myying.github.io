@@ -578,18 +578,17 @@
   if (sigOSlider) {
     sigOSlider.addEventListener("input", () => {
       SIG_O = clamp(parseFloat(sigOSlider.value) || 1, 0.2, 4);
-      sigOVal.textContent = SIG_O.toFixed(2);
+      sigOVal.textContent = SIG_O.toFixed(2) + " K";
       buildContours();   // EnKF gain and PF weights both depend on SIG_O
       render();
     });
   }
   rerunBtn.addEventListener("click", resample);
-  const contoursBtn = $("pf-contours");
-  if (contoursBtn) {
-    contoursBtn.addEventListener("click", () => {
-      showContours = !showContours;
-      contoursBtn.textContent = showContours ? "Contours: on" : "Contours: off";
-      contoursBtn.setAttribute("aria-pressed", String(showContours));
+  const contoursEl = $("pf-contours");
+  if (contoursEl) {
+    contoursEl.checked = showContours;
+    contoursEl.addEventListener("change", () => {
+      showContours = contoursEl.checked;
       render();
     });
   }
@@ -599,7 +598,7 @@
   sprdVal.innerHTML = (Lsprd / SIG).toFixed(1) + " &sigma;";
   nensSlider.value = NENS;
   nensVal.textContent = NENS;
-  if (sigOSlider) { sigOSlider.value = SIG_O; sigOVal.textContent = SIG_O.toFixed(2); }
+  if (sigOSlider) { sigOSlider.value = SIG_O; sigOVal.textContent = SIG_O.toFixed(2) + " K"; }
   sampleEnsemble();
   buildContours();
   render();

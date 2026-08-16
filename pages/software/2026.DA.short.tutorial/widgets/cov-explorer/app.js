@@ -242,7 +242,7 @@
   let oi = 28, oj = 22;        // observation (i, j) — on the hump's east flank
   let nens = 100;              // visible ensemble members (5..300)
   let R = 100e3;               // localization radius of influence, m
-  let locOn = true;            // apply the Gaspari–Cohn kernel?
+  let locOn = false;           // apply the Gaspari–Cohn kernel?
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
   // ------------------------------------------------------ canvas utils
@@ -322,22 +322,14 @@
     ctx.lineWidth = 2;
     ctx.strokeStyle = cssVar("--series-red");
     ctx.stroke();
-    if (locked) {
-      // filled dot = pinned in place
+    // small crosshair hints that the observation is draggable
+    ctx.strokeStyle = cssVar("--series-red");
+    ctx.lineWidth = 1.4;
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
       ctx.beginPath();
-      ctx.arc(ox, oy, 3.4, 0, Math.PI * 2);
-      ctx.fillStyle = cssVar("--series-red");
-      ctx.fill();
-    } else {
-      // small crosshair hints that the observation is draggable
-      ctx.strokeStyle = cssVar("--series-red");
-      ctx.lineWidth = 1.4;
-      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-        ctx.beginPath();
-        ctx.moveTo(ox + dx * 11, oy + dy * 11);
-        ctx.lineTo(ox + dx * 15, oy + dy * 15);
-        ctx.stroke();
-      }
+      ctx.moveTo(ox + dx * 11, oy + dy * 11);
+      ctx.lineTo(ox + dx * 15, oy + dy * 15);
+      ctx.stroke();
     }
   }
 
@@ -512,7 +504,6 @@
       `sample cov <strong>+${f(sMax)} / ${f(sMin)}</strong> K\u00B2 \u00B7 ` +
       `true cov <strong>+${f(tMax)} / ${f(tMin)}</strong> K\u00B2`;
     if (locOn) html += ` \u00B7 localized: beyond R = <strong>${Math.round(R / 1e3)} km</strong> set to 0`;
-    if (locked) html += ` \u00B7 obs <strong>locked</strong>`;
     $("readout").innerHTML = html;
   }
 
@@ -529,25 +520,7 @@
   }
 
   // --------------------------------------------------------- interaction
-  // dragging anywhere on a map moves the observation; a stationary click on
-  // the observation itself (or the lock button) pins it in place — while
-  // locked, the maps are inert and the marker shows a filled dot
-  let locked = false;
-  function toggleLock() {
-    locked = !locked;
-    const btn = $("ctl-lock");
-    if (btn) {
-      btn.classList.toggle("locked", locked);
-      btn.setAttribute("aria-pressed", String(locked));
-      const ic = btn.querySelector(".fa");
-      if (ic) ic.className = "fa " + (locked ? "fa-lock" : "fa-unlock");
-      const lb = btn.querySelector(".lock-label");
-      if (lb) lb.textContent = locked ? "unlock obs" : "lock obs";
-    }
-    root.classList.toggle("locked", locked);
-    render();
-  }
-
+  // dragging anywhere on a map moves the observation
   function mapPosToIJ(cv, clientX, clientY) {
     const rect = cv.getBoundingClientRect();
     const fx = clamp((clientX - rect.left) / rect.width, 0, 1);
@@ -557,7 +530,7 @@
 
   for (const id of ["map-truth", "map-true", "map-cov"]) {
     const cv = $(id);
-    let dragging = false, downX = 0, downY = 0, preOI = 0, preOJ = 0;
+    let dragging = false;
     const moveTo = (e) => {
       const { i, j } = mapPosToIJ(cv, e.clientX, e.clientY);
       oi = clamp(Math.round(i), 0, NX - 1);
@@ -565,28 +538,12 @@
       render();
     };
     cv.addEventListener("pointerdown", (e) => {
-      if (locked) return;                        // pinned: maps are inert
       dragging = true;
-      downX = e.clientX; downY = e.clientY;
-      preOI = oi; preOJ = oj;                    // obs cell before this press
       moveTo(e);
       try { cv.setPointerCapture(e.pointerId); } catch (err) { /* touch on some iOS versions */ }
     });
-    cv.addEventListener("pointermove", (e) => {
-      if (!dragging) return;
-      if (Math.hypot(e.clientX - downX, e.clientY - downY) > 5) moveTo(e);
-    });
-    cv.addEventListener("pointerup", (e) => {
-      if (dragging) {
-        const dist = Math.hypot(e.clientX - downX, e.clientY - downY);
-        if (dist <= 5) {
-          // stationary click: if it landed on the observation, pin/unpin it
-          const rect = cv.getBoundingClientRect();
-          const mx = e.clientX - rect.left, my = e.clientY - rect.top;
-          const mdx = (px(preOI) * rect.width) - mx, mdy = (py(preOJ) * rect.height) - my;
-          if (Math.hypot(mdx, mdy) < 14) toggleLock();
-        }
-      }
+    cv.addEventListener("pointermove", (e) => { if (dragging) moveTo(e); });
+    cv.addEventListener("pointerup", () => {
       dragging = false;
       hideTooltip();
     });
@@ -624,8 +581,6 @@
 
   // ------------------------------------------------------------ controls
   const nensEl = $("ctl-nens"), locEl = $("ctl-loc"), locOnEl = $("ctl-locon");
-  const lockBtn = $("ctl-lock");
-  if (lockBtn) lockBtn.addEventListener("click", () => toggleLock());
   if (nensEl) {
     nensEl.value = nens;
     nensEl.addEventListener("input", () => {
@@ -643,6 +598,9 @@
     });
   }
   if (locOnEl) {
+    locOnEl.checked = locOn;
+    locEl.disabled = !locOn;
+    $("loc-val").classList.toggle("dim", !locOn);
     locOnEl.addEventListener("change", () => {
       locOn = locOnEl.checked;
       locEl.disabled = !locOn;

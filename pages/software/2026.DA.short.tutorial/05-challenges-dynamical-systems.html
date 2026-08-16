@@ -77,27 +77,20 @@
       </nav>
 
       <p>
-        The last two chapters treated the analysis as a static problem: a Gaussian prior, a Gaussian
-        observation, one posterior. Real data assimilation lives in a harder setting — the model is a
-        <strong>chaotic dynamical system</strong>, the forecast <em>spreads</em>, and after long enough
-        the error distribution is not Gaussian at all. This chapter looks at where those difficulties
-        come from, using two toy dynamical systems: the 40-variable <strong>Lorenz-96</strong> model for
-        chaos and predictability, and the <strong>vort3d</strong> tropical-cyclone model for an
-        unpredictable process (rapid intensification) and for the non-Gaussianity that position error
-        produces. The analysis schemes in the next part are, at bottom, answers to exactly these
-        challenges.
+        So far the analysis has been a one-shot, Gaussian problem. Real models are
+        <strong>chaotic</strong>: forecasts spread out over time, and errors stop looking Gaussian.
+        This chapter shows why, with two toy models: <strong>Lorenz-96</strong> for chaos and
+        predictability, and <strong>vort3d</strong>, a simplified hurricane model, for non-Gaussian
+        error.
       </p>
 
       <!-- ================================================================== -->
       <h3 id="sec-chaos">1 &#183; Chaos: the forecast spreads</h3>
       <p>
-        Lorenz-96 is the standard toy for predictability studies: 40 variables on a ring,
-        $\dot x_i = (x_{i+1}-x_{i-2})x_{i-1} - x_i + F$ with $F=8$. It is deterministic and
-        chaotic: two states that differ by <em>anything</em> — even $10^{-12}$ — separate
-        exponentially, until the difference saturates at the system's natural variability.
-        A weather model does the same thing with its own initial-condition errors, which is
-        <em>why data assimilation exists</em>: the analysis exists to shrink those errors before
-        they have time to grow.
+        Lorenz-96 is 40 variables on a ring, chaotic and deterministic: two states that start
+        <em>almost</em> identical separate exponentially over time. A weather model does the same
+        with its own initial-condition errors — which is why data assimilation exists: to shrink
+        those errors before they have time to grow.
       </p>
       <p class="hint">
         <strong>Try it:</strong> slide the initial perturbation $\sigma$ down and the fan in panel (a)
@@ -169,41 +162,27 @@
       </div>
 
       <p>
-        Three features of panel (b) carry the whole lesson. First, the <strong>exponential phase</strong>:
-        at short lead times the error doubles on a characteristic timescale (here &asymp; 2 days — the
-        famous Lorenz-96 value), so the readout's <em>error-doubling time</em> is the model's intrinsic
-        error-doubling time. Second, the <strong>saturation</strong>: error and spread both level off at
-        the climatological std &asymp; 3.5, the limit of what is predictable about this system from initial
-        conditions alone. Third, <strong>spread tracks error</strong> — the ensemble is built from the
-        same perturbation statistics that generated the truth error, so its spread is a faithful forecast
-        of the error. The vertical marker is the <em>predictability limit</em>: past it, the forecast
-        carries no more information than a random draw from the climatology.
+        Panel (b) shows the whole story: error grows exponentially at first, then
+        <strong>saturates</strong> once it reaches the model's natural variability — beyond that
+        point, the forecast is no better than a random guess. Notice that spread tracks error
+        closely: the ensemble's confidence is honest here, because it was built to match exactly
+        this kind of error.
       </p>
 
       <!-- ================================================================== -->
       <h3 id="sec-vort3d">2 &#183; A real process: rapid intensification in the vort3d hurricane model</h3>
       <p>
-        The vort3d model is a minimal 3-D tropical-cyclone model (Zhu, Smith &amp; Ulrich 2001, in
-        <a href="https://github.com/nansencenter/NEDAS">NEDAS</a>). The demo below launches 20 forecasts
-        of the same storm from slightly perturbed initial states, and tracks each one for 11 days.
-        Two challenges stand out that the Gaussian picture of Chapters 1&#8211;2 cannot capture:
+        The demo below launches 20 forecasts of the same simulated hurricane from slightly
+        different starting states. Two things stand out that a Gaussian picture can't capture:
       </p>
       <p>
-        <b>Rapid intensification is a regime change.</b> Some members intensify quickly to
-        V<sub>max</sub> &gt; 60 m/s while others stall or decay — watch the intensity panel in row 1:
-        the 20 realizations separate into distinct stories. The storm's <em>tendency</em> is what is
-        uncertain, not just a small additive error, and the ensemble mean of a bimodal set of intensities
-        is not a storm anyone would see. This is the practical form of the "less predictable process"
-        problem: predictability depends on the flow, and a fast-developing regime is where it drops most.
+        <b>Rapid intensification is a regime change.</b> Some members intensify quickly, others
+        stall — the intensity panel splits into distinct stories, not a spread around one number.
       </p>
       <p>
-        <b>Position error is non-Gaussian.</b> Hover over a realization and look at the wind-speed maps in
-        row 2: members that agree on intensity can disagree wildly on <em>where</em> the vortex is. An
-        ensemble whose members carry position uncertainty produces, at any fixed grid point, a wind error
-        distribution that is bimodal (storm here or there), skew, and generally far from Gaussian — the
-        raw material that the linear-Gaussian analysis of the next chapters cannot represent. You met the
-        germ of this idea in Chapter 2 (position uncertainty produces strong negative correlations);
-        here it is in a real model. This is what motivates the nonlinear filters of Chapter 7.
+        <b>Position error is non-Gaussian.</b> Members that agree on storm strength can disagree
+        wildly on <em>where</em> it is — so at a fixed point, the error distribution is bimodal
+        and skewed, not a bell curve. That's what motivates the nonlinear filters in Chapter 6.
       </p>
 
       <div class="vort3d-embed">
@@ -212,19 +191,13 @@
       </div>
 
       <p class="vort3d-caption">
-        <b>Row 1</b> &mdash; vortex track, intensity (maximum boundary-layer wind) and size
-        (radius of the 15&nbsp;m/s wind ring) for 20 of 200 free-running pool realizations
-        (Ying, Anderson &amp; Bertino 2023, MWR, Fig.&nbsp;1 layout); dashed line: ensemble mean.
-        <b>Row 2</b> &mdash; the selected realization's structure at the chosen time:
-        boundary-layer wind speed map (1280&nbsp;km window centred on the vortex: dashed track = ensemble
-        mean, coloured track = the selected realization), and a radius&ndash;height cross-section of the
-        azimuthally-averaged radial wind (shading, inflow negative) with tangential-wind contours.
-        The white ring on the wind map is the 15&nbsp;m/s isotach &mdash; the same definition as the
-        "size" timeseries of row 1.
+        <b>Row 1</b> &mdash; track, intensity, and size for 20 forecasts; dashed line is the
+        ensemble mean. <b>Row 2</b> &mdash; the selected forecast's wind-speed map and a
+        cross-section through the storm, at the chosen time.
       </p>
       <p>
-        <i>Next:</i> Chapter 4 — <a href="04-kalman-filter.html">From best linear unbiased estimate to the Kalman filter</a> —
-        the first analysis scheme, built on exactly the Gaussian assumptions these examples will stress.
+        <i>Next:</i> Chapter 6 looks at <a href="06-nonlinear-filters.html">nonlinear filters</a> —
+        analysis schemes built for exactly the non-Gaussian cases seen here.
       </p>
 
       <nav class="widget-nav widget-nav-bottom">

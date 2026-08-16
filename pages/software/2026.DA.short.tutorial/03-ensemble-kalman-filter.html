@@ -10,8 +10,8 @@
 <link rel="stylesheet" href="../../../style.css">
 <link rel="stylesheet" href="chapters.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="widgets/enkf-explorer/style.css">
-<link rel="stylesheet" href="widgets/cycle-explorer/style.css">
+<link rel="stylesheet" href="widgets/enkf-explorer/style.css?v=2">
+<link rel="stylesheet" href="widgets/cycle-explorer/style.css?v=2">
 
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-148955805-2"></script>
@@ -52,31 +52,16 @@
 
       <h4 id="sec-enkf">1 &#183; A single analysis step</h4>
       <p>
-        From the scalar precision-weighted average of Chapter 1 to the full state vector: the best
-        linear unbiased estimate is a matrix update,
-        x<sub>a</sub> = x<sub>b</sub> + K(y &#8722; Hx<sub>b</sub>). But the covariance is too big to
-        store — so the ensemble carries it, and the analysis becomes a linear combination of the
-        ensemble perturbations. This widget assimilates the <em>very same observation</em> as
-        Chapter 2 into the <em>very same ensemble</em>, performing the stochastic EnKF update live
-        in your browser:
-      </p>
-      <p class="formula">
-        x<sub>a</sub><sup>m</sup> = x<sub>b</sub><sup>m</sup> + K (y<sup>m</sup> &#8722; H x<sub>b</sub><sup>m</sup>),
-        &nbsp; K = P<sub>b</sub>H<sup>T</sup> / (H P<sub>b</sub>H<sup>T</sup> + R),
-        &nbsp; y<sup>m</sup> = y + &#949;<sup>m</sup>, &#949;<sup>m</sup> ~ N(0, R).
-      </p>
-      <p>
-        With a single scalar observation, the gain K is one vector — the covariance of every grid
-        cell with the simulated observation, divided by the observation-space variance plus the
-        observation error R: the same dipole you saw as the correlation map in Chapter 2, re-used
-        as the update pattern. No matrix is ever assembled.
+        Chapter 1's weighted average, done for a whole field: each ensemble member is nudged
+        toward the observation by the same gain,
+        x<sub>a</sub> = x<sub>b</sub> + K(y &#8722; Hx<sub>b</sub>). This widget applies that update,
+        live, to Chapter 2's exact ensemble and observation — the correlation map you saw there
+        <em>is</em> the update pattern K.
       </p>
       <p class="hint">
-        <strong>Try it:</strong> drag the <em>obs error</em> slider and watch the pull — a small
-        &sigma;<sub>o</sub> trusts the observation and collapses the analysis band onto the truth
-        ring; a large &sigma;<sub>o</sub> barely moves the ensemble. Walk through members with the
-        member slider (the update arrow in the scatter shows how far each member is pulled), and
-        click or drag on a map to move the black state marker.
+        <strong>Try it:</strong> drag <em>obs error</em> — small &sigma;<sub>o</sub> trusts the
+        observation and pulls the ensemble tight onto the truth; large &sigma;<sub>o</sub> barely
+        moves it. Step through members with the slider, or click/drag a map to move the marker.
       </p>
 
       <!-- ================= Ensemble Kalman Filter Explorer ================ -->
@@ -108,16 +93,19 @@
           </div>
 
           <div class="controls">
-            <button class="ctl-btn" id="enkf-members" aria-pressed="true" title="show / hide the ensemble members">Members: on</button>
-            <div class="ctl">
-              <label for="mem-slider">member <em>m</em></label>
-              <input type="range" id="mem-slider" min="1" max="100" step="1" value="50">
-              <span class="ctl-val" id="mem-val">50</span>
+            <div class="ctl-toggle-row">
+              <label class="switch">
+                <input type="checkbox" id="enkf-members" checked>
+                <span class="switch-slider" aria-hidden="true"></span>
+                <span class="switch-label">member contours</span>
+              </label>
             </div>
-            <div class="ctl">
-              <label for="sig-o">obs error <em>&sigma;<sub>o</sub></em> (K)</label>
-              <input type="range" id="sig-o" min="0.2" max="4" step="0.1" value="1">
-              <span class="ctl-val" id="sig-o-val">1.00</span>
+            <div class="ctl-sliders">
+              <div class="ctl">
+                <label for="sig-o"><em>&sigma;<sub>o</sub></em></label>
+                <input type="range" id="sig-o" min="0.2" max="4" step="0.1" value="1">
+                <span class="ctl-val" id="sig-o-val">1.00 K</span>
+              </div>
             </div>
           </div>
 
@@ -137,58 +125,24 @@
 
       <h3>Reading the panels</h3>
       <p>
-        <b>1 &#183; The background</b> — the forecast: the same position-uncertainty ensemble as
-        Chapter 2 (std 50 km), its 4 K contours a loose coloured band around the truth ring. The
-        shading is the ensemble <em>mean</em> — position uncertainty averages out the blob, so the
-        forecast mean is broader and weaker than the truth (the dark ring). The selected member's
-        ring is thick and its blob centre is marked. The observation (red circle) reads
-        <b>5.53 K</b> — some members see it as warmer, some as colder, depending on where their
-        blob sits.
-      </p>
-      <p>
-        <b>2 &#183; The analysis</b> — every member after the EnKF update. Each one has been pushed
-        toward the observed value: the contour band tightens around the truth ring, the shading is
-        the analysis <em>mean</em> (pulled toward the observation, its peak rising toward the
-        truth ring's value), and the selected member's blob centre moves toward the observation
-        (the dashed line shows where it came from). The tighter the band, the smaller
-        &sigma;<sub>o</sub> — try it. Far from the observation the band barely moves: a single
-        observation cannot constrain the whole field.
-      </p>
-      <p>
-        <b>3 &#183; The scatter</b> — the update in the joint distribution: background points
-        (aqua) are pulled to analysis points (red), with the observed value and its
-        &plusmn;&sigma;<sub>o</sub> band (amber). The arrow connects the selected member's
-        before/after. Members that read too warm at the observation are pulled down, members that
-        read too cold are pulled up — the cloud contracts toward the observation. The reported
-        gain K = Var(Hx<sub>b</sub>) / (Var(Hx<sub>b</sub>) + &sigma;<sub>o</sub><sup>2</sup>) is
-        the fraction of the innovation the filter applies: &sigma;<sub>o</sub> = 1 K gives
-        K &#8776; 0.84, so each member moves 84% of the way.
-      </p>
-
-      <p class="planned-ref">
-        &#8594; Evensen et al., <i>Data Assimilation Fundamentals</i> (2022), Ch 6, 8 &#8212; linear analysis
-        and the EnKF update.
+        <b>Background</b> — the forecast ensemble, loose around the truth ring. <b>Analysis</b> —
+        every member after the update, pulled toward the observation; the band tightens more the
+        smaller &sigma;<sub>o</sub> is. <b>Scatter</b> — background points (aqua) moving to
+        analysis points (red); the arrow shows one member's move.
       </p>
 
       <!-- ====================== cycling EnKF widget ==================== -->
       <h4 id="sec-cycle">2 &#183; Cycling the filter</h4>
       <p>
-        Real data assimilation is not one analysis — it is a loop: forecast, observe, analyze,
-        repeat. The same warm blob from Chapter 2 becomes a storm here, drifting at a constant,
-        <em>perfectly known</em> velocity — the simplest possible dynamical system, no noise
-        anywhere — across a domain that wraps at the edges, so it keeps cycling past a network of
-        3&times;3 network of nine fixed ground stations forever. Each cycle observes every station in turn and applies
-        the exact same update as section 1 above to each — but now to a low-dimensional state, the
-        storm's centre (c<sub>x</sub>, c<sub>y</sub>), so the vector Kalman update is exact, not a
-        shortcut.
+        Real data assimilation loops: forecast, observe, analyze, repeat. Here a storm drifts at a
+        constant, perfectly known speed past a 3&times;3 grid of ground stations, and each cycle
+        applies the same update as above to the storm's centre.
       </p>
       <p class="hint">
-        <strong>Try it:</strong> hit <em>run</em> and watch the right-hand panel: the ensemble
-        spread (blue) shrinks every cycle, while the error against the truth (red) stays near
-        zero — the model is perfect, so the mean is always right even once spread collapses.
-        Nothing here regrows the spread the analysis keeps removing. Is that a problem? With a
-        perfect model, no. Chapter 4 changes exactly one thing about this setup and watches it
-        become one.
+        <strong>Try it:</strong> hit <em>run</em> and watch the ensemble spread (blue) shrink every
+        cycle while the error (red) stays near zero — with a perfect model, the mean is always
+        right even as spread collapses. Chapter 4 changes one thing about this setup, and that
+        stops being true.
       </p>
 
       <!-- ================= Cycling EnKF Explorer ================ -->
@@ -234,15 +188,12 @@
       <!-- ================= end widget ===================================== -->
 
       <p>
-        Watch the readout as the cycles pile up: spread keeps falling — 10s of km, then a handful,
-        then a fraction — while the rms error sits at zero throughout. That gap between a
-        confident-looking (small-spread) ensemble and an actually-correct one is invisible here
-        only because the model has no error to reveal it.
+        Watch the spread keep falling while the error stays at zero — a confident-looking ensemble
+        isn't necessarily a correct one; here it just happens to be, because the model is perfect.
       </p>
 
       <p class="planned-ref">
-        &#8594; Evensen et al., <i>Data Assimilation Fundamentals</i> (2022), Ch 6, 8 &#8212; linear analysis
-        and the EnKF update.
+        Suggested reading: Evensen et al., <i>Data Assimilation Fundamentals</i> (2022), Ch 6, 8.
       </p>
 
       <nav class="widget-nav widget-nav-bottom">
@@ -259,7 +210,7 @@
 
   <script src="../../../footer.js"></script>
   <script src="widgets/enkf-explorer/data.js"></script>
-  <script src="widgets/enkf-explorer/app.js"></script>
-  <script src="widgets/cycle-explorer/app.js"></script>
+  <script src="widgets/enkf-explorer/app.js?v=2"></script>
+  <script src="widgets/cycle-explorer/app.js?v=2"></script>
 </body>
 </html>

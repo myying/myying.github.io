@@ -107,7 +107,7 @@
   // ----------------------------------------------------------- state
   let si = 33, sj = 18;                  // (i, j) of the state marker
   let sel = 49;                          // selected member, 0-based (default #50)
-  let showMembers = true;                // show the ensemble members (contours + scatter dots)
+  let showContours = true;               // show member contours in the bg/an map panels
   let sigO = 1.0;                        // obs error std, K (slider)
 
   // ------------------------------------------------ EnKF statistics
@@ -435,8 +435,8 @@
     ctx.lineTo(mL + pw, Y(truthT[sj][si]));
     ctx.stroke();
 
-    // background points (aqua)
-    if (showMembers) {
+    // background points (aqua) — always shown, independent of the contour toggle
+    {
       ctx.fillStyle = cssVar("--series-aqua");
       for (let m = 0; m < nens; m++) {
         const x = X(hxb[m]), y = Y(ensT[sj][si][m]);
@@ -499,17 +499,13 @@
     const an = getAnContours();
 
     // ensemble-mean fields for the shading: the background forecast mean
-    // (fixed) and the analysis mean (recomputed at the current σ_o); a
-    // shared adaptive scale keeps both panels directly comparable
+    // (fixed) and the analysis mean (recomputed at the current σ_o); both
+    // panels share the fixed truth-range scale (vmax) so the colorbar
+    // doesn't rescale as σ_o or the marker move
     const meanInc = (obs.val - hxbMean + meanZ * sq) / denom;
     const anMeanF = new Float64Array(nx * ny);
-    let bgMax = 0, anMax = 0;
-    for (let c = 0; c < nx * ny; c++) {
-      anMeanF[c] = meanF[c] + covF[c] * meanInc;
-      if (meanF[c] > bgMax) bgMax = meanF[c];
-      if (anMeanF[c] > anMax) anMax = anMeanF[c];
-    }
-    const vmaxMean = Math.max(5, Math.ceil(Math.max(bgMax, anMax)));
+    for (let c = 0; c < nx * ny; c++) anMeanF[c] = meanF[c] + covF[c] * meanInc;
+    const vmaxMean = vmax;
 
     drawEnsMap($("map-bg"), bgSegs, bgCentres, 0.45, false, bgMean2D, vmaxMean);
     drawEnsMap($("map-an"), an.segs, an.centres, 0.7, true, flatField(anMeanF), vmaxMean);
@@ -542,7 +538,7 @@
     if (!fit) return;
     const { ctx, w, h } = fit;
     drawField(ctx, w, h, field2d, 0, fhi, lutTh);
-    if (showMembers) {
+    if (showContours) {
       for (let m = 0; m < nens; m++) {
         if (m === sel) continue;
         drawSegs(ctx, w, h, segs[m], memColor(m), 1, dim);
@@ -642,22 +638,14 @@
   function hideTooltip() { tip.style.display = "none"; }
 
   // ----------------------------------------------------------------- init
-  // select a member (slider or scatter click) — highlights its 4 K contour
+  // select a member (click a scatter dot) — highlights its 4 K contour
   // (both panels), its blob centres and its update arrow in the scatter
-  const memEl = $("mem-slider"), memVal = $("mem-val");
   function setSel(m) {
     sel = clamp(m, 0, nens - 1);
-    if (memEl) { memEl.value = sel + 1; memVal.textContent = sel + 1; }
     render();
   }
-  if (memEl) {
-    memEl.value = sel + 1;
-    memEl.addEventListener("input", () => {
-      setSel((parseInt(memEl.value, 10) || 1) - 1);
-    });
-  }
   // click on the scatter to select the nearest member (background or analysis
-  // point — the same member's two dots), driving the slider + highlights
+  // point — the same member's two dots)
   const scatCv = $("scat");
   if (scatCv) {
     scatCv.addEventListener("click", (e) => {
@@ -691,17 +679,16 @@
     sigEl.value = sigO;
     sigEl.addEventListener("input", () => {
       sigO = clamp(parseFloat(sigEl.value) || 1, 0.2, 4);
-      sigVal.textContent = sigO.toFixed(2);
+      sigVal.textContent = sigO.toFixed(2) + " K";
       render();
     });
   }
 
-  const membersBtn = $("enkf-members");
-  if (membersBtn) {
-    membersBtn.addEventListener("click", () => {
-      showMembers = !showMembers;
-      membersBtn.textContent = showMembers ? "Members: on" : "Members: off";
-      membersBtn.setAttribute("aria-pressed", String(showMembers));
+  const membersEl = $("enkf-members");
+  if (membersEl) {
+    membersEl.checked = showContours;
+    membersEl.addEventListener("change", () => {
+      showContours = membersEl.checked;
       render();
     });
   }

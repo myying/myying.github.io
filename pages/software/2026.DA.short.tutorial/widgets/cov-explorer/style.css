@@ -133,17 +133,29 @@
 }
 
 /* ------------------------------------------------------------- controls */
+/* localize toggle sits on its own row, above the boxed sliders sub-panel
+   (same convention as the Ch. 6 §2 widget) */
 .da-widget .controls {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px 22px;
+  flex-direction: column;
+  gap: 10px;
   margin: 14px 0 0;
   padding: 12px 16px;
   background: var(--surface-1);
   border: 1px solid var(--border);
   border-radius: 10px;
   box-shadow: var(--shadow);
+}
+.da-widget .ctl-toggle-row { display: flex; align-items: center; gap: 12px; }
+.da-widget .ctl-sliders {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 22px;
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
 }
 .da-widget .ctl {
   display: flex;
@@ -200,29 +212,6 @@
 .da-widget .switch input:checked + .switch-slider { background: var(--series-red); }
 .da-widget .switch input:checked + .switch-slider::after { transform: translateX(16px); }
 .da-widget .switch-label { font-size: 0.82rem; color: var(--ink-2); }
-
-/* lock/unlock the observation */
-.da-widget .lock-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  min-height: 30px;
-  padding: 0 12px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface-1);
-  color: var(--ink-2);
-  font: inherit;
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
-}
-.da-widget .lock-btn:hover { border-color: var(--series-red); color: var(--ink-1); }
-.da-widget .lock-btn.locked { background: var(--series-red); border-color: var(--series-red); color: #fff; }
-/* pinned: the maps no longer take the grab cursor */
-.da-widget.locked canvas.map { cursor: default; }
 
 /* ---------------------------------------------------------- mobile */
 @media (max-width: 560px) {

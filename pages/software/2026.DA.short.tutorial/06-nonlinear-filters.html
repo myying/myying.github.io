@@ -9,8 +9,8 @@
 
 <link rel="stylesheet" href="../../../style.css">
 <link rel="stylesheet" href="chapters.css">
-<link rel="stylesheet" href="widgets/position-error/style.css?v=27">
-<link rel="stylesheet" href="widgets/pf-explorer/style.css?v=5">
+<link rel="stylesheet" href="widgets/position-error/style.css?v=28">
+<link rel="stylesheet" href="widgets/pf-explorer/style.css?v=11">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <!-- Global site tag (gtag.js) - Google Analytics -->
@@ -49,29 +49,19 @@
 
       <h3>Nonlinear filters</h3>
       <p>
-        Chapters 1&#8211;6 built every analysis scheme on two linear-Gaussian assumptions: the
-        observation operator is (locally) linear and the prior error is Gaussian. Both fail for
-        coherent structures like tropical cyclones. This chapter starts with the most common failure
-        mode &#8212; <em>position error</em> &#8212; and will build up to particle filters, which
-        replace the Gaussian assumption altogether.
+        Every filter so far assumed a Gaussian prior. That breaks down for coherent structures
+        like storms, where uncertainty is mostly about <em>position</em>. This chapter shows why,
+        then builds up to particle filters, which drop the Gaussian assumption entirely.
       </p>
 
       <!-- ====================== Gaussian hump widget ================== -->
       <h4 id="sec-position-error">1 &#183; Position errors break the Gaussian assumption</h4>
       <p>
-        A Gaussian hump &#8212; the exact same warm blob as Chapter 2's own data generator (peak 8 K,
-        radius scale &sigma; = 50 km, on the same 500&#8201;&#215;&#8201;500&#8201;km / 10&#8201;km
-        grid) &#8212; is the simplest model of a coherent anomaly. The ensemble below has 100 members
-        that differ <em>only</em> in where the hump sits: each centre is drawn from a Gaussian with
-        standard deviation L<sub>sprd</sub> around the truth location (given in units of the hump
-        radius scale &sigma;). The observation point P (marked +) sits at the same grid offset from
-        the truth centre as Chapter 2's own observation from its blob peak &#8212; not on the
-        4&#8201;K contour, same as in Chapter 2 &#8212; and the state we watch is the temperature T
-        at P. Click P on panel (a) to move it anywhere; click a dot in
-        panel (c) to highlight that member's ring in panel (a). Slide L<sub>sprd</sub> up and down:
-        at small spread the distribution of T at P (panel (b)) is Gaussian; once the spread reaches
-        the hump size, members' centres pass P and the histogram skews hard against the T = 0
-        bound &#8212; no Gaussian prior can represent it.
+        A warm blob whose members only differ in where it's centred — spread L<sub>sprd</sub>
+        controls how much. We watch the temperature at a fixed point P. Click P to move it, or a
+        dot in panel (c) to highlight that member. At small spread, the value at P is roughly
+        Gaussian; once the spread is large enough that members' centres sweep past P, the
+        distribution skews hard and stops looking Gaussian at all.
       </p>
 
       <div class="da-widget" id="position-error">
@@ -143,46 +133,26 @@
       </div>
 
       <p>
-        <strong>Why the bend.</strong> The temperature at a fixed point is the hump evaluated at the
-        member centre's distance from that point: a bell curve in the centre position. Near P that
-        map is locally linear, so a small position spread keeps the error at P Gaussian. As the
-        spread grows, members' centres sweep across P: the value at P peaks when a member's centre
-        sits exactly on P and falls to zero on both sides (panel (c)) &#8212; a non-monotone map pushed
-        through a Gaussian cloud of centres. The histogram in panel (b) skews and fattens, piling
-        against the hard T = 0 bound, and the readout's skewness leaves 0. An ensemble that is
-        Gaussian in <em>where</em> the anomaly is is emphatically non-Gaussian in <em>what the
-        value is at any fixed point</em>.
-      </p>
-      <p>
-        This is the same mechanism that produced the correlation dipole in Chapter 2 &#8212; position
-        uncertainty at work &#8212; and it is exactly the situation section 2's comparison has to deal
-        with when the observation at P is assimilated.
+        <strong>Why the bend.</strong> The value at P peaks when a member's centre lands exactly on
+        P, and falls off on both sides — a non-monotone relationship. Push a Gaussian cloud of
+        centres through that, and the temperature at P comes out skewed, not Gaussian, even though
+        the <em>position</em> uncertainty itself was perfectly Gaussian.
       </p>
 
       <!-- ====================== EnKF vs particle filter ================ -->
       <h4 id="sec-pf">2 &#183; EnKF vs particle filter</h4>
       <p>
-        When the Gaussian assumptions fail, Bayes' rule is solved directly on the ensemble: the
-        <strong>particle filter</strong> turns the prior members into a <em>weighted</em> sample,
-        each particle reweighted by the observation likelihood p(y&#8202;|&#8202;centre). The EnKF cannot do
-        that &#8212; its analysis is an affine combination of the prior members, so the posterior keeps
-        the Gaussian shape of the prior. The three panels below show the 4 K contour
-        spaghetti of the <em>same</em> Gaussian hump ensemble as section 1 &#8212; where every member's
-        rings sit &#8212; before and after assimilating one observation of the temperature T at P (the
-        +, same grid offset from the truth centre as Chapter 2's own observation &#8212; not on the
-        4&#8201;K contour): the prior, the EnKF analysis, and the particle-filter posterior, whose
-        members light up with their weight. The observed value is 4 K, with error
-        &sigma;<sub>o</sub> (tunable, default 1 K). Every member keeps its own colour in all three
-        panels, so its rings can be traced from prior to posterior.
+        The <strong>particle filter</strong> reweights each prior member by how well it matches
+        the observation, instead of shifting members like the EnKF does. Since it never assumes a
+        Gaussian shape, it can handle the skewed prior from section 1. The three panels below show
+        the same ensemble before and after assimilating one observation at P: the prior, the EnKF
+        analysis, and the particle-filter posterior (members light up by their weight).
       </p>
       <p class="hint">
-        <strong>Try it:</strong> slide L<sub>sprd</sub> up &#8212; the prior band widens, the EnKF band
-        only tightens where the regression points, and the particle filter lights up just the
-        members whose rings are consistent with the observation. Watch the readout: the weighted
-        centre distance shows how far the posterior is pulled toward the truth, and
-        N<sub>eff</sub> = 1/&Sigma;w<sub>m</sub><sup>2</sup> collapses as the observation becomes
-        unlikely under the prior. N<sub>ens</sub> changes how
-        many contours the filters share.
+        <strong>Try it:</strong> slide L<sub>sprd</sub> up — the EnKF only tightens where a linear
+        update points, while the particle filter lights up just the members actually consistent
+        with the observation. Watch N<sub>eff</sub> in the readout: it collapses as the observation
+        becomes unlikely under the prior — a sign of too few effective particles.
       </p>
 
       <div class="da-widget" id="pf-explorer">
@@ -213,24 +183,30 @@
           </div>
 
           <div class="controls">
-            <div class="ctl">
-              <label for="pf-sprd">location spread <em>L<sub>sprd</sub></em></label>
-              <input type="range" id="pf-sprd" min="0.1" max="3" step="0.1" value="1.5">
-              <span class="ctl-val" id="pf-sprd-val"></span>
-            </div>
-            <div class="ctl">
-              <label for="pf-nens">N<sub>ens</sub></label>
-              <input type="range" id="pf-nens" min="20" max="400" step="10" value="100">
-              <span class="ctl-val" id="pf-nens-val"></span>
-            </div>
-            <div class="ctl">
-              <label for="pf-sigo">obs error <em>&sigma;<sub>o</sub></em> (K)</label>
-              <input type="range" id="pf-sigo" min="0.2" max="4" step="0.1" value="1">
-              <span class="ctl-val" id="pf-sigo-val">1.00</span>
-            </div>
-            <div class="ctl ctl-buttons">
-              <button class="ctl-btn" id="pf-contours" aria-pressed="true" title="show / hide the ensemble contours">Contours: on</button>
+            <div class="ctl-toggle-row">
+              <label class="switch">
+                <input type="checkbox" id="pf-contours" checked>
+                <span class="switch-slider" aria-hidden="true"></span>
+                <span class="switch-label">contours</span>
+              </label>
               <button class="ctl-btn" id="pf-rerun" title="draw a new prior ensemble">&#8635; new ensemble</button>
+            </div>
+            <div class="ctl-sliders">
+              <div class="ctl">
+                <label for="pf-sprd"><em>L<sub>sprd</sub></em></label>
+                <input type="range" id="pf-sprd" min="0.1" max="3" step="0.1" value="1.5">
+                <span class="ctl-val" id="pf-sprd-val"></span>
+              </div>
+              <div class="ctl">
+                <label for="pf-nens"><em>N<sub>ens</sub></em></label>
+                <input type="range" id="pf-nens" min="20" max="400" step="10" value="100">
+                <span class="ctl-val" id="pf-nens-val"></span>
+              </div>
+              <div class="ctl">
+                <label for="pf-sigo"><em>&sigma;<sub>o</sub></em></label>
+                <input type="range" id="pf-sigo" min="0.2" max="4" step="0.1" value="1">
+                <span class="ctl-val" id="pf-sigo-val">1.00 K</span>
+              </div>
             </div>
           </div>
 
@@ -239,34 +215,24 @@
           <ul class="legend">
             <li><span class="mark truth"></span> truth &#183; 4 K contour</li>
             <li><span class="mark member"></span> members</li>
-            <li class="legend-note">panel (c): brightness &amp; line width &#8733; particle weight</li>
+            <li class="legend-note">brightness &#8733; particle weight</li>
           </ul>
         </main>
 
       </div>
 
       <p>
-        <strong>Reading the panels.</strong> <b>(a)</b> The prior: every member's 4 K rings around
-        its centre &#8212; a wide band of where the 4 K line could be; the shading is the ensemble
-        <em>mean</em> field, broader and weaker than the truth ring since position uncertainty
-        averages the blob out (same convention as Chapter 3's background panel). <b>(b)</b> The EnKF
-        analysis: the SAME per-grid-cell formula as Chapter 3, applied independently at every cell
-        &#8212; it does not move any member's centre, so instead of sliding the rings tighten and
-        distort into the classic position-error dipole shape (the readout's centre distance can even
-        go up: a linear per-cell update cannot represent a rigid shift); the shading is the analysis
-        mean, on the same colour scale as (a) so the two are directly comparable. <b>(c)</b> The
-        particle filter: the <em>same</em> prior members, reweighted by the
-        observation likelihood &#8212; the rings light up only where the observed temperature is
-        plausible, and the shading is the <em>weighted</em> mean (&Sigma; w<sub>m</sub>&#183;field<sub>m</sub>,
-        same colour scale as (a)/(b)): near-zero-weight particles contribute essentially nothing to
-        it, so it concentrates on wherever the surviving members sit &#8212; a direct picture of
-        importance-sampling degeneracy, which the readout's N<sub>eff</sub> quantifies as how few
-        particles effectively survive.
+        <strong>Reading the panels.</strong> <b>(a)</b> The prior: a wide band of rings, the
+        possible positions. <b>(b)</b> The EnKF: the same update as Chapter 3, applied per grid
+        cell — it can only tighten the band, not slide it, so it distorts instead of shifting.
+        <b>(c)</b> The particle filter: the same members, but only the ones consistent with the
+        observation light up — a direct picture of how few particles actually matter, which
+        N<sub>eff</sub> in the readout quantifies.
       </p>
 
       <p class="planned-ref">
-        &#8594; Evensen et al., <i>Data Assimilation Fundamentals</i> (2022), Ch 9 &#8212; nonlinear filters;
-        van Leeuwen (2009), <i>Mon. Wea. Rev.</i>, particle filters in geoscience.
+        Suggested reading: Evensen et al., <i>Data Assimilation Fundamentals</i> (2022), Ch 9;
+        van Leeuwen (2009), <i>Mon. Wea. Rev.</i>
       </p>
 
       <nav class="widget-nav widget-nav-bottom">
@@ -282,7 +248,7 @@
   </div>
 
   <script src="../../../footer.js"></script>
-  <script src="widgets/position-error/app.js?v=19"></script>
-  <script src="widgets/pf-explorer/app.js?v=9"></script>
+  <script src="widgets/position-error/app.js?v=20"></script>
+  <script src="widgets/pf-explorer/app.js?v=11"></script>
 </body>
 </html>

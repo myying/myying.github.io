@@ -71,7 +71,10 @@
 }
 
 .da-widget .plot-wrap {
-  min-width: 0;
+  min-width: 220px;
+  max-width: 460px;
+  width: 100%;
+  align-self: center;      /* centres the panel when its column is wider than max-width */
   display: flex;
   flex-direction: column;   /* so the canvas can stretch to fill its grid cell */
 }
@@ -225,14 +228,23 @@
 .da-widget #pe-plot-c { cursor: pointer; }
 .da-widget .mark.sprd   { height: 0; width: 16px; border-top: 2px solid var(--series-amber); }
 
+/* medium: two rows instead of one — controls + (a) stacked on top (full
+   width), (b) and (c) side by side underneath — instead of jumping straight
+   to a full vertical stack */
 @media (max-width: 899px) {
-  /* narrow: plain block flow — control, then (a), (b), (c), full width each */
   .da-widget .workspace { display: block; }
-  .da-widget .pe-col { display: block; margin-bottom: 16px; }
-  .da-widget .pe-col .controls,
-  .da-widget .pe-col .plot-wrap { grid-area: auto; margin-left: 0; width: auto; }
+  .da-widget .pe-col-left { display: block; margin-bottom: 16px; }
+  .da-widget .pe-col-left .controls,
+  .da-widget .pe-col-left .plot-wrap { grid-area: auto; margin-left: 0; width: auto; }
   .da-widget .controls { width: 100%; margin-left: 0; }
-  .da-widget .plot-wrap { margin-bottom: 16px; }
+  .da-widget .pe-col-left .plot-wrap { margin: 0 auto; }
+  .da-widget .pe-col-right { display: flex; flex-direction: row; gap: 16px; }
+}
+
+@media (max-width: 599px) {
+  /* narrow: plain block flow — control, then (a), (b), (c), full width each */
+  .da-widget .pe-col-right { display: block; }
+  .da-widget .pe-col-right .plot-wrap { margin-bottom: 16px; }
   /* (b)/(c): too squat at 8:5 when they stretch full-width on a phone — give them
      1.5x the height (8:5 -> 16:15 at the same width). Panel (a) keeps its own
      square-ish map aspect (its #pe-plot-a rule out-specifies this). */

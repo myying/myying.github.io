@@ -10,8 +10,8 @@
 <link rel="stylesheet" href="../../../style.css">
 <link rel="stylesheet" href="chapters.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="widgets/cov-explorer/style.css">
-<link rel="stylesheet" href="widgets/inflation-explorer/style.css">
+<link rel="stylesheet" href="widgets/cov-explorer/style.css?v=2">
+<link rel="stylesheet" href="widgets/inflation-explorer/style.css?v=2">
 
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-148955805-2"></script>
@@ -50,21 +50,14 @@
 
       <h3>Localization and inflation</h3>
       <p>
-        Chapter 2 showed the <em>correlation</em> between an observation and the state. What the
-        ensemble Kalman filter actually uses is the <strong>sample covariance</strong> &#8212; the same
-        quantity with units (K&#178; here). This widget replays the experiment with a shorter-scale
-        truth &#8212; a compact warm hump on a smooth random background &#8212; and shows the covariance the
-        ensemble estimates next to the <em>true</em> covariance, so the sampling error is directly
-        visible. You control the ensemble size, the observation location, and the
-        <strong>localization</strong> knob that makes small ensembles usable: a smooth kernel that zeros
-        out covariance beyond a chosen radius, where sampling noise hides any real signal.
+        A small ensemble estimates covariance noisily. This widget shows the ensemble's estimate
+        next to the true covariance, so you can see the noise directly — and a
+        <strong>localization</strong> knob that cleans it up by zeroing out covariance beyond a
+        chosen radius.
       </p>
       <p class="hint">
-        <strong>Try it:</strong> drag the red observation anywhere on a map &#8212; the covariance follows
-        it (click it to pin it in place). Slide the ensemble size down to 10 and watch the sample
-        map fill with spurious blobs; slide it up and it converges toward the true covariance in the
-        middle panel. Then turn localization on and dial the radius: everything beyond the dashed
-        circle is set to zero.
+        <strong>Try it:</strong> drag the observation, and slide the ensemble size down to see the
+        sample map fill with spurious blobs. Turn localization on and dial the radius.
       </p>
 
       <!-- ================= Sample Covariance Explorer ===================== -->
@@ -95,35 +88,31 @@
           </div>
 
           <div class="controls">
-            <div class="ctl">
-              <button type="button" id="ctl-lock" class="lock-btn" aria-pressed="false">
-                <i class="fa fa-unlock" aria-hidden="true"></i>
-                <span class="lock-label">lock obs</span>
-              </button>
-            </div>
-            <div class="ctl">
-              <label for="ctl-nens">ensemble size <em>n</em></label>
-              <input type="range" id="ctl-nens" min="5" max="300" step="5" value="100">
-              <span class="ctl-val" id="nens-val">100</span>
-            </div>
-            <div class="ctl">
-              <label for="ctl-loc">localization radius <em>R</em></label>
-              <input type="range" id="ctl-loc" min="20" max="250" step="5" value="100">
-              <span class="ctl-val" id="loc-val">100 km</span>
-            </div>
-            <div class="ctl ctl-toggle">
+            <div class="ctl-toggle-row">
               <label class="switch">
-                <input type="checkbox" id="ctl-locon" checked>
+                <input type="checkbox" id="ctl-locon">
                 <span class="switch-slider" aria-hidden="true"></span>
                 <span class="switch-label">localize</span>
               </label>
+            </div>
+            <div class="ctl-sliders">
+              <div class="ctl">
+                <label for="ctl-nens"><em>n</em></label>
+                <input type="range" id="ctl-nens" min="5" max="300" step="5" value="100">
+                <span class="ctl-val" id="nens-val">100</span>
+              </div>
+              <div class="ctl">
+                <label for="ctl-loc"><em>R</em></label>
+                <input type="range" id="ctl-loc" min="20" max="250" step="5" value="100">
+                <span class="ctl-val" id="loc-val">100 km</span>
+              </div>
             </div>
           </div>
 
           <p class="readout" id="readout" role="status"></p>
 
           <ul class="legend">
-            <li><span class="mark obs"></span> observation &#8212; drag to move, click to lock</li>
+            <li><span class="mark obs"></span> observation &#8212; drag to move</li>
             <li><span class="mark loc"></span> localization radius <em>R</em></li>
           </ul>
         </main>
@@ -133,75 +122,33 @@
 
       <h3>Reading the panels</h3>
       <p>
-        <b>1 &#183; The truth field</b> — the field the analysis is trying to estimate: a compact warm
-        hump (peak &#8776; 8 K above the background, radius scale 30 km) on a smooth random background
-        (std 1.5 K, correlation &#8776; 40 km), on a 50&#215;50 grid with 10 km cells. The field is shifted
-        so the temperature stays positive, and drawn in the <em>YlOrRd</em> colormap &#8212; cold pale
-        yellow, warm deep red &#8212; to keep it visually distinct from the blue&#8211;white&#8211;red covariance
-        scales.
-        The red circle is the <em>observation</em> of T at that point &#8212; drag it anywhere and
-        everything follows.
-      </p>
-      <p>
-        <b>2 &#183; The true covariance</b> — the <em>exact</em> covariance of this perturbation model, known
-        analytically: the covariance of the hump under random translation (std 25 km) plus the
-        background covariance. Because the hump is compact, so is the pattern: <b>+7.0 K&#178;</b> right at
-        the observation, <b>&#8722;3.0 K&#178;</b> on the opposite flank ~86 km away, essentially gone by
-        150 km. It depends only on the observation location &#8212; not on the ensemble size. Both
-        covariance panels share one fixed colour scale, <b>&#177;7 K&#178;</b> (the true peak at the default
-        observation is 6.96 K&#178;): the sample is compared against it directly, and sample values
-        beyond &#177;7 saturate the scale.
-      </p>
-      <p>
-        <b>3 &#183; The sample covariance</b> — what a finite ensemble actually gives you,
-        <code>(1/(n&#8722;1)) &#931; (x<sub>m</sub>&#8722;x&#772;)(y<sub>m</sub>&#8722;y&#772;)</code>,
-        on the same colour scale as the true panel so the two can be compared directly. With
-        <b>n = 100</b> the pattern is close to the truth; slide n down to 10 and spurious blobs appear
-        <em>everywhere</em> — values beyond 80 km can even exceed the true peak (9.1 K&#178; vs the true
-        3.0 K&#178; there). That sampling noise is exactly what localization removes.
+        <b>Left</b> — the truth field; the red circle is the observation, drag it anywhere.
+        <b>Middle</b> — the true covariance, known exactly here. <b>Right</b> — what the ensemble
+        estimates, on the same colour scale. Small <em>n</em> makes the right panel noisy and
+        blobby compared to the middle one — that's sampling error, and it's what localization
+        cleans up.
       </p>
 
       <h4 id="sec-loc">1 &#183; Localization: the fix for sampling noise</h4>
       <p>
-        Toggle <b>localize</b> on: the sample covariance map is multiplied, point by point, by the
-        <strong>Gaspari&#8211;Cohn</strong> compact-support kernel &#8212; weight 1 at the observation, a smooth
-        taper, and <em>exactly zero</em> beyond the dashed circle of radius <em>R</em>. The positive core
-        near the observation survives; everything beyond <em>R</em> is discarded, whether spurious or
-        genuine, because with a small ensemble the far-field sample covariance is mostly noise anyway.
-        Compare the middle and right panels: the true covariance&#8217;s negative lobe at ~86 km is real,
-        yet with <em>R</em> = 100 km it lies close to the kernel&#8217;s cutoff and nearly vanishes from the
-        sample map &#8212; that is the price of killing sampling noise. Slide <em>R</em> down to localize more
-        aggressively, or toggle localization off to see the raw sample.
+        With <b>localize</b> on, the sample covariance is tapered to exactly zero beyond radius
+        <em>R</em> — keeping the reliable signal near the observation and discarding the noisy
+        far field, real or not.
       </p>
       <h4 id="sec-infl">2 &#183; Inflation: the fix for missing spread</h4>
       <p>
-        Localization fixes a <em>spatial</em> problem — sampling noise far from the observation.
-        Inflation fixes a different one: Chapter 3 section 2 showed that a perfect, deterministic
-        model has nothing to replenish spread — harmless there, since the mean always tracks the
-        truth exactly regardless. This is the exact same cycling, 3x3 nine-station storm-tracking
-        widget, still with a perfectly deterministic truth, but with one change: the ensemble's
-        forecast assumes a <em>systematic bias</em> in the storm's mean velocity — every member is
-        advected noticeably <em>slower</em> than the truth actually moves (about two-thirds
-        speed), cycle after cycle, forever.
-        With nothing to replenish spread, the analysis stays confidently — and wrongly — certain
-        about where the storm is, while the ensemble mean keeps falling further behind.
-        <strong>Inflation</strong> is the fix, and here it's the simplest possible kind: after
-        every analysis, every member's position gets its own independent random kick — a
-        <strong>position perturbation</strong>, standard deviation in km — literally the same
-        mechanism as the per-cycle gustiness Chapter 3 could have had, just applied after the
-        analysis instead of during the forecast. The bigger the perturbation, the more spread
-        survives each cycle for the Kalman gain to work with, which is exactly what a persistent
-        bias needs.
+        Localization fixes noise in space. Inflation fixes a different problem: an ensemble that's
+        lost its spread has nothing left to correct itself with. This storm-tracking widget is the
+        same as Chapter 3's, except every member now drifts noticeably slower than the truth,
+        cycle after cycle. Without spread, the ensemble stays confidently wrong. <b>Inflation</b>
+        fixes that here in the simplest way — after each analysis, give every member's position an
+        independent random kick, sized by the slider.
       </p>
       <p class="hint">
-        <strong>Try it:</strong> hit <em>run</em> with the perturbation at 0 km (no inflation) and
-        watch the storm's forecast systematically lag behind — the ensemble mean trails further
-        and further off the truth track, spread collapses to nearly nothing, and the rms error
-        (red) climbs and stays high, because the ensemble has no bias problem it can see, only one
-        it keeps causing. Reset, raise the perturbation toward 5&#8211;8 km, and run again: the
-        larger spread gives the analysis more leverage to correct the bias each cycle, and the
-        ensemble mean settles in close behind the truth. Push it well past that and it gets worse
-        again — more random kick just means more spread, not more accuracy.
+        <strong>Try it:</strong> run with the perturbation at 0 — the ensemble mean falls steadily
+        behind the truth. Raise it to 5&#8211;8 km and run again — the extra spread gives the next
+        analysis enough leverage to correct the bias each cycle. Push it much higher and it gets
+        worse again: more spread isn't automatically more accuracy.
       </p>
 
       <!-- ================= Inflation Explorer ================ -->
@@ -226,9 +173,9 @@
 
           <div class="controls">
             <div class="ctl">
-              <label for="infl-perturb">position perturbation (km)</label>
+              <label for="infl-perturb">infl.</label>
               <input type="range" id="infl-perturb" min="0" max="25" step="1" value="0">
-              <span class="ctl-val" id="infl-perturb-val">0</span>
+              <span class="ctl-val" id="infl-perturb-val">0 km</span>
             </div>
             <div class="ctl ctl-buttons">
               <button class="ctl-btn" id="infl-run" aria-pressed="false" title="run automatically">&#9654; run</button>
@@ -252,13 +199,11 @@
       <!-- ================= end widget ===================================== -->
 
       <p>
-        This position perturbation is a single dial standing in for a whole family of inflation
-        schemes — real systems use several variants (multiplicative scaling, relaxation to prior
-        perturbations, additive noise like this widget's), and the right one depends on what's
-        actually wrong. The mechanism is always the same, though: put back some of the spread the
-        analysis removes, so the ensemble's confidence stays honest about how wrong it actually is.
+        Real systems use other flavors of inflation too (multiplicative scaling, relaxation to
+        prior spread), but the idea is always the same: put back some of the spread the analysis
+        removes, so the ensemble stays honest about how wrong it might be.
       </p>
-      <p class="planned-ref">&#8594; Evensen et al., <i>Data Assimilation Fundamentals</i> (2022), Ch 10 &#8212; localization and inflation; Gaspari &amp; Cohn (1999), <i>QJRMS</i> 125, 723&#8211;757.</p>
+      <p class="planned-ref">Suggested reading: Evensen et al., <i>Data Assimilation Fundamentals</i> (2022), Ch 10; Gaspari &amp; Cohn (1999), <i>QJRMS</i> 125, 723&#8211;757.</p>
 
       <nav class="widget-nav widget-nav-bottom">
         <a href="toc.html" class="nav-home"><i class="fa fa-arrow-up" aria-hidden="true"></i> Table of Contents</a>
@@ -273,7 +218,7 @@
   </div>
 
   <script src="../../../footer.js"></script>
-  <script src="widgets/cov-explorer/app.js"></script>
-  <script src="widgets/inflation-explorer/app.js"></script>
+  <script src="widgets/cov-explorer/app.js?v=2"></script>
+  <script src="widgets/inflation-explorer/app.js?v=2"></script>
 </body>
 </html>

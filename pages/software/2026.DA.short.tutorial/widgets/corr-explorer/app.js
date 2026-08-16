@@ -121,7 +121,7 @@
   // ----------------------------------------------------------- state
   let si = 33, sj = 18;                  // (i, j) of the state marker
   let sel = 49;                          // selected member, 0-based (default #50)
-  let showMembers = true;                // show the ensemble members (contours + scatter dots)
+  let showContours = true;               // show member contours in the truth map panel
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
   // ------------------------------ 4 K contour extraction (marching squares)
@@ -361,9 +361,10 @@
     ctx.fillText(`State T (K)`, 0, 0);
     ctx.restore();
 
-    // ensemble points (aqua); skip any non-finite member so a single bad value
-    // can't silently break the rest of the panel
-    if (showMembers) {
+    // ensemble points (aqua) — always shown, independent of the contour toggle;
+    // skip any non-finite member so a single bad value can't silently break
+    // the rest of the panel
+    {
       ctx.fillStyle = cssVar("--series-aqua");
       for (let m = 0; m < nens; m++) {
         const x = X(obsEns[m]), y = Y(ensVals[m]);
@@ -450,7 +451,7 @@
     if (!fit) return;
     const { ctx, w, h } = fit;
     drawField(ctx, w, h, truthT, 0, vmax, lutTh);
-    if (showMembers) {
+    if (showContours) {
       for (let m = 0; m < nens; m++) {
         if (m === sel) continue;
         drawSegs(ctx, w, h, memberSegs[m], memColor(m), 1, 0.45);
@@ -545,19 +546,11 @@
   const nensEl = $("nens-label");   // optional: shown in the standalone hero tag
   if (nensEl) nensEl.textContent = nens;
 
-  // select a member (slider or scatter click) — highlights its 4 K contour
+  // select a member (click a scatter dot) — highlights its 4 K contour
   // (truth panel), its blob centre and its ringed point in the scatter
-  const memEl = $("cont-mem"), memVal = $("cont-mem-val");
   function setSel(m) {
     sel = clamp(m, 0, nens - 1);
-    if (memEl) { memEl.value = sel + 1; memVal.textContent = sel + 1; }
     render();
-  }
-  if (memEl) {
-    memEl.value = sel + 1;
-    memEl.addEventListener("input", () => {
-      setSel((parseInt(memEl.value, 10) || 1) - 1);
-    });
   }
   // click on the scatter to select the nearest member
   const scatCv = $("scat");
@@ -581,12 +574,11 @@
       if (best >= 0) setSel(best);
     });
   }
-  const membersBtn = $("cont-members");
-  if (membersBtn) {
-    membersBtn.addEventListener("click", () => {
-      showMembers = !showMembers;
-      membersBtn.textContent = showMembers ? "Members: on" : "Members: off";
-      membersBtn.setAttribute("aria-pressed", String(showMembers));
+  const membersEl = $("cont-members");
+  if (membersEl) {
+    membersEl.checked = showContours;
+    membersEl.addEventListener("change", () => {
+      showContours = membersEl.checked;
       render();
     });
   }

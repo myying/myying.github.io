@@ -62,7 +62,7 @@
       <p>
         A small ensemble estimates covariance noisily. This widget shows the ensemble's estimate
         next to the true covariance, so you can see the noise directly. With <b>localize</b> on,
-        the sample covariance is tapered to exactly zero beyond radius <em>R</em> — keeping the
+        the sample covariance is tapered to exactly zero beyond radius <em>L</em> — keeping the
         reliable signal near the observation and discarding the noisy far field, real or not.
       </p>
       <p class="hint">
@@ -107,12 +107,12 @@
             </div>
             <div class="ctl-sliders">
               <div class="ctl">
-                <label for="ctl-nens"><em>n</em></label>
+                <label for="ctl-nens"><em>N<sub>ens</sub></em></label>
                 <input type="range" id="ctl-nens" min="5" max="300" step="5" value="100">
                 <span class="ctl-val" id="nens-val">100</span>
               </div>
               <div class="ctl">
-                <label for="ctl-loc"><em>R</em></label>
+                <label for="ctl-loc"><em>L</em></label>
                 <input type="range" id="ctl-loc" min="20" max="250" step="5" value="100">
                 <span class="ctl-val" id="loc-val">100 km</span>
               </div>
@@ -123,7 +123,7 @@
 
           <ul class="legend">
             <li><span class="mark obs"></span> observation &#8212; drag to move</li>
-            <li><span class="mark loc"></span> localization radius <em>R</em></li>
+            <li><span class="mark loc"></span> localization radius <em>L</em></li>
           </ul>
         </main>
 

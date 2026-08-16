@@ -503,7 +503,7 @@
       `n = <strong>${nens}</strong> members \u00B7 ` +
       `sample cov <strong>+${f(sMax)} / ${f(sMin)}</strong> K\u00B2 \u00B7 ` +
       `true cov <strong>+${f(tMax)} / ${f(tMin)}</strong> K\u00B2`;
-    if (locOn) html += ` \u00B7 localized: beyond R = <strong>${Math.round(R / 1e3)} km</strong> set to 0`;
+    if (locOn) html += ` \u00B7 localized: beyond L = <strong>${Math.round(R / 1e3)} km</strong> set to 0`;
     $("readout").innerHTML = html;
   }
 

@@ -143,22 +143,19 @@
   flex-direction: column;
 }
 .da-widget .ctl-group[data-color="member"] { --ctl-accent: var(--series-amber); }
-.da-widget .ctl-title {
-  margin: 0;
-  font-size: 0.82rem;
-  font-weight: 650;
-  color: var(--ink-1);
+/* sliders as fixed-width chips (same ~190px convention as the other
+   widgets' control boxes), wrapping onto a new line if they don't fit */
+.da-widget .ctl-sliders {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 10px 16px;
 }
-.da-widget .ctl-note { font-size: 0.7rem; font-weight: 500; color: var(--ink-3); }
 .da-widget .ctl-row {
+  flex: 0 0 190px;
   display: grid;
-  grid-template-columns: 44px 1fr 52px;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 8px;
-  margin-top: 9px;
   font-size: 0.75rem;
   color: var(--ink-2);
 }
@@ -177,7 +174,8 @@
   white-space: nowrap;
 }
 .da-widget .ctl-btn {
-  width: 100%;
+  align-self: flex-start;   /* size to content instead of stretching full-width */
+  margin-top: 10px;
   padding: 9px 12px;
   font-size: 0.8rem;
   font-weight: 600;
@@ -187,6 +185,7 @@
   border-radius: 9px;
   cursor: pointer;
   box-shadow: var(--shadow);
+  white-space: nowrap;
 }
 .da-widget .ctl-btn:hover { border-color: var(--series-amber); color: var(--series-amber); }
 

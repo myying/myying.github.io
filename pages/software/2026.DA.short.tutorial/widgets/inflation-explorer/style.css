@@ -113,7 +113,7 @@
 #inflation-explorer .ctl {
   display: grid;
   grid-template-columns: auto 1fr auto;
-  max-width: 260px;   /* short label now — no need for the slider to stretch full-width */
+  max-width: 380px;   /* label sized for "location random kick" */
   align-items: center;
   gap: 9px;
   font-size: 0.82rem;

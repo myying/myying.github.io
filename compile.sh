@@ -123,7 +123,7 @@ for page in research courses software; do
     rm -f $page.html
     html_start >> $page.html
     echo '    <div class="page" id="'$page'">' >> $page.html
-    for item in `find pages/$page/* -maxdepth 0 |sort -t'/' -k3 -r`; do
+    for item in `find pages/$page/* -maxdepth 0 -type d |sort -t'/' -k3 -r`; do
         echo '<h2 id="'`basename $item`'">'`cat $item/title`'</h2>' >> $page.html
         cat $item/abstract.html >> $page.html
         if [ -f $item/article.html ]; then

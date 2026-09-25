@@ -261,6 +261,13 @@ main section { padding-block: 44px 0; }
 .ill .i-ice { fill: var(--surface); stroke: var(--deep); stroke-width: 1.4; }
 .ill .i-body { fill: #175f83; }
 .ill .i-panel { fill: var(--oc); stroke: #175f83; stroke-width: 1.4; }
+.ill .i-use { stroke: var(--muted); stroke-width: 0.9; opacity: 0.6; }
+.ill .i-box { fill: var(--surface); stroke: var(--deep); stroke-width: 1.2; }
+.ill .i-sw { fill: var(--ink); font-family: var(--mono); font-size: 6.9px; text-anchor: middle; }
+.ill .i-iface { fill: none; stroke: color-mix(in srgb, var(--oc) 40%, var(--ink)); stroke-width: 2.2; stroke-linecap: round; }
+.ill .i-plug { fill: none; stroke: var(--deep); stroke-width: 1.1; stroke-dasharray: 3 3; }
+.ill .i-chip { fill: var(--oc); stroke: color-mix(in srgb, var(--oc) 40%, var(--ink)); stroke-width: 1; }
+.ill .i-chiptxt { fill: var(--o-ink); font-family: var(--mono); font-size: 7.8px; text-anchor: middle; }
 .ill .i-swath { fill: var(--oc); opacity: 0.45; }
 
 /* ---------- value chain ---------- */
@@ -396,6 +403,53 @@ main .tab-panel { padding-block: 0; }
 .tab-panel .panel-title { font-size: 1.35rem; }
 .tab-panel .section-head { margin-bottom: 18px; }
 
+/* ---------- progress (Table 1.2) ---------- */
+.p-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
+.p-sum { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.p-sum .lbl { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.p-sum .val { font-family: var(--display); font-weight: 700; font-size: 1.35rem; font-variant-numeric: tabular-nums; }
+.p-sum .val small { font-family: var(--body); font-weight: 400; font-size: 0.85rem; color: var(--muted); }
+.p-bar { height: 6px; border-radius: 999px; background: var(--line); overflow: hidden; display: flex; margin-top: 6px; }
+.p-bar .b-done { background: #2e7d32; }
+.p-bar .b-progress { background: #e0a800; }
+@media (max-width: 720px) { .p-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.p-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.85rem; color: var(--muted); margin-bottom: 10px; align-items: center; }
+.p-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.p-legend .gap { margin-left: 8px; }
+.sw { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
+.c-D { background: #4f9a45; } .c-L { background: #c3e3b2; } .c-Y { background: #f1df72; } .c-B { background: #a6d6ef; }
+.p-scroll { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.p-table { border-collapse: separate; border-spacing: 2px; font-size: 0.85rem; margin: 6px; }
+.p-table th { font-weight: 600; text-align: left; white-space: nowrap; padding: 2px 8px 2px 4px; }
+.p-table thead th { font-family: var(--mono); font-size: 0.68rem; font-weight: 500; color: var(--muted); text-align: center; padding: 2px; vertical-align: bottom; }
+.p-table thead th.vert { writing-mode: vertical-rl; transform: rotate(180deg); height: 84px; }
+.p-table thead tr.grp th { font-family: var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink); border-bottom: 2px solid var(--line); }
+.p-table th.path { font-family: var(--mono); font-size: 0.68rem; font-weight: 500; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; padding-top: 10px; }
+.p-table tbody th.row { position: sticky; left: 0; background: var(--surface); z-index: 1; font-weight: 500; }
+.p-table td { width: 30px; min-width: 30px; height: 26px; padding: 0; border-radius: 4px; text-align: center; }
+.p-table td.split { border-left: 0; }
+.p-table td.sep, .p-table th.sep { width: 6px; min-width: 6px; background: none; }
+.p-table td.e { background: color-mix(in srgb, var(--line) 45%, transparent); }
+.p-table td button {
+  width: 100%; height: 26px; border: 0; background: none; padding: 0; cursor: pointer;
+  display: grid; place-items: center; border-radius: 4px; color: #10181d;
+}
+.p-table td.c-D button { color: #fff; }
+.p-table td button:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+.p-table td.sel button { outline: 2px solid var(--ink); outline-offset: 1px; }
+.m { width: 13px; height: 13px; border-radius: 50%; display: inline-grid; place-items: center; box-sizing: border-box; font-family: var(--mono); font-size: 0.7rem; font-weight: 700; line-height: 1; }
+.m-planned { border: 1.5px solid currentColor; opacity: 0.55; }
+.m-progress { border: 1.5px solid currentColor; background: linear-gradient(90deg, currentColor 50%, transparent 50%); }
+.m-done { background: currentColor; position: relative; }
+.m-done::after { content: ""; width: 3px; height: 6px; border: solid var(--surface); border-width: 0 1.5px 1.5px 0; transform: translate(0, -1px) rotate(45deg); }
+.p-legend .m { color: var(--ink); }
+.p-legend .m-done::after { border-color: var(--surface); }
+.p-table td button .m-done::after { border-color: #fff; }
+.p-table td.c-D button .m-done::after { border-color: #4f9a45; }
+.m-demo { width: auto; height: auto; border-radius: 0; font-size: 0.72rem; }
+.p-detail { margin-top: 10px; font-size: 0.95rem; min-height: 1.6em; }
+.p-updated { font-size: 0.85rem; color: var(--muted); margin-top: 4px; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
 }
@@ -410,7 +464,7 @@ main .tab-panel { padding-block: 0; }
     <h1><svg class="logo" viewBox="190 100 1375 390" role="img" aria-label="COMEDI"><g class="t"><path d="M387.48037889039244 345.93504736129904C367.9174560216509 366.13937753721245 351.5615696887686 373.8362652232747 328.7916102841678 373.8362652232747C284.8552097428958 373.8362652232747 249.25710419485793 337.27604871447903 249.25710419485793 293.0189445196211C249.25710419485793 273.77672530446546 256.6332882273342 253.25169147496615 268.82002706359947 239.14073071718536C283.25169147496615 222.14343707713124 303.7767253044655 213.16373477672528 327.82949932341 213.16373477672528C355.41001353179973 213.16373477672528 374.0108254397835 222.14343707713124 390.04600811907983 242.9891745602165H439.11366711772666C429.8132611637348 222.46414073071716 421.4749661705007 211.23951285520974 405.43978349120437 198.09066305818672C383.6319350473613 180.45196211096075 355.73071718538563 170.83085250338294 326.86738836265226 170.83085250338294C259.8403247631935 170.83085250338294 205.0 225.67117726657645 205.0 292.6982408660352C205.0 361.3288227334235 260.48173207036535 416.16914749661703 329.7537212449256 416.16914749661703C378.5006765899865 416.16914749661703 420.51285520974295 389.2300405953992 439.11366711772666 345.93504736129904Z"/><path d="M812.0 412.0H855.9364005412721V234.33017591339646L917.8322056833559 412.0H953.7510148849798L1015.6468200270637 234.33017591339646V412.0H1059.5832205683357V174.99999999999997H999.2909336941814L936.1123139377537 354.5940460081191L872.2922868741543 174.99999999999997H812.0Z"/><path d="M1118.0 412.0H1245.319350473613V369.9878213802436H1161.936400541272V314.82679296346413H1241.7916102841677V272.8146143437077H1161.936400541272V217.0121786197564H1245.319350473613V174.99999999999997H1118.0Z"/><path d="M1285.0 412.0H1340.1610284167793C1376.0798376184032 412.0 1397.5669824086604 408.4722598105548 1416.8092016238159 398.851150202977C1453.3694181326116 380.8917456021651 1474.8565629228688 341.765899864682 1474.8565629228688 293.98105548037887C1474.8565629228688 248.76184032476317 1456.255751014885 211.88092016238159 1423.2232746955344 191.99729364005412C1404.6224627875506 180.77266576454667 1376.4005412719891 174.99999999999997 1339.1989174560215 174.99999999999997H1285.0ZM1328.936400541272 369.9878213802436V217.0121786197564H1337.595399188092C1365.8173207036534 217.0121786197564 1380.569688768606 219.57780784844383 1394.359945872801 226.63328822733422C1416.8092016238159 238.1786197564276 1430.5994587280106 263.5142083897158 1430.5994587280106 293.98105548037887C1430.5994587280106 322.5236806495264 1417.4506089309878 347.8592692828146 1396.2841677943165 359.404600811908C1383.1353179972937 366.46008119079835 1364.8552097428958 369.9878213802436 1338.5575101488498 369.9878213802436Z"/><path d="M1507.0 412.0H1550.936400541272V174.99999999999997H1507.0Z"/></g><circle cx="696.1" cy="145.9" r="34.9" fill="#175f83"/><circle cx="784.7" cy="257.1" r="34.9" fill="#175f83"/><circle cx="753.1" cy="395.6" r="34.9" fill="#175f83"/><circle cx="625.0" cy="457.3" r="34.9" fill="#175f83"/><circle cx="496.9" cy="395.6" r="34.9" fill="#175f83"/><circle cx="465.3" cy="257.1" r="34.9" fill="#175f83"/><circle cx="553.9" cy="145.9" r="34.9" fill="#175f83"/><circle cx="625" cy="293.5" r="140" fill="#175f83"/><circle cx="625" cy="293.5" r="118.6" fill="#fff"/><path d="M 548.6 217.1 A 108.1 108.1 0 0 1 701.4 217.1 L 664.1 254.4 A 55.3 55.3 0 0 0 585.9 254.4 Z" fill="#9adcf8" stroke="#fff" stroke-width="11.9" stroke-linejoin="miter"/><path d="M 701.4 217.1 A 108.1 108.1 0 0 1 701.4 369.9 L 664.1 332.6 A 55.3 55.3 0 0 0 664.1 254.4 Z" fill="#e79fdc" stroke="#fff" stroke-width="11.9" stroke-linejoin="miter"/><path d="M 701.4 369.9 A 108.1 108.1 0 0 1 548.6 369.9 L 585.9 332.6 A 55.3 55.3 0 0 0 664.1 332.6 Z" fill="#90d977" stroke="#fff" stroke-width="11.9" stroke-linejoin="miter"/><path d="M 548.6 369.9 A 108.1 108.1 0 0 1 548.6 217.1 L 585.9 254.4 A 55.3 55.3 0 0 0 585.9 332.6 Z" fill="#f1aa85" stroke="#fff" stroke-width="11.9" stroke-linejoin="miter"/><circle cx="625" cy="293.5" r="37.4" fill="#175f83"/></svg></h1>
     <p class="expansion"><b>CO</b>pernicus <b>M</b>arine services with <b>E</b>nhanced <b>D</b>ata assimilation and improved <b>I</b>nteroperability</p>
     <p class="lede">COMEDI will modernise and harmonise data assimilation (DA) practices across all Monitoring and Forecasting Centres (MFCs) of the Copernicus Marine Service, enabling them to leverage new technologies and use new types of ocean observations to achieve better accuracy and reliability.</p>
-    <nav class="quick" aria-label="On this page"><a href="#objectives">Objectives</a><a href="#service">Copernicus Marine</a><a href="#mfcs">Forecasting centres</a><a href="#partners">Consortium</a><a href="#workplan">Work plan</a><a href="#news">News</a></nav>
+    <nav class="quick" aria-label="On this page"><a href="#objectives">Objectives</a><a href="#service">Copernicus Marine</a><a href="#mfcs">Forecasting centres</a><a href="#partners">Consortium</a><a href="#workplan">Work plan</a><a href="#progress">Progress</a><a href="#news">News</a></nav>
     <dl class="facts">
       <div><dt>Call</dt><dd>HORIZON-CL4-2025-02-SPACE-44</dd></div>
       <div><dt>Duration</dt><dd>48 months, from Sep 2026</dd></div>
@@ -488,7 +542,7 @@ main .tab-panel { padding-block: 0; }
           <ul class="obj-pick">
             <li><button type="button" data-open="1"><span class="num n1">1</span><span><strong>Advance DA methods</strong><small>Multiscale, non-Gaussian and AI-based methods</small></span></button></li>
             <li><button type="button" data-open="2"><span class="num n2">2</span><span><strong>Make best use of observations</strong><small>Sentinel-3 NG, CIMR and reflectance data; impact diagnostics</small></span></button></li>
-            <li><button type="button" data-open="3"><span class="num n3">3</span><span><strong>Improve interoperability</strong><small>Modular software, shared interfaces and Joint Development Teams</small></span></button></li>
+            <li><button type="button" data-open="3"><span class="num n3">3</span><span><strong>Improve interoperability</strong><small>Interfaces between DA software and shareable modules</small></span></button></li>
             <li><button type="button" data-open="4"><span class="num n4">4</span><span><strong>Prepare innovations for operational use</strong><small>Demonstrations in every MFC and user engagement</small></span></button></li>
           </ul>
         </div>
@@ -576,29 +630,26 @@ main .tab-panel { padding-block: 0; }
 
         <article class="detail" data-view="3" hidden>
           <div class="detail-head"><span class="num n3">3</span><h3><span class="so">SO-3</span>Improve interoperability</h3></div>
-          <svg class="ill" viewBox="0 0 320 146" role="img" aria-label="The seven MFCs linked to each other and to a shared set of data assimilation tools.">
-<line class="i-dash" x1="215.5" y1="25.1" x2="284.8" y2="60.4"/><line class="i-dash" x1="284.8" y1="60.4" x2="260.1" y2="104.4"/><line class="i-dash" x1="260.1" y1="104.4" x2="160.0" y2="124.0"/><line class="i-dash" x1="160.0" y1="124.0" x2="59.9" y2="104.4"/><line class="i-dash" x1="59.9" y1="104.4" x2="35.2" y2="60.4"/><line class="i-dash" x1="35.2" y1="60.4" x2="104.5" y2="25.1"/><line class="i-dash" x1="104.5" y1="25.1" x2="215.5" y2="25.1"/><line class="i-link" x1="160" y1="72" x2="215.5" y2="25.1"/><line class="i-link" x1="160" y1="72" x2="284.8" y2="60.4"/><line class="i-link" x1="160" y1="72" x2="260.1" y2="104.4"/><line class="i-link" x1="160" y1="72" x2="160.0" y2="124.0"/><line class="i-link" x1="160" y1="72" x2="59.9" y2="104.4"/><line class="i-link" x1="160" y1="72" x2="35.2" y2="60.4"/><line class="i-link" x1="160" y1="72" x2="104.5" y2="25.1"/>
-<rect class="i-fill solid" x="116" y="56" width="88" height="32" rx="16"/>
-<text class="i-txt strong" x="160" y="76" text-anchor="middle">common core</text>
-<circle class="i-node" cx="215.5" cy="25.1" r="16"/><text class="i-code" x="215.5" y="28.6">ARC</text><circle class="i-node" cx="284.8" cy="60.4" r="16"/><text class="i-code" x="284.8" y="63.9">BAL</text><circle class="i-node" cx="260.1" cy="104.4" r="16"/><text class="i-code" x="260.1" y="107.9">BLK</text><circle class="i-node" cx="160.0" cy="124.0" r="16"/><text class="i-code" x="160.0" y="127.5">MED</text><circle class="i-node" cx="59.9" cy="104.4" r="16"/><text class="i-code" x="59.9" y="107.9">IBI</text><circle class="i-node" cx="35.2" cy="60.4" r="16"/><text class="i-code" x="35.2" y="63.9">GLO</text><circle class="i-node" cx="104.5" cy="25.1" r="16"/><text class="i-code" x="104.5" y="28.6">NWS</text>
-</svg>
-          <p class="lead">Improve the interoperability of the MFCs by developing modular software components and shared interfaces, enabling a more efficient exchange of new methods among operational centres. Each MFC keeps its established workflow while connecting to common DA core methods.</p>
+          <svg class="ill" viewBox="0 0 370 200" role="img" aria-label="No central system: each MFC keeps its own DA software. Interfaces link the software packages (MROA and NEDAS to the PDAF core, OceanVar to the NEMO observation module), and standalone modules such as STOPACK, AI ensemble generation, correlated observation errors and the CIMR radiative transfer model plug into several of them."><line class="i-use" x1="25" y1="33" x2="25" y2="80"/><line class="i-use" x1="25" y1="33" x2="72" y2="80"/><line class="i-use" x1="25" y1="33" x2="299" y2="80"/><line class="i-use" x1="72" y1="33" x2="72" y2="80"/><line class="i-use" x1="138" y1="33" x2="118" y2="80"/><line class="i-use" x1="138" y1="33" x2="163" y2="80"/><line class="i-use" x1="185" y1="33" x2="118" y2="80"/><line class="i-use" x1="185" y1="33" x2="208" y2="80"/><line class="i-use" x1="250" y1="33" x2="253" y2="80"/><line class="i-use" x1="300" y1="33" x2="299" y2="80"/><line class="i-use" x1="345" y1="33" x2="345" y2="80"/><line class="i-plug" x1="48" y1="150" x2="25" y2="96"/><line class="i-plug" x1="48" y1="150" x2="72" y2="96"/><line class="i-plug" x1="146" y1="150" x2="118" y2="96"/><line class="i-plug" x1="146" y1="150" x2="299" y2="96"/><line class="i-plug" x1="236" y1="150" x2="253" y2="96"/><line class="i-plug" x1="236" y1="150" x2="72" y2="96"/><line class="i-plug" x1="322" y1="150" x2="345" y2="96"/><line class="i-plug" x1="322" y1="150" x2="299" y2="96"/><path class="i-iface" d="M 72 96 Q 95.0 128 118 96"/><path class="i-iface" d="M 208 96 Q 230.5 124 253 96"/><path class="i-iface" d="M 253 96 Q 276.0 124 299 96"/><path class="i-iface" d="M 253 96 Q 299.0 164 345 96"/><circle class="i-node" cx="25" cy="20" r="13"/><text class="i-code" x="25" y="23.3">GLO</text><circle class="i-node" cx="72" cy="20" r="13"/><text class="i-code" x="72" y="23.3">NWS</text><circle class="i-node" cx="138" cy="20" r="13"/><text class="i-code" x="138" y="23.3">BLK</text><circle class="i-node" cx="185" cy="20" r="13"/><text class="i-code" x="185" y="23.3">MED</text><circle class="i-node" cx="250" cy="20" r="13"/><text class="i-code" x="250" y="23.3">BAL</text><circle class="i-node" cx="300" cy="20" r="13"/><text class="i-code" x="300" y="23.3">IBI</text><circle class="i-node" cx="345" cy="20" r="13"/><text class="i-code" x="345" y="23.3">ARC</text><rect class="i-box" x="4.0" y="80" width="42" height="16" rx="3"/><text class="i-sw" x="25" y="90.8">CIGAR</text><rect class="i-box" x="51.0" y="80" width="42" height="16" rx="3"/><text class="i-sw" x="72" y="90.8">NEMOVAR</text><rect class="i-box" x="97.0" y="80" width="42" height="16" rx="3"/><text class="i-sw" x="118" y="90.8">OceanVar</text><rect class="i-box" x="142.0" y="80" width="42" height="16" rx="3"/><text class="i-sw" x="163" y="90.8">OAK</text><rect class="i-box" x="187.0" y="80" width="42" height="16" rx="3"/><text class="i-sw" x="208" y="90.8">E-Med-BGC</text><rect class="i-box" x="232.0" y="80" width="42" height="16" rx="3"/><text class="i-sw" x="253" y="90.8">PDAF</text><rect class="i-box" x="278.0" y="80" width="42" height="16" rx="3"/><text class="i-sw" x="299" y="90.8">MROA</text><rect class="i-box" x="324.0" y="80" width="42" height="16" rx="3"/><text class="i-sw" x="345" y="90.8">NEDAS</text><rect class="i-chip" x="20.0" y="150" width="56" height="16" rx="8"/><text class="i-chiptxt" x="48" y="160.8">STOPACK</text><rect class="i-chip" x="113.0" y="150" width="66" height="16" rx="8"/><text class="i-chiptxt" x="146" y="160.8">AI ensembles</text><rect class="i-chip" x="203.0" y="150" width="66" height="16" rx="8"/><text class="i-chiptxt" x="236" y="160.8">Correlated R</text><rect class="i-chip" x="294.0" y="150" width="56" height="16" rx="8"/><text class="i-chiptxt" x="322" y="160.8">CIMR RTM</text><line class="i-iface" x1="8" y1="185" x2="28" y2="185"/><text class="i-txt" x="33" y="188">interface between DA software</text><line class="i-plug" x1="232" y1="185" x2="252" y2="185"/><text class="i-txt" x="257" y="188">shareable module</text></svg>
+          <p class="lead">Improve the interoperability of the MFCs by developing modular software components and shared interfaces, enabling a more efficient exchange of new methods among operational centres. There is no single common system: each MFC keeps its own DA software, and methods travel through interfaces between software packages and through standalone modules that several packages can use.</p>
           <h4>Today in the MFCs &rarr; with COMEDI</h4>
           <div class="table-scroll"><table class="compare">
             <thead><tr><th scope="col">Topic</th><th scope="col">Today</th><th scope="col">COMEDI</th></tr></thead>
             <tbody>
-              <tr><th scope="row">Method exchange</th><td>Limited, because the MFCs share no DA software</td><td>Interoperable tools with unit tests, and interfaces to common DA software</td></tr>
-              <tr><th scope="row">Teams</th><td>DA developed independently at each MFC</td><td>Three Joint Development Teams: AI, Protocol and Software</td></tr>
+              <tr><th scope="row">DA software</th><td>Each MFC develops its own DA software, and methods rarely pass between centres</td><td>Each MFC keeps its own software; new interfaces let packages use each other's methods, such as MROA and NEDAS using the PDAF core</td></tr>
+              <tr><th scope="row">New methods</th><td>Built deep into centre-specific code and costly to transfer</td><td>Released as standalone modules that several DA packages can adopt</td></tr>
+              <tr><th scope="row">AI</th><td>Little connection to modern AI tools</td><td>Interfaces to AI libraries in Python and Julia, shared between partners</td></tr>
             </tbody>
           </table></div>
           <h4>Key results</h4>
           <ul class="kpis">
             <li><b>7</b> developments from WP2&ndash;5 implemented on at least two MFC DA platforms</li>
-            <li><b>3</b> interfaces to a common assimilation core (PDAF), linking 4 ensemble-based MFCs</li>
+            <li><b>3</b> interfaces that give other DA software access to the PDAF core methods, linking 4 ensemble-based MFCs</li>
             <li><b>2</b> variational platforms sharing the same NEMO observation operator</li>
             <li><b>5</b> DA software packages interfaced to AI models</li>
             <li>The STOPACK perturbation package available for both NEMO and HYCOM</li>
           </ul>
+          <p style="margin-top:10px"><a href="#progress">See where each innovation is shared, and its status &rarr;</a></p>
           <h4>Work package</h4>
           <div class="wps"><span class="wp-chip"><b>WP6</b>Interoperable software development</span></div>
           <div class="detail-nav"><button type="button" data-open="0"><span aria-hidden="true">&larr;</span>All objectives</button><button type="button" data-open="4">Next: operations<span aria-hidden="true">&rarr;</span></button></div>
@@ -645,6 +696,7 @@ main .tab-panel { padding-block: 0; }
         <button type="button" role="tab" id="tab-mfcs" aria-controls="mfcs" aria-selected="false" tabindex="-1">Forecasting centres</button>
         <button type="button" role="tab" id="tab-partners" aria-controls="partners" aria-selected="false" tabindex="-1">Consortium</button>
         <button type="button" role="tab" id="tab-workplan" aria-controls="workplan" aria-selected="false" tabindex="-1">Work plan</button>
+        <button type="button" role="tab" id="tab-progress" aria-controls="progress" aria-selected="false" tabindex="-1">Progress</button>
         <button type="button" role="tab" id="tab-news" aria-controls="news" aria-selected="false" tabindex="-1">News</button>
       </div>
     </div>
@@ -751,6 +803,28 @@ main .tab-panel { padding-block: 0; }
         <div class="g-row" role="row"><div class="g-label" role="cell"><b>WP8</b>Dissemination, exploitation and communication<small>Lead: NERSC</small></div><div class="g-track" role="cell"><span class="g-bar navy" style="--s:1;--e:48;--c:#175f83">M1&ndash;M48</span></div></div>
       </div>
     </section>
+    <section id="progress" class="tab-panel" role="tabpanel" aria-labelledby="tab-progress" tabindex="0" hidden>
+        <div class="section-head">
+          <p class="eyebrow">Table 1.2 of the proposal</p>
+          <h3 class="panel-title">Progress on sharing each innovation</h3>
+          <p class="note">Each row is a COMEDI innovation; each column an MFC or a DA software package. The colour shows how the innovation reaches it, and the mark shows the status of the work there.</p>
+        </div>
+        <div class="p-summary" id="p-summary"></div>
+        <div class="p-legend">
+          <span><i class="sw c-D"></i>Initial implementation</span>
+          <span><i class="sw c-L"></i>Shared as a module</span>
+          <span><i class="sw c-Y"></i>Shared through a new interface</span>
+          <span><i class="sw c-B"></i>Implemented separately</span>
+          <span class="gap"><b class="m m-planned"></b>Planned</span>
+          <span><b class="m m-progress"></b>In progress</span>
+          <span><b class="m m-done"></b>Done</span>
+          <span><b class="m m-demo">X</b>Demonstration in an MFC</span>
+        </div>
+        <div class="p-scroll"><table class="p-table" id="p-table"></table></div>
+        <p class="p-detail" id="p-detail" aria-live="polite">Select a cell to see what it stands for.</p>
+        <p class="p-updated" id="p-updated"></p>
+        <script type="application/json" id="table12">{"cols":["ARC","BAL","BLK","GLO","IBI","MED","NWS","CIGAR","NEMOVAR","OceanVar","E-Med-BGC","MROA","NEDAS","OAK","PDAF"],"split":7,"rows":[{"path":1,"group":"Core assimilation method","name":"Non-Gaussian filtering","cells":["DX","DX","-","Y","Y","-","-","-","-","-","-","Y","DX","-","DX"]},{"path":1,"group":"Core assimilation method","name":"AI assimilation core","cells":["DX","Y","DX","-","-","DX","-","-","-","DX","-","-","DX","DX","Y"]},{"path":1,"group":"Core assimilation method","name":"Automated tuning","cells":["Y","L","-","Y","Y","DX","-","-","-","-","YX","Y","Y","-","DX"]},{"path":1,"group":"Core assimilation method","name":"Higher-order sampling","cells":["Y","L","-","Y","Y","DX","-","-","-","-","YX","Y","Y","-","DX"]},{"path":2,"group":"Modular tools","name":"AI super resolution","cells":["L","L","L","L","L","DX","-","-","-","-","DX","L","L","L","L"]},{"path":2,"group":"Modular tools","name":"AI ensemble generation","cells":["DX","L","DX","DX","DX","DX","L","L","L","DX","L","DX","DX","L","L"]},{"path":2,"group":"Modular tools","name":"Upgraded stochastic physics","cells":["Y","L","L","DX","L","L","LX","DX","LX","L","L","L","Y","L","L"]},{"path":2,"group":"Modular tools","name":"AI bias correction","cells":["-","L","L","DX","L","L","L","DX","L","L","L","L","-","L","L"]},{"path":2,"group":"Modular tools","name":"Mechanistic perturbation","cells":["L","L","DX","LX","L","LX","-","-","-","-","LX","LX","L","DX","L"]},{"path":2,"group":"Modular tools","name":"Correlated R","cells":["YX","YX","LX","Y","Y","L","DX","-","DX","LX","-","Y","YX","-","YX"]},{"path":2,"group":"New observation operators","name":"Sentinel-3 NG WiSA","cells":["-","-","Y","B","B","Y","BX","-","BX","Y","-","B","-","-","-"]},{"path":2,"group":"New observation operators","name":"CIMR Tb","cells":["DX","L","L","L","L","L","-","-","-","-","L","L","DX","L","L"]},{"path":2,"group":"New observation operators","name":"Sentinel-3 reflectance","cells":["-","-","BX","BX","B","BX","-","-","-","-","BX","BX","-","BX","-"]},{"path":3,"group":"Model-specific","name":"Dynamic ensemble","cells":["BX","BX","BX","BX","BX","YX","BX","BX","BX","-","YX","BX","BX","BX","BX"]},{"path":3,"group":"Model-specific","name":"Multiscale B","cells":["B","DX","-","DX","DX","Y","DX","-","DX","-","Y","DX","B","-","DX"]},{"path":3,"group":"Model-specific","name":"Hybrid B","cells":["B","B","DX","LX","-","DX","DX","LX","DX","DX","-","-","B","-","B"]},{"path":3,"group":"Model-specific","name":"FSOI and its emulation","cells":["DX","L","L","DX","L","L","L","-","DX","-","L","L","DX","L","L"]}]}</script>
+      </section>
     <section id="news" class="tab-panel" role="tabpanel" aria-labelledby="tab-news" tabindex="0" hidden>
       <div class="section-head">
         <p class="eyebrow">Milestones</p>
@@ -893,6 +967,97 @@ main .tab-panel { padding-block: 0; }
     });
   });
   fromHash();
+})();
+</script>
+<script>
+(function () {
+  var el = document.getElementById('table12');
+  if (!el) return;
+  var data = JSON.parse(el.textContent);
+  var KIND = { D: 'Initial implementation', L: 'Shared as a module', Y: 'Shared through a new interface', B: 'Implemented separately' };
+  var STATUS = { planned: 'Planned', progress: 'In progress', done: 'Done' };
+  var status = {};
+  var table = document.getElementById('p-table');
+  var detail = document.getElementById('p-detail');
+
+  // A cell is tracked work when COMEDI demonstrates it (X) or builds a new interface for it (yellow).
+  function tracked(code) { return code.indexOf('X') > 0 || code[0] === 'Y'; }
+  function key(r, c) { return r.name + '|' + data.cols[c]; }
+  function st(r, c) { return status[key(r, c)] || 'planned'; }
+
+  function render() {
+    var h = '<thead><tr class="grp"><th></th><th colspan="' + data.split + '">MFCs</th><th class="sep"></th>' +
+            '<th colspan="' + (data.cols.length - data.split) + '">DA software</th></tr><tr><th></th>';
+    data.cols.forEach(function (c, i) {
+      if (i === data.split) h += '<th class="sep"></th>';
+      h += '<th class="vert" scope="col">' + c + '</th>';
+    });
+    h += '</tr></thead><tbody>';
+    var lastGroup = '';
+    data.rows.forEach(function (r, ri) {
+      if (r.group !== lastGroup) {
+        h += '<tr><th class="path" colspan="' + (data.cols.length + 2) + '">Path ' + r.path + ' &middot; ' + r.group + '</th></tr>';
+        lastGroup = r.group;
+      }
+      h += '<tr><th class="row" scope="row">' + r.name + '</th>';
+      r.cells.forEach(function (code, ci) {
+        if (ci === data.split) h += '<td class="sep"></td>';
+        if (code === '-') { h += '<td class="e"></td>'; return; }
+        var mark = tracked(code) ? '<b class="m m-' + st(r, ci) + '"></b>' : '';
+        if (code.indexOf('X') > 0 && !mark) mark = '<b class="m m-demo">X</b>';
+        h += '<td class="c-' + code[0] + '"><button type="button" data-r="' + ri + '" data-c="' + ci + '" aria-label="' +
+             r.name + ', ' + data.cols[ci] + '">' + mark + '</button></td>';
+      });
+      h += '</tr>';
+    });
+    table.innerHTML = h + '</tbody>';
+    summary();
+  }
+
+  function summary() {
+    var groups = [['All tracked work', function () { return true; }],
+                  ['Path 1 · core methods', function (r) { return r.path === 1; }],
+                  ['Path 2 · modular tools', function (r) { return r.path === 2; }],
+                  ['Path 3 · model-specific', function (r) { return r.path === 3; }]];
+    document.getElementById('p-summary').innerHTML = groups.map(function (g) {
+      var n = { planned: 0, progress: 0, done: 0 };
+      data.rows.forEach(function (r) {
+        if (!g[1](r)) return;
+        r.cells.forEach(function (code, ci) { if (tracked(code)) n[st(r, ci)]++; });
+      });
+      var total = n.planned + n.progress + n.done || 1;
+      return '<div class="p-sum"><div class="lbl">' + g[0] + '</div><div class="val">' + n.done + ' <small>of ' +
+             (n.planned + n.progress + n.done) + ' done &middot; ' + n.progress + ' in progress</small></div>' +
+             '<div class="p-bar"><span class="b-done" style="width:' + (100 * n.done / total) + '%"></span>' +
+             '<span class="b-progress" style="width:' + (100 * n.progress / total) + '%"></span></div></div>';
+    }).join('');
+  }
+
+  table.addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-r]');
+    if (!b) return;
+    var r = data.rows[+b.dataset.r], ci = +b.dataset.c, code = r.cells[ci];
+    table.querySelectorAll('td.sel').forEach(function (td) { td.classList.remove('sel'); });
+    b.parentNode.classList.add('sel');
+    var txt = '<strong>' + r.name + '</strong> in <strong>' + data.cols[ci] + '</strong>: ' + KIND[code[0]].toLowerCase();
+    if (code.indexOf('X') > 0) txt += ', with a demonstration in an MFC';
+    txt += tracked(code) ? '. Status: <strong>' + STATUS[st(r, ci)] + '</strong>.' : '. Not tracked as a COMEDI task.';
+    detail.innerHTML = txt;
+  });
+
+  render();
+  // Live status: edit status.json next to this page and push; entries look like
+  // "Non-Gaussian filtering|ARC": "progress" (planned, progress or done).
+  fetch('status.json', { cache: 'no-store' }).then(function (res) {
+    if (!res.ok) throw new Error(res.status);
+    return res.json();
+  }).then(function (s) {
+    status = s.status || {};
+    render();
+    if (s.updated) document.getElementById('p-updated').textContent = 'Status last updated ' + s.updated + '.';
+  }).catch(function () {
+    document.getElementById('p-updated').textContent = 'Live status could not be loaded; all work is shown as planned.';
+  });
 })();
 </script>
 </body>

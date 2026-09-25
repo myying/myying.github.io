@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="author" content="Yue Ying">
+<meta name="description" content="COMEDI: COpernicus Marine services with Enhanced Data assimilation and improved Interoperability, a Horizon Europe project (2026-2030), grant agreement No. 101296319.">
+<title>COMEDI Project</title>
+<link rel="icon" type="image/svg+xml" href="COMEDI.icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Palette from the COMEDI logo: ocean blue ring, dark navy lettering and the
+   four objective colours. Display face Jost is close to the logo lettering. */
+:root {
+  --bg: #edf2f5;
+  --surface: #ffffff;
+  --hero: #f8fbfc;
+  --ink: #14222c;
+  --muted: #566874;
+  --line: #d6e0e6;
+  --deep: #175f83;
+  --deep-ink: #ffffff;
+  --logo-ink: #0d3044;
+  --link: #175f83;
+  --o1: #9adcf8;
+  --o2: #e79fdc;
+  --o3: #90d977;
+  --o4: #f1aa85;
+  --o-ink: #10181d;
+  --oc: transparent;
+  --display: "Century Gothic", "Jost", "Futura", "Segoe UI", system-ui, sans-serif;
+  --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0c161d;
+    --surface: #12212b;
+    --hero: #0f1c25;
+    --ink: #dce7ed;
+    --muted: #94a7b3;
+    --line: #23363f;
+    --deep: #1d6a91;
+    --logo-ink: #e3edf2;
+    --link: #74bde2;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0c161d;
+  --surface: #12212b;
+  --hero: #0f1c25;
+  --ink: #dce7ed;
+  --muted: #94a7b3;
+  --line: #23363f;
+  --deep: #1d6a91;
+  --logo-ink: #e3edf2;
+  --link: #74bde2;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 17px;
+  line-height: 1.6;
+}
+a { color: var(--link); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+a:hover { text-decoration-thickness: 2px; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--link); outline-offset: 3px; border-radius: 4px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; line-height: 1.15; margin: 0; }
+h2 { font-size: 1.75rem; font-weight: 600; letter-spacing: -0.005em; }
+h3 { font-size: 1.12rem; font-weight: 600; }
+p { margin: 0; }
+ul { margin: 0; padding-left: 1.1em; }
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.ms { width: 1.35em; height: 1.35em; fill: currentColor; flex: 0 0 auto; }
+.wrap { max-width: 1000px; margin: 0 auto; padding-inline: 20px; }
+
+/* ---------- hero ---------- */
+.hero {
+  position: relative;
+  background: var(--hero);
+  padding-block: 18px 96px;
+}
+.back { font-size: 0.9rem; }
+.hero .eyebrow { margin-top: 30px; }
+.logo { display: block; width: min(520px, 100%); height: auto; margin-top: 12px; }
+.logo .t { fill: var(--logo-ink); }
+.expansion {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: clamp(1.1rem, 2.6vw, 1.4rem);
+  margin-top: 10px;
+  max-width: 42ch;
+  color: var(--muted);
+}
+.expansion b { color: var(--ink); font-weight: 700; }
+.lede { margin-top: 18px; max-width: 64ch; font-size: 1.08rem; }
+.facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  margin: 30px 0 0;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.facts div { background: var(--surface); padding: 12px 14px; }
+.facts dt { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.facts dd { margin: 3px 0 0; font-weight: 600; line-height: 1.35; font-variant-numeric: tabular-nums; }
+@media (max-width: 720px) { .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.hero-waves { position: absolute; left: 0; right: 0; bottom: -1px; width: 100%; height: 76px; display: block; }
+.hero-waves .w1 { fill: #175f83; opacity: 0.35; }
+.hero-waves .w2 { fill: #175f83; opacity: 0.7; }
+.hero-waves .w3 { fill: var(--bg); }
+
+/* ---------- sections ---------- */
+main section { padding-block: 44px 0; }
+.section-head { display: grid; gap: 6px; margin-bottom: 22px; }
+.section-head p.note { color: var(--muted); max-width: 64ch; }
+
+/* ---------- objectives wheel ---------- */
+.obj-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 400px) minmax(0, 1fr);
+  gap: 32px;
+  align-items: start;
+}
+.wheel-col { position: sticky; top: 16px; }
+@media (max-width: 800px) {
+  .obj-stage { grid-template-columns: minmax(0, 1fr); }
+  .wheel-col { position: static; }
+  .wheel { max-width: 380px; margin-inline: auto; }
+}
+.wheel { display: block; width: 100%; height: auto; overflow: visible; font-family: var(--display); }
+.wheel .mfc-node circle, .wheel .ring, .wheel .hub { fill: #175f83; }
+.wheel .mfc-node text { fill: #fff; font-size: 19px; font-weight: 600; text-anchor: middle; }
+.wheel .mfc-node text.small { font-size: 14px; font-weight: 500; opacity: 0.85; }
+.wheel .hub-text { fill: #fff; font-size: 17px; font-weight: 600; text-anchor: middle; }
+.seg { cursor: pointer; transition: transform 0.35s cubic-bezier(.2,.8,.2,1), opacity 0.3s ease; outline: none; }
+.seg-fill { stroke: #fff; stroke-width: 6; stroke-linejoin: round; transition: stroke 0.2s ease; }
+.seg[data-obj="1"] .seg-fill { fill: var(--o1); }
+.seg[data-obj="2"] .seg-fill { fill: var(--o2); }
+.seg[data-obj="3"] .seg-fill { fill: var(--o3); }
+.seg[data-obj="4"] .seg-fill { fill: var(--o4); }
+.seg-label { fill: var(--o-ink); font-size: 17px; font-weight: 600; text-anchor: middle; pointer-events: none; }
+.seg:hover, .seg:focus-visible { transform: translate(calc(var(--dx) * 7px), calc(var(--dy) * 7px)); }
+.seg:focus-visible .seg-fill { stroke: #10181d; stroke-width: 3; }
+.seg.active { transform: translate(calc(var(--dx) * 16px), calc(var(--dy) * 16px)); }
+.wheel.has-active .seg:not(.active) { opacity: 0.45; }
+.wheel.has-active .seg:not(.active):hover { opacity: 0.8; }
+.wheel-hint { text-align: center; font-size: 0.88rem; color: var(--muted); margin-top: 6px; }
+
+.obj-panel {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 22px 24px 24px;
+  transition: background-color 0.5s ease, border-color 0.5s ease;
+}
+.obj-panel.tinted {
+  background: color-mix(in srgb, var(--oc) 22%, var(--surface));
+  border-color: color-mix(in srgb, var(--oc) 60%, var(--surface));
+}
+.flood {
+  position: absolute; inset: 0; z-index: 2;
+  background: var(--oc);
+  pointer-events: none;
+  opacity: 0;
+}
+.obj-panel.flooding .flood { animation: flood 0.9s cubic-bezier(.3,.7,.2,1) forwards; }
+@keyframes flood {
+  0%   { opacity: 1; clip-path: circle(0px at var(--x) var(--y)); }
+  55%  { opacity: 1; clip-path: circle(var(--r) at var(--x) var(--y)); }
+  100% { opacity: 0; clip-path: circle(var(--r) at var(--x) var(--y)); }
+}
+.obj-panel.flooding [data-view]:not([hidden]) { animation: rise 0.5s ease 0.45s both; }
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+.overview h3 { margin-bottom: 6px; font-size: 1.25rem; }
+.overview > p { color: var(--muted); margin-bottom: 14px; }
+.obj-pick { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.obj-pick button {
+  width: 100%;
+  display: grid; grid-template-columns: 2.2rem minmax(0, 1fr); gap: 12px; align-items: center;
+  text-align: left; font: inherit; color: var(--ink);
+  background: transparent; border: 1px solid var(--line); border-radius: 10px;
+  padding: 8px 12px; cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+.obj-pick button:hover { border-color: var(--deep); background: var(--bg); }
+.obj-pick strong { display: block; font-family: var(--display); font-weight: 600; line-height: 1.25; }
+.obj-pick small { color: var(--muted); font-size: 0.88rem; }
+.num {
+  width: 2.2rem; height: 2.2rem; border-radius: 50%;
+  display: grid; place-items: center; flex: 0 0 auto;
+  font-family: var(--display); font-weight: 700; color: var(--o-ink);
+}
+.num.n1 { background: var(--o1); } .num.n2 { background: var(--o2); }
+.num.n3 { background: var(--o3); } .num.n4 { background: var(--o4); }
+
+.detail-head { display: flex; align-items: center; gap: 12px; }
+.detail-head h3 { font-size: 1.4rem; }
+.detail-head .so { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em; color: var(--muted); display: block; }
+.ill { display: block; width: 100%; max-width: 100%; height: auto; margin: 14px 0 12px; }
+.detail p.lead { font-size: 1.03rem; }
+.detail h4 {
+  font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--muted); margin: 18px 0 8px; font-weight: 500;
+}
+.compare { width: 100%; border-collapse: collapse; font-size: 0.93rem; line-height: 1.4; }
+.compare th, .compare td { text-align: left; vertical-align: top; padding: 7px 8px; border-top: 1px solid color-mix(in srgb, var(--ink) 12%, transparent); }
+.compare thead th { border-top: 0; font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 500; padding-top: 0; }
+.compare tbody th { font-weight: 600; width: 22%; }
+.compare td:first-of-type { color: var(--muted); }
+.table-scroll { overflow-x: auto; }
+.kpis li + li { margin-top: 3px; }
+.kpis b { font-variant-numeric: tabular-nums; }
+.wps { display: flex; flex-wrap: wrap; gap: 6px; }
+.wp-chip {
+  font-size: 0.85rem; background: var(--surface); border: 1px solid var(--line);
+  border-radius: 999px; padding: 2px 10px;
+}
+.wp-chip b { font-family: var(--mono); font-weight: 500; font-size: 0.78rem; margin-right: 4px; }
+.detail-nav { display: flex; justify-content: space-between; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+.detail-nav button {
+  font: inherit; font-size: 0.9rem; font-weight: 600; color: var(--ink);
+  background: var(--surface); border: 1px solid var(--line); border-radius: 999px;
+  padding: 6px 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+}
+.detail-nav button:hover { border-color: var(--deep); }
+
+/* illustration marks, all theme-aware */
+.ill .i-axis { stroke: var(--muted); stroke-width: 1.2; }
+.ill .i-fill { fill: var(--oc); opacity: 0.85; }
+.ill .i-fill.solid { opacity: 1; }
+.ill .i-line { fill: none; stroke: var(--deep); stroke-width: 2.4; stroke-linejoin: round; }
+.ill .i-dash { fill: none; stroke: var(--muted); stroke-width: 1.4; stroke-dasharray: 4 4; }
+.ill .i-link { stroke: var(--deep); stroke-width: 1.6; }
+.ill .i-dot { fill: var(--ink); }
+.ill .i-node { fill: #175f83; stroke: var(--surface); stroke-width: 2; }
+.ill .i-code { fill: #fff; font-family: var(--mono); font-size: 9.5px; text-anchor: middle; }
+.ill .i-txt { fill: var(--muted); font-family: var(--body); font-size: 11.5px; }
+.ill .i-txt.strong { fill: var(--ink); font-weight: 600; }
+.ill .i-sea { fill: #175f83; opacity: 0.22; }
+.ill .i-ice { fill: var(--surface); stroke: var(--deep); stroke-width: 1.4; }
+.ill .i-body { fill: #175f83; }
+.ill .i-panel { fill: var(--oc); stroke: #175f83; stroke-width: 1.4; }
+.ill .i-swath { fill: var(--oc); opacity: 0.45; }
+
+/* ---------- value chain ---------- */
+.chain {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 1.55fr);
+  gap: 14px;
+}
+.stage {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px 16px 18px;
+}
+.stage:not(:last-child)::after {
+  content: "";
+  position: absolute; top: 34px; right: -12px; z-index: 1;
+  width: 10px; height: 10px;
+  border-top: 2px solid var(--deep); border-right: 2px solid var(--deep);
+  transform: rotate(45deg);
+}
+.stage .icons { display: flex; gap: 8px; color: var(--deep); font-size: 1.4rem; margin-bottom: 10px; }
+.stage.comedi { border: 2px solid var(--deep); }
+.badge {
+  display: inline-block; margin-left: 6px; vertical-align: 2px;
+  font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em; font-weight: 500;
+  background: var(--deep); color: var(--deep-ink); border-radius: 999px; padding: 1px 8px;
+}
+.stage p { color: var(--muted); font-size: 0.95rem; margin-top: 6px; line-height: 1.5; }
+.users { list-style: none; padding: 0; margin: 10px 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 12px; }
+.users li { display: flex; gap: 8px; align-items: center; font-size: 0.92rem; line-height: 1.25; }
+.users .ms { color: var(--deep); }
+.stat { font-family: var(--display); font-weight: 700; font-size: 1.5rem; line-height: 1.1; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.stat small { display: block; font-family: var(--body); font-weight: 400; font-size: 0.85rem; color: var(--muted); }
+@media (max-width: 880px) {
+  .chain { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .stage:not(:last-child)::after { top: auto; bottom: -13px; right: auto; left: 28px; transform: rotate(135deg); }
+}
+
+/* ---------- MFCs ---------- */
+.map {
+  margin: 0 0 18px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+}
+.map img { display: block; width: 100%; max-width: 100%; height: auto; }
+.map figcaption { font-size: 0.85rem; color: #566874; margin-top: 6px; }
+.mfc-table { width: 100%; min-width: 620px; border-collapse: collapse; font-size: 0.95rem; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.mfc-table th, .mfc-table td { text-align: left; vertical-align: top; padding: 9px 12px; border-top: 1px solid var(--line); line-height: 1.4; }
+.mfc-table thead th { border-top: 0; font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 500; background: var(--bg); }
+.code {
+  font-family: var(--mono); font-size: 0.8rem;
+  color: var(--deep-ink); background: var(--deep);
+  border-radius: 999px; padding: 1px 9px; white-space: nowrap;
+}
+
+/* ---------- work plan ---------- */
+.gantt { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px 16px; }
+.g-row { display: grid; grid-template-columns: minmax(0, 270px) minmax(0, 1fr); gap: 14px; align-items: center; padding-block: 6px; }
+.g-row + .g-row { border-top: 1px solid var(--line); }
+.g-label { line-height: 1.25; font-size: 0.93rem; }
+.g-label b { font-family: var(--mono); font-weight: 500; font-size: 0.78rem; margin-right: 6px; }
+.g-label small { color: var(--muted); display: block; margin-top: 2px; }
+.g-track {
+  position: relative; height: 22px; border-radius: 6px;
+  background: repeating-linear-gradient(to right, transparent 0, transparent calc(25% - 1px), var(--line) calc(25% - 1px), var(--line) 25%);
+}
+.g-bar {
+  position: absolute; top: 3px; bottom: 3px;
+  left: calc((var(--s) - 1) / 48 * 100%);
+  width: calc((var(--e) - var(--s) + 1) / 48 * 100%);
+  border-radius: 999px; background: var(--c, #175f83);
+  font-family: var(--mono); font-size: 0.68rem; line-height: 16px; color: var(--o-ink);
+  padding-inline: 8px; white-space: nowrap; overflow: hidden;
+}
+.g-bar.navy { color: #fff; }
+.g-head .g-track { background: none; height: auto; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.g-head .g-track span { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); letter-spacing: 0.04em; }
+@media (max-width: 640px) {
+  .g-row { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .g-head .g-label { display: none; }
+}
+
+/* ---------- consortium ---------- */
+.partners { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+.partners li {
+  display: grid; grid-template-columns: 2rem minmax(0, 1fr); gap: 10px; align-items: baseline;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px;
+}
+.partners .pn { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.partners strong { font-family: var(--display); font-weight: 600; }
+.partners small { display: block; color: var(--muted); line-height: 1.35; }
+.jdts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 22px; }
+.jdts > div { border-top: 3px solid var(--deep); padding-top: 10px; }
+.jdts p { color: var(--muted); font-size: 0.95rem; margin-top: 4px; line-height: 1.45; }
+@media (max-width: 720px) { .jdts { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---------- timeline ---------- */
+.timeline { list-style: none; margin: 0; padding: 0; border-left: 2px solid var(--line); }
+.timeline li { position: relative; padding: 0 0 22px 22px; }
+.timeline li::before {
+  content: ""; position: absolute; left: -7px; top: 0.45em;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--surface); border: 2px solid var(--deep);
+}
+.timeline li.upcoming::before { background: var(--bg); border-style: dashed; }
+.timeline time { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.timeline h3 { margin-top: 2px; }
+.timeline p { color: var(--muted); margin-top: 4px; max-width: 64ch; }
+
+footer {
+  margin-top: 56px; border-top: 1px solid var(--line);
+  padding-block: 26px 40px; font-size: 0.9rem; color: var(--muted);
+}
+footer .cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 28px; }
+footer p + p { margin-top: 8px; }
+.eu-flag { display: inline-flex; align-items: center; gap: 10px; font-weight: 600; color: var(--ink); }
+.eu-flag svg { flex: 0 0 auto; border-radius: 2px; }
+@media (max-width: 680px) { footer .cols { grid-template-columns: minmax(0, 1fr); } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <a class="back" href="../../../research.html">&larr; Yue Ying &middot; Research projects</a>
+    <p class="eyebrow">Horizon Europe &middot; Grant agreement 101296319</p>
+    <h1><svg class="logo" viewBox="190 100 1375 390" role="img" aria-label="COMEDI"><g class="t"><path d="M387.48037889039244 345.93504736129904C367.9174560216509 366.13937753721245 351.5615696887686 373.8362652232747 328.7916102841678 373.8362652232747C284.8552097428958 373.8362652232747 249.25710419485793 337.27604871447903 249.25710419485793 293.0189445196211C249.25710419485793 273.77672530446546 256.6332882273342 253.25169147496615 268.82002706359947 239.14073071718536C283.25169147496615 222.14343707713124 303.7767253044655 213.16373477672528 327.82949932341 213.16373477672528C355.41001353179973 213.16373477672528 374.0108254397835 222.14343707713124 390.04600811907983 242.9891745602165H439.11366711772666C429.8132611637348 222.46414073071716 421.4749661705007 211.23951285520974 405.43978349120437 198.09066305818672C383.6319350473613 180.45196211096075 355.73071718538563 170.83085250338294 326.86738836265226 170.83085250338294C259.8403247631935 170.83085250338294 205.0 225.67117726657645 205.0 292.6982408660352C205.0 361.3288227334235 260.48173207036535 416.16914749661703 329.7537212449256 416.16914749661703C378.5006765899865 416.16914749661703 420.51285520974295 389.2300405953992 439.11366711772666 345.93504736129904Z"/><path d="M812.0 412.0H855.9364005412721V234.33017591339646L917.8322056833559 412.0H953.7510148849798L1015.6468200270637 234.33017591339646V412.0H1059.5832205683357V174.99999999999997H999.2909336941814L936.1123139377537 354.5940460081191L872.2922868741543 174.99999999999997H812.0Z"/><path d="M1118.0 412.0H1245.319350473613V369.9878213802436H1161.936400541272V314.82679296346413H1241.7916102841677V272.8146143437077H1161.936400541272V217.0121786197564H1245.319350473613V174.99999999999997H1118.0Z"/><path d="M1285.0 412.0H1340.1610284167793C1376.0798376184032 412.0 1397.5669824086604 408.4722598105548 1416.8092016238159 398.851150202977C1453.3694181326116 380.8917456021651 1474.8565629228688 341.765899864682 1474.8565629228688 293.98105548037887C1474.8565629228688 248.76184032476317 1456.255751014885 211.88092016238159 1423.2232746955344 191.99729364005412C1404.6224627875506 180.77266576454667 1376.4005412719891 174.99999999999997 1339.1989174560215 174.99999999999997H1285.0ZM1328.936400541272 369.9878213802436V217.0121786197564H1337.595399188092C1365.8173207036534 217.0121786197564 1380.569688768606 219.57780784844383 1394.359945872801 226.63328822733422C1416.8092016238159 238.1786197564276 1430.5994587280106 263.5142083897158 1430.5994587280106 293.98105548037887C1430.5994587280106 322.5236806495264 1417.4506089309878 347.8592692828146 1396.2841677943165 359.404600811908C1383.1353179972937 366.46008119079835 1364.8552097428958 369.9878213802436 1338.5575101488498 369.9878213802436Z"/><path d="M1507.0 412.0H1550.936400541272V174.99999999999997H1507.0Z"/></g><circle cx="696.1" cy="145.9" r="34.9" fill="#175f83"/><circle cx="784.7" cy="257.1" r="34.9" fill="#175f83"/><circle cx="753.1" cy="395.6" r="34.9" fill="#175f83"/><circle cx="625.0" cy="457.3" r="34.9" fill="#175f83"/><circle cx="496.9" cy="395.6" r="34.9" fill="#175f83"/><circle cx="465.3" cy="257.1" r="34.9" fill="#175f83"/><circle cx="553.9" cy="145.9" r="34.9" fill="#175f83"/><circle cx="625" cy="293.5" r="140" fill="#175f83"/><circle cx="625" cy="293.5" r="118.6" fill="#fff"/><path d="M 548.6 217.1 A 108.1 108.1 0 0 1 701.4 217.1 L 664.1 254.4 A 55.3 55.3 0 0 0 585.9 254.4 Z" fill="#9adcf8" stroke="#fff" stroke-width="11.9" stroke-linejoin="miter"/><path d="M 701.4 217.1 A 108.1 108.1 0 0 1 701.4 369.9 L 664.1 332.6 A 55.3 55.3 0 0 0 664.1 254.4 Z" fill="#e79fdc" stroke="#fff" stroke-width="11.9" stroke-linejoin="miter"/><path d="M 701.4 369.9 A 108.1 108.1 0 0 1 548.6 369.9 L 585.9 332.6 A 55.3 55.3 0 0 0 664.1 332.6 Z" fill="#90d977" stroke="#fff" stroke-width="11.9" stroke-linejoin="miter"/><path d="M 548.6 369.9 A 108.1 108.1 0 0 1 548.6 217.1 L 585.9 254.4 A 55.3 55.3 0 0 0 585.9 332.6 Z" fill="#f1aa85" stroke="#fff" stroke-width="11.9" stroke-linejoin="miter"/><circle cx="625" cy="293.5" r="37.4" fill="#175f83"/></svg></h1>
+    <p class="expansion"><b>CO</b>pernicus <b>M</b>arine services with <b>E</b>nhanced <b>D</b>ata assimilation and improved <b>I</b>nteroperability</p>
+    <p class="lede">COMEDI will modernise and harmonise data assimilation (DA) practices across all Monitoring and Forecasting Centres (MFCs) of the Copernicus Marine Service, enabling them to leverage new technologies and use new types of ocean observations to achieve better accuracy and reliability.</p>
+    <dl class="facts">
+      <div><dt>Call</dt><dd>HORIZON-CL4-2025-02-SPACE-44</dd></div>
+      <div><dt>Duration</dt><dd>48 months, from Sep 2026</dd></div>
+      <div><dt>Coordinator</dt><dd>NERSC, Bergen, Norway</dd></div>
+      <div><dt>Consortium</dt><dd>11 partners, 7 MFCs</dd></div>
+    </dl>
+  </div>
+  <svg class="hero-waves" viewBox="0 0 1200 80" preserveAspectRatio="none" aria-hidden="true">
+<path class="w1" d="M 0 80 L 0 37.0 L 20 39.1 L 40 40.9 L 60 42.4 L 80 43.4 L 100 43.9 L 120 43.9 L 140 43.4 L 160 42.4 L 180 40.9 L 200 39.1 L 220 37.0 L 240 34.8 L 260 32.5 L 280 30.3 L 300 28.2 L 320 26.5 L 340 25.2 L 360 24.4 L 380 24.0 L 400 24.2 L 420 24.9 L 440 26.1 L 460 27.7 L 480 29.6 L 500 31.8 L 520 34.1 L 540 36.3 L 560 38.5 L 580 40.4 L 600 42.0 L 620 43.2 L 640 43.8 L 660 44.0 L 680 43.6 L 700 42.7 L 720 41.4 L 740 39.7 L 760 37.6 L 780 35.4 L 800 33.1 L 820 30.8 L 840 28.8 L 860 27.0 L 880 25.5 L 900 24.5 L 920 24.0 L 940 24.1 L 960 24.7 L 980 25.7 L 1000 27.2 L 1020 29.1 L 1040 31.2 L 1060 33.4 L 1080 35.7 L 1100 37.9 L 1120 39.9 L 1140 41.6 L 1160 42.9 L 1180 43.7 L 1200 44.0 L 1200 80 Z"/>
+<path class="w2" d="M 0 80 L 0 53.6 L 20 52.4 L 40 50.5 L 60 48.1 L 80 45.5 L 100 43.0 L 120 40.8 L 140 39.1 L 160 38.2 L 180 38.0 L 200 38.7 L 220 40.2 L 240 42.3 L 260 44.7 L 280 47.3 L 300 49.7 L 320 51.8 L 340 53.3 L 360 54.0 L 380 53.8 L 400 52.9 L 420 51.2 L 440 49.0 L 460 46.5 L 480 43.9 L 500 41.5 L 520 39.7 L 540 38.4 L 560 38.0 L 580 38.4 L 600 39.6 L 620 41.5 L 640 43.8 L 660 46.4 L 680 48.9 L 700 51.1 L 720 52.8 L 740 53.8 L 760 54.0 L 780 53.3 L 800 51.9 L 820 49.8 L 840 47.4 L 860 44.8 L 880 42.3 L 900 40.3 L 920 38.8 L 940 38.1 L 960 38.2 L 980 39.1 L 1000 40.7 L 1020 42.9 L 1040 45.5 L 1060 48.0 L 1080 50.4 L 1100 52.3 L 1120 53.5 L 1140 54.0 L 1160 53.6 L 1180 52.5 L 1200 50.6 L 1200 80 Z"/>
+<path class="w3" d="M 0 80 L 0 53.5 L 20 52.9 L 40 52.4 L 60 52.1 L 80 52.0 L 100 52.0 L 120 52.3 L 140 52.6 L 160 53.1 L 180 53.8 L 200 54.6 L 220 55.4 L 240 56.4 L 260 57.4 L 280 58.4 L 300 59.4 L 320 60.3 L 340 61.2 L 360 62.0 L 380 62.7 L 400 63.3 L 420 63.7 L 440 63.9 L 460 64.0 L 480 63.9 L 500 63.7 L 520 63.3 L 540 62.7 L 560 62.0 L 580 61.2 L 600 60.3 L 620 59.4 L 640 58.4 L 660 57.4 L 680 56.4 L 700 55.4 L 720 54.6 L 740 53.8 L 760 53.1 L 780 52.6 L 800 52.3 L 820 52.0 L 840 52.0 L 860 52.1 L 880 52.4 L 900 52.9 L 920 53.5 L 940 54.2 L 960 55.0 L 980 55.9 L 1000 56.9 L 1020 57.9 L 1040 58.9 L 1060 59.9 L 1080 60.8 L 1100 61.6 L 1120 62.4 L 1140 63.0 L 1160 63.5 L 1180 63.8 L 1200 64.0 L 1200 80 Z"/></svg>
+</header>
+
+<main class="wrap">
+
+  <section id="objectives">
+    <div class="section-head">
+      <p class="eyebrow">What the project will do</p>
+      <h2>Four specific objectives</h2>
+      <p class="note">The seven MFCs surround four shared objectives. Select a segment of the wheel to open that objective.</p>
+    </div>
+
+    <div class="obj-stage" id="obj-stage">
+      <div class="wheel-col">
+        <svg class="wheel" viewBox="-245 -245 490 490" role="group" aria-label="COMEDI objectives wheel. Select a segment to open that objective.">
+<defs>
+<path id="tp10" d="M -90.5 -90.5 A 128 128 0 0 1 90.5 -90.5"/>
+<path id="tp11" d="M -73.5 -73.5 A 104 104 0 0 1 73.5 -73.5"/>
+<path id="tp20" d="M 90.5 -90.5 A 128 128 0 0 1 90.5 90.5"/>
+<path id="tp21" d="M 73.5 -73.5 A 104 104 0 0 1 73.5 73.5"/>
+<path id="tp30" d="M -77.1 77.1 A 109 109 0 0 0 77.1 77.1"/>
+<path id="tp31" d="M -94.0 94.0 A 133 133 0 0 0 94.0 94.0"/>
+<path id="tp40" d="M -90.5 90.5 A 128 128 0 0 1 -90.5 -90.5"/>
+<path id="tp41" d="M -73.5 73.5 A 104 104 0 0 1 -73.5 -73.5"/>
+</defs>
+<g class="mfc-node"><title>ARC MFC: Arctic</title><circle cx="85.9" cy="-178.4" r="44"/><text x="85.9" y="-181.4">ARC</text><text class="small" x="85.9" y="-163.4">MFC</text></g>
+<g class="mfc-node"><title>BAL MFC: Baltic Sea</title><circle cx="193.0" cy="-44.1" r="44"/><text x="193.0" y="-47.1">BAL</text><text class="small" x="193.0" y="-29.1">MFC</text></g>
+<g class="mfc-node"><title>BLK MFC: Black Sea</title><circle cx="154.8" cy="123.5" r="44"/><text x="154.8" y="120.5">BLK</text><text class="small" x="154.8" y="138.5">MFC</text></g>
+<g class="mfc-node"><title>MED MFC: Mediterranean</title><circle cx="0.0" cy="198.0" r="44"/><text x="0.0" y="195.0">MED</text><text class="small" x="0.0" y="213.0">MFC</text></g>
+<g class="mfc-node"><title>IBI MFC: Iberia-Biscay-Ireland</title><circle cx="-154.8" cy="123.5" r="44"/><text x="-154.8" y="120.5">IBI</text><text class="small" x="-154.8" y="138.5">MFC</text></g>
+<g class="mfc-node"><title>GLO MFC: Global Ocean</title><circle cx="-193.0" cy="-44.1" r="44"/><text x="-193.0" y="-47.1">GLO</text><text class="small" x="-193.0" y="-29.1">MFC</text></g>
+<g class="mfc-node"><title>NWS MFC: North-West Shelf</title><circle cx="-85.9" cy="-178.4" r="44"/><text x="-85.9" y="-181.4">NWS</text><text class="small" x="-85.9" y="-163.4">MFC</text></g>
+<circle class="ring" r="174"/>
+<g class="seg" data-obj="1" tabindex="0" role="button" aria-pressed="false" aria-label="Objective 1: Advance DA methods" style="--dx:0.000;--dy:-1.000">
+<path class="seg-fill" d="M -111.7 -111.7 A 158 158 0 0 1 111.7 -111.7 L 49.5 -49.5 A 70 70 0 0 0 -49.5 -49.5 Z"/>
+<text class="seg-label"><textPath href="#tp10" startOffset="50%">1. Advance DA</textPath></text>
+<text class="seg-label"><textPath href="#tp11" startOffset="50%">methods</textPath></text>
+</g>
+<g class="seg" data-obj="2" tabindex="0" role="button" aria-pressed="false" aria-label="Objective 2: Make best use of observations" style="--dx:1.000;--dy:-0.000">
+<path class="seg-fill" d="M 111.7 -111.7 A 158 158 0 0 1 111.7 111.7 L 49.5 49.5 A 70 70 0 0 0 49.5 -49.5 Z"/>
+<text class="seg-label"><textPath href="#tp20" startOffset="50%">2. Make best use</textPath></text>
+<text class="seg-label"><textPath href="#tp21" startOffset="50%">of observations</textPath></text>
+</g>
+<g class="seg" data-obj="3" tabindex="0" role="button" aria-pressed="false" aria-label="Objective 3: Improve interoperability" style="--dx:0.000;--dy:1.000">
+<path class="seg-fill" d="M 111.7 111.7 A 158 158 0 0 1 -111.7 111.7 L -49.5 49.5 A 70 70 0 0 0 49.5 49.5 Z"/>
+<text class="seg-label"><textPath href="#tp30" startOffset="50%">3. Improve</textPath></text>
+<text class="seg-label"><textPath href="#tp31" startOffset="50%">interoperability</textPath></text>
+</g>
+<g class="seg" data-obj="4" tabindex="0" role="button" aria-pressed="false" aria-label="Objective 4: Prepare innovations for operational use" style="--dx:-1.000;--dy:0.000">
+<path class="seg-fill" d="M -111.7 111.7 A 158 158 0 0 1 -111.7 -111.7 L -49.5 -49.5 A 70 70 0 0 0 -49.5 49.5 Z"/>
+<text class="seg-label"><textPath href="#tp40" startOffset="50%">4. Prepare for</textPath></text>
+<text class="seg-label"><textPath href="#tp41" startOffset="50%">operational use</textPath></text>
+</g>
+<circle class="hub" r="62"/><text class="hub-text" y="-14">Modernise</text><text class="hub-text" y="8">&amp;</text><text class="hub-text" y="30">Harmonise</text>
+</svg>
+        <p class="wheel-hint">Select a coloured segment</p>
+      </div>
+
+      <div class="obj-panel" id="obj-panel" aria-live="polite">
+        <div class="flood" aria-hidden="true"></div>
+
+        <div class="overview" data-view="0">
+          <h3>Modernise and harmonise</h3>
+          <p>MFCs rely on simplified DA methods, and each develops its own DA software independently. COMEDI brings research advances into operations and builds shared tools so the centres can exchange them.</p>
+          <ul class="obj-pick">
+            <li><button type="button" data-open="1"><span class="num n1">1</span><span><strong>Advance DA methods</strong><small>Multiscale, non-Gaussian and AI-based methods</small></span></button></li>
+            <li><button type="button" data-open="2"><span class="num n2">2</span><span><strong>Make best use of observations</strong><small>Sentinel-3 NG, CIMR and reflectance data; impact diagnostics</small></span></button></li>
+            <li><button type="button" data-open="3"><span class="num n3">3</span><span><strong>Improve interoperability</strong><small>Modular software, shared interfaces and Joint Development Teams</small></span></button></li>
+            <li><button type="button" data-open="4"><span class="num n4">4</span><span><strong>Prepare innovations for operational use</strong><small>Demonstrations in every MFC and user engagement</small></span></button></li>
+          </ul>
+        </div>
+
+        <article class="detail" data-view="1" hidden>
+          <div class="detail-head"><span class="num n1">1</span><h3><span class="so">SO-1</span>Advance DA methods</h3></div>
+          <svg class="ill" viewBox="0 0 320 140" role="img" aria-label="A skewed, two-peaked error distribution compared with the Gaussian curve the EnKF assumes.">
+<line class="i-axis" x1="24" y1="118" x2="296" y2="118"/>
+<path class="i-fill" d="M 30 118 L 30.0 118.0 L 32.6 118.0 L 35.2 118.0 L 37.8 118.0 L 40.4 118.0 L 43.0 118.0 L 45.6 118.0 L 48.2 118.0 L 50.8 118.0 L 53.4 118.0 L 56.0 117.9 L 58.6 117.9 L 61.2 117.8 L 63.8 117.6 L 66.4 117.3 L 69.0 116.8 L 71.6 116.1 L 74.2 114.9 L 76.8 113.3 L 79.4 110.9 L 82.0 107.7 L 84.6 103.6 L 87.2 98.3 L 89.8 92.1 L 92.4 84.9 L 95.0 77.0 L 97.6 68.8 L 100.2 60.9 L 102.8 53.7 L 105.4 47.8 L 108.0 43.9 L 110.6 42.1 L 113.2 42.7 L 115.8 45.6 L 118.4 50.6 L 121.0 57.1 L 123.6 64.8 L 126.2 72.9 L 128.8 81.0 L 131.4 88.6 L 134.0 95.3 L 136.6 101.0 L 139.2 105.6 L 141.8 109.2 L 144.4 111.9 L 147.0 113.7 L 149.6 114.8 L 152.2 115.4 L 154.8 115.6 L 157.4 115.4 L 160.0 114.8 L 162.6 113.9 L 165.2 112.7 L 167.8 111.2 L 170.4 109.3 L 173.0 107.0 L 175.6 104.4 L 178.2 101.5 L 180.8 98.3 L 183.4 94.9 L 186.0 91.3 L 188.6 87.8 L 191.2 84.4 L 193.8 81.2 L 196.4 78.5 L 199.0 76.4 L 201.6 74.9 L 204.2 74.1 L 206.8 74.1 L 209.4 74.9 L 212.0 76.4 L 214.6 78.5 L 217.2 81.2 L 219.8 84.4 L 222.4 87.8 L 225.0 91.3 L 227.6 94.9 L 230.2 98.3 L 232.8 101.5 L 235.4 104.4 L 238.0 107.0 L 240.6 109.3 L 243.2 111.2 L 245.8 112.8 L 248.4 114.1 L 251.0 115.1 L 253.6 115.9 L 256.2 116.5 L 258.8 117.0 L 261.4 117.3 L 264.0 117.5 L 266.6 117.7 L 269.2 117.8 L 271.8 117.9 L 274.4 117.9 L 277.0 117.9 L 279.6 118.0 L 282.2 118.0 L 284.8 118.0 L 287.4 118.0 L 290.0 118.0 L 290 118 Z"/>
+<path class="i-line" d="M 30.0 118.0 L 32.6 118.0 L 35.2 118.0 L 37.8 118.0 L 40.4 118.0 L 43.0 118.0 L 45.6 118.0 L 48.2 118.0 L 50.8 118.0 L 53.4 118.0 L 56.0 117.9 L 58.6 117.9 L 61.2 117.8 L 63.8 117.6 L 66.4 117.3 L 69.0 116.8 L 71.6 116.1 L 74.2 114.9 L 76.8 113.3 L 79.4 110.9 L 82.0 107.7 L 84.6 103.6 L 87.2 98.3 L 89.8 92.1 L 92.4 84.9 L 95.0 77.0 L 97.6 68.8 L 100.2 60.9 L 102.8 53.7 L 105.4 47.8 L 108.0 43.9 L 110.6 42.1 L 113.2 42.7 L 115.8 45.6 L 118.4 50.6 L 121.0 57.1 L 123.6 64.8 L 126.2 72.9 L 128.8 81.0 L 131.4 88.6 L 134.0 95.3 L 136.6 101.0 L 139.2 105.6 L 141.8 109.2 L 144.4 111.9 L 147.0 113.7 L 149.6 114.8 L 152.2 115.4 L 154.8 115.6 L 157.4 115.4 L 160.0 114.8 L 162.6 113.9 L 165.2 112.7 L 167.8 111.2 L 170.4 109.3 L 173.0 107.0 L 175.6 104.4 L 178.2 101.5 L 180.8 98.3 L 183.4 94.9 L 186.0 91.3 L 188.6 87.8 L 191.2 84.4 L 193.8 81.2 L 196.4 78.5 L 199.0 76.4 L 201.6 74.9 L 204.2 74.1 L 206.8 74.1 L 209.4 74.9 L 212.0 76.4 L 214.6 78.5 L 217.2 81.2 L 219.8 84.4 L 222.4 87.8 L 225.0 91.3 L 227.6 94.9 L 230.2 98.3 L 232.8 101.5 L 235.4 104.4 L 238.0 107.0 L 240.6 109.3 L 243.2 111.2 L 245.8 112.8 L 248.4 114.1 L 251.0 115.1 L 253.6 115.9 L 256.2 116.5 L 258.8 117.0 L 261.4 117.3 L 264.0 117.5 L 266.6 117.7 L 269.2 117.8 L 271.8 117.9 L 274.4 117.9 L 277.0 117.9 L 279.6 118.0 L 282.2 118.0 L 284.8 118.0 L 287.4 118.0 L 290.0 118.0"/>
+<path class="i-dash" d="M 30.0 117.6 L 32.6 117.5 L 35.2 117.4 L 37.8 117.2 L 40.4 117.1 L 43.0 116.9 L 45.6 116.7 L 48.2 116.5 L 50.8 116.2 L 53.4 115.9 L 56.0 115.6 L 58.6 115.2 L 61.2 114.8 L 63.8 114.3 L 66.4 113.7 L 69.0 113.1 L 71.6 112.4 L 74.2 111.7 L 76.8 110.9 L 79.4 110.0 L 82.0 109.0 L 84.6 107.9 L 87.2 106.8 L 89.8 105.5 L 92.4 104.2 L 95.0 102.8 L 97.6 101.3 L 100.2 99.8 L 102.8 98.2 L 105.4 96.5 L 108.0 94.7 L 110.6 93.0 L 113.2 91.1 L 115.8 89.3 L 118.4 87.5 L 121.0 85.6 L 123.6 83.8 L 126.2 82.0 L 128.8 80.2 L 131.4 78.6 L 134.0 77.0 L 136.6 75.5 L 139.2 74.1 L 141.8 72.8 L 144.4 71.7 L 147.0 70.7 L 149.6 69.9 L 152.2 69.2 L 154.8 68.8 L 157.4 68.5 L 160.0 68.4 L 162.6 68.5 L 165.2 68.8 L 167.8 69.2 L 170.4 69.9 L 173.0 70.7 L 175.6 71.7 L 178.2 72.8 L 180.8 74.1 L 183.4 75.5 L 186.0 77.0 L 188.6 78.6 L 191.2 80.2 L 193.8 82.0 L 196.4 83.8 L 199.0 85.6 L 201.6 87.5 L 204.2 89.3 L 206.8 91.1 L 209.4 93.0 L 212.0 94.7 L 214.6 96.5 L 217.2 98.2 L 219.8 99.8 L 222.4 101.3 L 225.0 102.8 L 227.6 104.2 L 230.2 105.5 L 232.8 106.8 L 235.4 107.9 L 238.0 109.0 L 240.6 110.0 L 243.2 110.9 L 245.8 111.7 L 248.4 112.4 L 251.0 113.1 L 253.6 113.7 L 256.2 114.3 L 258.8 114.8 L 261.4 115.2 L 264.0 115.6 L 266.6 115.9 L 269.2 116.2 L 271.8 116.5 L 274.4 116.7 L 277.0 116.9 L 279.6 117.1 L 282.2 117.2 L 284.8 117.4 L 287.4 117.5 L 290.0 117.6"/>
+<text class="i-txt" x="210" y="40">Gaussian (EnKF)</text>
+<text class="i-txt strong" x="62" y="22">non-Gaussian</text>
+<text class="i-txt" x="160" y="134" text-anchor="middle">forecast error</text>
+</svg>
+          <p class="lead">Advance the DA methods in current MFC operations by implementing novel techniques for uncertainty representation and assimilation, integrating AI, to achieve better accuracy and reliability of the operational products.</p>
+          <h4>Today in the MFCs &rarr; with COMEDI</h4>
+          <div class="table-scroll"><table class="compare">
+            <thead><tr><th scope="col">Topic</th><th scope="col">Today</th><th scope="col">COMEDI</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Multiscale</th><td>Mostly optimised for a single scale; NWS uses two scales</td><td>Multiscale covariances and scale-dependent localisation in 3DVar and EnKFs</td></tr>
+              <tr><th scope="row">Ensembles</th><td>Mostly static covariances; only ARC and GLO run dynamic ensembles</td><td>Dynamic ensembles in EnKFs, blended into 3DVar</td></tr>
+              <tr><th scope="row">Non-Gaussian</th><td>All operational methods assume Gaussian errors</td><td>Three non-Gaussian filters for coupled BGC and sea-ice DA</td></tr>
+              <tr><th scope="row">AI</th><td>Prototypes exist but are not used in operations</td><td>AI bias correction, super-resolution and generative AI as a core DA method</td></tr>
+            </tbody>
+          </table></div>
+          <h4>Key results</h4>
+          <ul class="kpis">
+            <li><b>2</b> multiscale methods for uncertainty representation</li>
+            <li><b>1</b> perturbation scheme for coupled physics&ndash;BGC models</li>
+            <li><b>2</b> hybrid climatological&ndash;dynamical covariance techniques</li>
+            <li><b>3</b> AI methods for systematic errors, subgrid uncertainty and ensemble diversity</li>
+            <li><b>3</b> non-Gaussian ensemble filters</li>
+            <li><b>2</b> generative AI algorithms used as core DA</li>
+          </ul>
+          <h4>Work packages</h4>
+          <div class="wps"><span class="wp-chip"><b>WP2</b>Forecast uncertainty representation</span><span class="wp-chip"><b>WP3</b>Core assimilation method</span></div>
+          <div class="detail-nav"><button type="button" data-open="0"><span aria-hidden="true">&larr;</span>All objectives</button><button type="button" data-open="2">Next: observations<span aria-hidden="true">&rarr;</span></button></div>
+        </article>
+
+        <article class="detail" data-view="2" hidden>
+          <div class="detail-head"><span class="num n2">2</span><h3><span class="so">SO-2</span>Make best use of observations</h3></div>
+          <svg class="ill" viewBox="0 0 320 140" role="img" aria-label="A satellite scanning a wide swath of ocean and sea ice, with a profiling float below the surface.">
+            <path class="i-dash" d="M 10 58 Q 160 -6 310 40"/>
+            <path class="i-swath" d="M 226 44 L 172 104 L 300 104 Z"/>
+            <rect class="i-body" x="214" y="24" width="24" height="18" rx="3"/>
+            <rect class="i-panel" x="186" y="28" width="24" height="10" rx="1.5"/>
+            <rect class="i-panel" x="242" y="28" width="24" height="10" rx="1.5"/>
+            <path class="i-sea" d="M 0 104 Q 20 98 40 104 T 80 104 T 120 104 T 160 104 T 200 104 T 240 104 T 280 104 T 320 104 L 320 140 L 0 140 Z"/>
+            <path class="i-ice" d="M 18 104 L 30 97 L 58 98 L 66 104 Z"/>
+            <path class="i-ice" d="M 74 104 L 82 99 L 104 100 L 110 104 Z"/>
+            <path class="i-ice" d="M 118 104 L 124 100 L 140 101 L 144 104 Z"/>
+            <line class="i-link" x1="96" y1="112" x2="96" y2="106"/>
+            <rect class="i-body" x="92" y="112" width="8" height="20" rx="4"/>
+            <path class="i-dash" d="M 110 110 C 124 116 118 124 132 134"/>
+            <text class="i-txt strong" x="180" y="16">S3-NG &middot; CIMR</text>
+            <text class="i-txt" x="244" y="98">wide swath</text>
+            <text class="i-txt" x="36" y="88">sea ice</text>
+            <text class="i-txt" x="138" y="128">Argo float</text>
+          </svg>
+          <p class="lead">Prepare the MFCs and users to take maximum benefit from novel ocean observations, upgrading the DA methods to make better use of observation information and implementing diagnostic tools to evaluate their impact systematically.</p>
+          <h4>Today in the MFCs &rarr; with COMEDI</h4>
+          <div class="table-scroll"><table class="compare">
+            <thead><tr><th scope="col">Topic</th><th scope="col">Today</th><th scope="col">COMEDI</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Sea ice</th><td>Retrieved sea-ice and surface temperature products</td><td>Direct assimilation of brightness temperatures in coupled ocean&ndash;sea ice DA</td></tr>
+              <tr><th scope="row">High resolution</th><td>Observation errors treated as uncorrelated, except along-track altimetry</td><td>Correlated observation errors in both 3DVar and EnKFs</td></tr>
+              <tr><th scope="row">New missions</th><td>Prototype operators for S3-NG, CIMR and reflectance</td><td>S3-NG wide-swath altimetry, CIMR brightness temperatures and reflectance assimilated in real MFC settings</td></tr>
+              <tr><th scope="row">Impact</th><td>Data-denial experiments; cross-MFC evaluation is hard</td><td>Assessment protocol, systematic OSSEs and OSEs, and FSOI for 3DVar and EnKFs</td></tr>
+            </tbody>
+          </table></div>
+          <h4>Key results</h4>
+          <ul class="kpis">
+            <li><b>1</b> updated observation operator for the CIMR mission</li>
+            <li><b>1</b> method for correlated observation errors in wide-swath altimetry</li>
+            <li><b>2</b> tools for forecast sensitivity to observation impact (FSOI)</li>
+            <li>An AI emulator of FSOI at least <b>10&times;</b> faster, in the GLO system</li>
+            <li><b>2</b> OSSEs: S3-NG in the NWS MFC and CIMR in the ARC MFC</li>
+            <li>OSEs for reflectance data in <b>3</b> MFCs</li>
+          </ul>
+          <h4>Work packages</h4>
+          <div class="wps"><span class="wp-chip"><b>WP4</b>Observation operator and uncertainty</span><span class="wp-chip"><b>WP5</b>Observation impact evaluation</span></div>
+          <div class="detail-nav"><button type="button" data-open="0"><span aria-hidden="true">&larr;</span>All objectives</button><button type="button" data-open="3">Next: interoperability<span aria-hidden="true">&rarr;</span></button></div>
+        </article>
+
+        <article class="detail" data-view="3" hidden>
+          <div class="detail-head"><span class="num n3">3</span><h3><span class="so">SO-3</span>Improve interoperability</h3></div>
+          <svg class="ill" viewBox="0 0 320 146" role="img" aria-label="The seven MFCs linked to each other and to a shared set of data assimilation tools.">
+<line class="i-dash" x1="215.5" y1="25.1" x2="284.8" y2="60.4"/><line class="i-dash" x1="284.8" y1="60.4" x2="260.1" y2="104.4"/><line class="i-dash" x1="260.1" y1="104.4" x2="160.0" y2="124.0"/><line class="i-dash" x1="160.0" y1="124.0" x2="59.9" y2="104.4"/><line class="i-dash" x1="59.9" y1="104.4" x2="35.2" y2="60.4"/><line class="i-dash" x1="35.2" y1="60.4" x2="104.5" y2="25.1"/><line class="i-dash" x1="104.5" y1="25.1" x2="215.5" y2="25.1"/><line class="i-link" x1="160" y1="72" x2="215.5" y2="25.1"/><line class="i-link" x1="160" y1="72" x2="284.8" y2="60.4"/><line class="i-link" x1="160" y1="72" x2="260.1" y2="104.4"/><line class="i-link" x1="160" y1="72" x2="160.0" y2="124.0"/><line class="i-link" x1="160" y1="72" x2="59.9" y2="104.4"/><line class="i-link" x1="160" y1="72" x2="35.2" y2="60.4"/><line class="i-link" x1="160" y1="72" x2="104.5" y2="25.1"/>
+<rect class="i-fill solid" x="116" y="56" width="88" height="32" rx="16"/>
+<text class="i-txt strong" x="160" y="76" text-anchor="middle">common core</text>
+<circle class="i-node" cx="215.5" cy="25.1" r="16"/><text class="i-code" x="215.5" y="28.6">ARC</text><circle class="i-node" cx="284.8" cy="60.4" r="16"/><text class="i-code" x="284.8" y="63.9">BAL</text><circle class="i-node" cx="260.1" cy="104.4" r="16"/><text class="i-code" x="260.1" y="107.9">BLK</text><circle class="i-node" cx="160.0" cy="124.0" r="16"/><text class="i-code" x="160.0" y="127.5">MED</text><circle class="i-node" cx="59.9" cy="104.4" r="16"/><text class="i-code" x="59.9" y="107.9">IBI</text><circle class="i-node" cx="35.2" cy="60.4" r="16"/><text class="i-code" x="35.2" y="63.9">GLO</text><circle class="i-node" cx="104.5" cy="25.1" r="16"/><text class="i-code" x="104.5" y="28.6">NWS</text>
+</svg>
+          <p class="lead">Improve the interoperability of the MFCs by developing modular software components and shared interfaces, enabling a more efficient exchange of new methods among operational centres. Each MFC keeps its established workflow while connecting to common DA core methods.</p>
+          <h4>Today in the MFCs &rarr; with COMEDI</h4>
+          <div class="table-scroll"><table class="compare">
+            <thead><tr><th scope="col">Topic</th><th scope="col">Today</th><th scope="col">COMEDI</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Method exchange</th><td>Limited, because the MFCs share no DA software</td><td>Interoperable tools with unit tests, and interfaces to common DA software</td></tr>
+              <tr><th scope="row">Teams</th><td>DA developed independently at each MFC</td><td>Three Joint Development Teams: AI, Protocol and Software</td></tr>
+            </tbody>
+          </table></div>
+          <h4>Key results</h4>
+          <ul class="kpis">
+            <li><b>7</b> developments from WP2&ndash;5 implemented on at least two MFC DA platforms</li>
+            <li><b>3</b> interfaces to a common assimilation core (PDAF), linking 4 ensemble-based MFCs</li>
+            <li><b>2</b> variational platforms sharing the same NEMO observation operator</li>
+            <li><b>5</b> DA software packages interfaced to AI models</li>
+            <li>The STOPACK perturbation package available for both NEMO and HYCOM</li>
+          </ul>
+          <h4>Work package</h4>
+          <div class="wps"><span class="wp-chip"><b>WP6</b>Interoperable software development</span></div>
+          <div class="detail-nav"><button type="button" data-open="0"><span aria-hidden="true">&larr;</span>All objectives</button><button type="button" data-open="4">Next: operations<span aria-hidden="true">&rarr;</span></button></div>
+        </article>
+
+        <article class="detail" data-view="4" hidden>
+          <div class="detail-head"><span class="num n4">4</span><h3><span class="so">SO-4</span>Prepare innovations for operational use</h3></div>
+          <svg class="ill" viewBox="0 0 320 140" role="img" aria-label="An analysis fitted to observations, followed by a forecast whose uncertainty band widens with lead time.">
+<line class="i-axis" x1="20" y1="122" x2="300" y2="122"/>
+<path class="i-fill" d="M 170 92.3 L 174 94.0 L 178 94.9 L 182 94.9 L 186 94.0 L 190 92.0 L 194 89.1 L 198 85.5 L 202 81.3 L 206 76.8 L 210 72.3 L 214 67.8 L 218 63.8 L 222 60.2 L 226 57.3 L 230 55.1 L 234 53.5 L 238 52.4 L 242 51.8 L 246 51.3 L 250 50.8 L 254 50.1 L 258 49.0 L 262 47.4 L 266 45.2 L 270 42.4 L 274 39.1 L 278 35.4 L 282 31.5 L 286 27.5 L 290 23.9 L 294 20.6 L 294 81.2 L 290 82.7 L 286 84.6 L 282 86.7 L 278 88.9 L 274 90.9 L 270 92.4 L 266 93.4 L 262 93.8 L 258 93.7 L 254 93.0 L 250 92.0 L 246 90.7 L 242 89.4 L 238 88.4 L 234 87.7 L 230 87.5 L 226 88.0 L 222 89.1 L 218 90.9 L 214 93.2 L 210 95.9 L 206 98.7 L 202 101.4 L 198 103.8 L 194 105.7 L 190 106.8 L 186 107.0 L 182 106.2 L 178 104.5 L 174 101.8 L 170 98.3 Z"/>
+<path class="i-line" d="M 24 64.7 L 28 61.9 L 32 58.6 L 36 55.0 L 40 51.4 L 44 47.9 L 48 44.8 L 52 42.4 L 56 40.7 L 60 40.0 L 64 40.3 L 68 41.6 L 72 43.7 L 76 46.6 L 80 50.0 L 84 53.8 L 88 57.6 L 92 61.2 L 96 64.4 L 100 67.2 L 104 69.3 L 108 70.7 L 112 71.5 L 116 71.9 L 120 71.9 L 124 71.8 L 128 71.7 L 132 71.8 L 136 72.4 L 140 73.6 L 144 75.3 L 148 77.6 L 152 80.5 L 156 83.8 L 160 87.2 L 164 90.7 L 168 93.9"/>
+<path class="i-line" d="M 170 95.3 L 174 97.9 L 178 99.7 L 182 100.6 L 186 100.5 L 190 99.4 L 194 97.4 L 198 94.7 L 202 91.4 L 206 87.8 L 210 84.1 L 214 80.5 L 218 77.3 L 222 74.7 L 226 72.7 L 230 71.3 L 234 70.6 L 238 70.4 L 242 70.6 L 246 71.0 L 250 71.4 L 254 71.5 L 258 71.3 L 262 70.6 L 266 69.3 L 270 67.4 L 274 65.0 L 278 62.2 L 282 59.1 L 286 56.1 L 290 53.3 L 294 50.9"/>
+<circle class="i-dot" cx="30" cy="57.7" r="2.6"/> <circle class="i-dot" cx="42" cy="45.7" r="2.6"/> <circle class="i-dot" cx="54" cy="40.4" r="2.6"/> <circle class="i-dot" cx="66" cy="37.4" r="2.6"/> <circle class="i-dot" cx="78" cy="43.9" r="2.6"/> <circle class="i-dot" cx="90" cy="58.4" r="2.6"/> <circle class="i-dot" cx="102" cy="72.5" r="2.6"/> <circle class="i-dot" cx="114" cy="74.8" r="2.6"/> <circle class="i-dot" cx="126" cy="74.3" r="2.6"/> <circle class="i-dot" cx="138" cy="70.1" r="2.6"/> <circle class="i-dot" cx="150" cy="79.4" r="2.6"/> <circle class="i-dot" cx="162" cy="86.7" r="2.6"/>
+<line class="i-dash" x1="170" y1="14" x2="170" y2="122"/>
+<text class="i-txt" x="96" y="134" text-anchor="middle">analysis</text>
+<text class="i-txt" x="236" y="134" text-anchor="middle">forecast</text>
+<text class="i-txt strong" x="174" y="22">now</text>
+</svg>
+          <p class="lead">Prepare DA method innovations for operational use by demonstrating them in realistic MFC configurations, reaching Technology Readiness Level 6, and by engaging CMEMS stakeholders for feedback.</p>
+          <h4>Key results</h4>
+          <ul class="kpis">
+            <li><b>7</b> demonstrations for physical ocean products with <b>10%</b> error reduction (GLO &times;2, BAL, BLK, MED, NWS, IBI)</li>
+            <li><b>1</b> demonstration for coupled physics&ndash;sea ice products (ARC)</li>
+            <li><b>5</b> demonstrations for coupled physics&ndash;BGC products (GLO, ARC, BAL, BLK, MED)</li>
+            <li><b>2</b> user workshops with 30 participants each</li>
+            <li>A roadmap for transferring the results into CMEMS operations</li>
+          </ul>
+          <h4>Work packages</h4>
+          <div class="wps"><span class="wp-chip"><b>WP5</b>Observation impact evaluation</span><span class="wp-chip"><b>WP7</b>Demonstration in MFCs</span><span class="wp-chip"><b>WP8</b>Dissemination, exploitation and communication</span></div>
+          <div class="detail-nav"><button type="button" data-open="0"><span aria-hidden="true">&larr;</span>All objectives</button><button type="button" data-open="1">Back to objective 1<span aria-hidden="true">&rarr;</span></button></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="service">
+    <div class="section-head">
+      <p class="eyebrow">Copernicus Marine Service</p>
+      <h2>From observations to users</h2>
+      <p class="note">Every MFC production system has the same building blocks. Data assimilation combines model predictions with observations to find the best estimate of the ocean state, which then starts the forecasts and reanalyses that users rely on.</p>
+    </div>
+    <div class="chain">
+      <div class="stage">
+        <div class="icons" aria-hidden="true"><svg class="ms" viewBox="0 -960 960 960" aria-hidden="true"><path d="M560-32v-60q125 0 212.5-87.32T860-392h60q0 75-28.5 140.5t-77 114q-48.5 48.5-114 77T560-32Zm0-120v-60q69 0 124.5-55.5T740-392h60q0 95-72.5 167.5T560-152ZM222-49q-11.67 0-23.33-4.5Q187-58 179-66L9-236q-8-8-12.5-19.56Q-8-267.11-8-278.67q0-12.33 4.43-23.21Q.87-312.75 9-321l151-151q17-17 42.5-17t42.5 17l64 64 37-37-64-64q-17-17.31-17-42.16Q265-576 282-593l75-75q17.38-17 42.69-17T442-668l64 64 37-37-64-64q-17-17.38-17-42.69T479-790l151-151q8.86-9 19.93-13.5T673-959q12 0 23 4t20 13l170 170q8.87 8.52 12.93 19.75 4.07 11.24 4.07 23.63 0 11.62-5 23.12-5 11.5-13 19.5L734-535q-23 23-42.5 23T649-535l-64-64-37 37 64 64q17 17.38 16.5 42.69T611-413l-74 74q-17.38 17-42.69 17T452-339l-64-64-37 37 64 64q17 17 17 42.5T415-217L264-66q-8.25 8.13-19.12 12.57Q234-49 222-49Zm0-59 54-54-170-170-54 54 170 170Zm97-97 54-54-170-170-54 54 170 170Zm176-176 74-74-170-170-74 74 170 170Zm197-197 54-54-170-170-54 54 170 170Zm97-97 54-54-170-170-54 54 170 170ZM447-503Z"/></svg><svg class="ms" viewBox="0 -960 960 960" aria-hidden="true"><path d="M197-197q-54-54-85.5-126.5T80-480q0-84 31.5-156.5T197-763l43 43q-46 46-73 107.5T140-480q0 71 26.5 132T240-240l-43 43Zm113-113q-32-32-51-75.5T240-480q0-51 19-94.5t51-75.5l43 43q-24 24-38.5 56.5T300-480q0 38 14 70t39 57l-43 43Zm113.5-113.5Q400-447 400-480t23.5-56.5Q447-560 480-560t56.5 23.5Q560-513 560-480t-23.5 56.5Q513-400 480-400t-56.5-23.5ZM650-310l-43-43q24-24 38.5-56.5T660-480q0-38-14-70t-39-57l43-43q32 32 51 75.5t19 94.5q0 50-19 93.5T650-310Zm113 113-43-43q46-46 73-107.5T820-480q0-71-26.5-132T720-720l43-43q54 55 85.5 127.5T880-480q0 83-31.5 155.5T763-197Z"/></svg><svg class="ms" viewBox="0 -960 960 960" aria-hidden="true"><path d="M178-80h-58v-60h58q40 0 79-11t76-34q35 22 72 32.5t75 10.5q38 0 75-10.5t72-32.5q38 23 77.5 34t78.5 11h57v60h-57q-39 0-78-9t-77-28q-38 19-75 28t-73 9q-36 0-73-9.5T333-117q-38 18-77.5 27.5T178-80Zm226.5-169.5Q365-270 330-307q-33 33-71 52.5T182-230l-71-245q-4-12 2-22.5t18-14.5l55-16v-190q0-25 17.5-42.5T246-778h132v-103h204v103h132q25 0 42.5 17.5T774-718v190l55 16q12 4 18 14.5t2 22.5l-71 245q-39-5-77-24.5T630-307q-35 37-74.5 57.5T480-229q-36 0-75.5-20.5ZM481-289q32 0 58.5-18t47.5-43l41-48 36 38q16 17 34 31t38 25l48-159-304-92-304 92 48 159q20-11 38-25t34-31l36-38 41 48q22 25 49 43t59 18ZM246-547l234-71 234 72v-172H246v171Zm234 125Z"/></svg></div>
+        <h3>Observe</h3>
+        <p>Satellites and in situ networks such as Argo floats measure sea level, temperature, salinity, sea ice and ocean colour.</p>
+      </div>
+      <div class="stage comedi">
+        <div class="icons" aria-hidden="true"><svg class="ms" viewBox="0 -960 960 960" aria-hidden="true"><path d="M153-73q-33-33-33-81t33.25-81q33.25-33 80.75-33 14 0 24.5 2.5T280-258l85-106q-19-23-29-52.5t-5-61.5l-121-41q-15 25-39.5 39T114-466q-47.5 0-80.75-33.25T0-580q0-47.5 33.25-80.75T114-694q47.5 0 80.75 33.25T228-580v4l122 42q18-32 43.5-49t56.5-24v-129q-39-11-61.5-43T366-846q0-47.5 33-80.75T480-960q48 0 81 33.25T594-846q0 35-23 67t-61 43v129q31 7 57 24t44 49l121-42v-4q0-47.5 33.25-80.75T846-694q47.5 0 80.75 33T960-580q0 48-33.25 81T846-466q-32 0-57-14t-39-39l-121 41q5 32-4.5 61.5T595-364l85 106q11-5 21.5-7.5t24.06-2.5Q774-268 807-235t33 81q0 48-33 81t-81 33q-48 0-81-33.25T612-154q0-20 5.5-36t15.5-31l-85-106q-32.13 17-68.56 17Q443-310 411-327l-84 107q10 15 15.5 30.5T348-154q0 47.5-33 80.75T234-40q-48 0-81-33Zm-38.96-453q22.96 0 38.46-15.54 15.5-15.53 15.5-38.5 0-22.96-15.54-38.46-15.53-15.5-38.5-15.5Q91-634 75.5-618.46 60-602.93 60-579.96 60-557 75.54-541.5q15.53 15.5 38.5 15.5ZM272.5-115.54q15.5-15.53 15.5-38.5 0-22.96-15.54-38.46-15.53-15.5-38.5-15.5-22.96 0-38.46 15.54-15.5 15.53-15.5 38.5 0 22.96 15.54 38.46 15.53 15.5 38.5 15.5 22.96 0 38.46-15.54Zm246-692q15.5-15.53 15.5-38.5 0-22.96-15.54-38.46-15.53-15.5-38.5-15.5-22.96 0-38.46 15.54-15.5 15.53-15.5 38.5 0 22.96 15.54 38.46 15.53 15.5 38.5 15.5 22.96 0 38.46-15.54ZM480.5-370q37.5 0 63.5-26.5t26-64q0-37.5-26.1-63.5T480-550q-37 0-63.5 26.1T390-460q0 37 26.5 63.5t64 26.5Zm284 254.46q15.5-15.53 15.5-38.5 0-22.96-15.54-38.46-15.53-15.5-38.5-15.5-22.96 0-38.46 15.54-15.5 15.53-15.5 38.5 0 22.96 15.54 38.46 15.53 15.5 38.5 15.5 22.96 0 38.46-15.54Zm120-426q15.5-15.53 15.5-38.5 0-22.96-15.54-38.46-15.53-15.5-38.5-15.5-22.96 0-38.46 15.54-15.5 15.53-15.5 38.5 0 22.96 15.54 38.46 15.53 15.5 38.5 15.5 22.96 0 38.46-15.54ZM480-846ZM114-580Zm366 120Zm366-120ZM234-154Zm492 0Z"/></svg><svg class="ms" viewBox="0 -960 960 960" aria-hidden="true"><path d="M80-146v-60q28-3 48-16t40-27.5q20-14.5 45-25.5t62-11q37 0 63 12.5t47.5 27.5q21.5 15 43.5 27.5t51 12.5q29 0 51-12.5t43.5-27.5q21.5-15 47.5-27.5t63-12.5q37 0 61.5 11t45 25.5Q812-235 832-222t48 16v60q-35-2-58.5-14.5t-44-27Q757-202 736-214t-51-12q-30 0-52.5 12.5t-44 27.5q-21.5 15-47 27.5T480-146q-36 0-61.5-12.5t-47-27.5q-21.5-15-44-27.5T275-226q-30 0-51.5 12T182-187.5q-20 14.5-43.5 27T80-146Zm0-176v-60q28-3 48-16t40-27.5q20-14.5 45-25.5t62-11q37 0 63 12.5t47.5 27.5q21.5 15 43.5 27.5t51 12.5q29 0 51-12.5t43.5-27.5q21.5-15 47.5-27.5t63-12.5q37 0 61.5 11t45 25.5Q812-411 832-398t48 16v60q-35-4-58.5-17t-44-27Q757-380 736-391t-51-11q-30 0-52 12.5T589-362q-22 15-47.5 27.5T480-322q-36 0-61.5-12.5t-47-27.5q-21.5-15-44-27.5T275-402q-30 0-51.5 12T182-363.5q-20 14.5-43.5 27T80-322Zm0-176v-60q28-2 48-14.5t40-27q20-14.5 45-26.5t62-12q37 0 63 12.5t47.5 27.5q21.5 15 43.5 27.5t51 12.5q29 0 51-12.5t43.5-27.5q21.5-15 47.5-27.5t63-12.5q37 0 61.5 12t45 26.5q20.5 14.5 40.5 27t48 14.5v60q-35-2-58.5-14.5t-44-27Q757-554 736-566t-51-12q-30 0-52.5 12.5t-44 27.5q-21.5 15-47 27.5T480-498q-36 0-61.5-12.5t-47-27.5q-21.5-15-44-27.5T275-578q-30 0-51.5 12T182-539.5q-20 14.5-43.5 27T80-498Zm0-176v-60q28-3 48-16t40-27.5q20-14.5 45-25.5t62-11q37 0 63 12.5t47.5 27.5q21.5 15 43.5 27.5t51 12.5q29 0 51-12.5t43.5-27.5q21.5-15 47.5-27.5t63-12.5q37 0 61.5 11t45 25.5Q812-763 832-750t48 16v60q-35-2-58.5-14.5t-44-27Q757-730 736-742t-51-12q-30 0-52.5 12.5t-44 27.5q-21.5 15-47 27.5T480-674q-36 0-61.5-12.5t-47-27.5q-21.5-15-44-27.5T275-754q-30 0-51.5 12T182-715.5q-20 14.5-43.5 27T80-674Z"/></svg></div>
+        <h3>Assimilate and forecast <span class="badge">COMEDI</span></h3>
+        <p>The MFCs combine the observations with ocean, biogeochemistry and sea-ice models through data assimilation.</p>
+      </div>
+      <div class="stage">
+        <div class="icons" aria-hidden="true"><svg class="ms" viewBox="0 -960 960 960" aria-hidden="true"><path d="M480-130 120-410l50-37 310 241 310-241 50 37-360 280Zm0-152L120-562l360-280 360 280-360 280Zm0-301Zm0 225 262-204-262-204-262 204 262 204Z"/></svg><svg class="ms" viewBox="0 -960 960 960" aria-hidden="true"><path d="M324-111.5Q251-143 197-197t-85.5-127Q80-397 80-480t31.5-156Q143-709 197-763t127-85.5Q397-880 480-880t156 31.5Q709-817 763-763t85.5 127Q880-563 880-480t-31.5 156Q817-251 763-197t-127 85.5Q563-80 480-80t-156-31.5ZM437-141v-82q-35 0-59-26t-24-61v-44L149-559q-5 20-7 39.5t-2 39.5q0 130 84.5 227T437-141Zm294-108q44-48 66.5-107.5T820-480q0-106-58-192.5T607-799v18q0 35-24 61t-59 26h-87v87q0 17-13.5 28T393-568h-83v88h258q17 0 28 13t11 30v127h43q29 0 51 17t30 44Z"/></svg></div>
+        <h3>Deliver products</h3>
+        <p>Copernicus Marine publishes near-real-time forecasts and multi-year reanalyses, with their uncertainties.</p>
+      </div>
+      <div class="stage">
+        <h3>Serve users</h3>
+        <p class="stat">~30,000 <small>active users, over 100,000 registered</small></p>
+        <ul class="users">
+          <li><svg class="ms" viewBox="0 -960 960 960" aria-hidden="true"><path d="M178-80h-58v-60h58q40 0 79-11t76-34q35 22 72 32.5t75 10.5q38 0 75-10.5t72-32.5q38 23 77.5 34t78.5 11h57v60h-57q-39 0-78-9t-77-28q-38 19-75 28t-73 9q-36 0-73-9.5T333-117q-38 18-77.5 27.5T178-80Zm226.5-169.5Q365-270 330-307q-33 33-71 52.5T182-230l-71-245q-4-12 2-22.5t18-14.5l55-16v-190q0-25 17.5-42.5T246-778h132v-103h204v103h132q25 0 42.5 17.5T774-718v190l55 16q12 4 18 14.5t2 22.5l-71 245q-39-5-77-24.5T630-307q-35 37-74.5 57.5T480-229q-36 0-75.5-20.5ZM481-289q32 0 58.5-18t47.5-43l41-48 36 38q16 17 34 31t38 25l48-159-304-92-304 92 48 159q20-11 38-25t34-31l36-38 41 48q22 25 49 43t59 18ZM246-547l234-71 234 72v-172H246v171Zm234 125Z"/></svg>Shipping and navigation</li>
+          <li><svg class="ms" viewBox="0 -960 960 960" aria-hidden="true"><path d="M100-360q-24.75 0-42.37-17.63Q40-395.25 40-420v-400q0-24.75 17.63-42.38Q75.25-880 100-880h760q24.75 0 42.38 17.62Q920-844.75 920-820v400q0 24.75-17.62 42.37Q884.75-360 860-360H100Zm0-460v400h760v-400H100Zm23 600-3-60 719-38 3 60-719 38Zm-3 99v-60h720v60H120Zm300-389q70.84 0 136.42-24.5Q622-559 672-610q5 37 37 57.5t71 22.5v-180q-40 3-72.5 23T671-629q-50.77-48.63-115.44-74.81Q490.89-730 420-730q-74.79 0-143.89 25.5Q207-679 162-620q45 59 114.11 84.5Q345.21-510 420-510ZM100-820v400-400Z"/></svg>Fisheries and aquaculture</li>
+          <li><svg class="ms" viewBox="0 -960 960 960" aria-hidden="true"><path d="M430-40q0-25 17.63-42.5Q465.25-100 490-100v-225q-15-4-28-10.5T438-353l-88 55q-14 9-30.5 11t-33.5-3l-180-51q-29-8-47.5-32.5T40-429q0-38 26.5-64.5T131-520h301q10-11 22-19t26-13v-137q0-17 6.5-32t18.5-26l137-128q23-22 53.5-25.5T752-887q32 19.95 41.5 56.35 9.5 36.41-10.5 68.33L623-500q8 13 11.5 27t4.5 29l108 26q17 4 29.62 14 12.62 10 20.38 24l91 164q15 27 11 57t-26 52q-27 27-64.5 27T744-107L550-301v201q25 0 42.5 17.62Q610-64.75 610-40H430ZM160-770v-60h240v60H160Zm380 72v141q11 2 21.5 6t19.5 9l151-252q7-11 3.5-24T720-836.5q-9-5.5-19.5-4T683-832L540-698ZM40-610v-60h200v60H40Zm480 230q25.5 0 42.75-17.25T580-440q0-25.5-17.25-42.75T520-500q-25.5 0-42.75 17.25T460-440q0 25.5 17.25 42.75T520-380Zm-208 36 95-58q-5-14-5.5-29t1.5-29H131q-13 0-22 9t-9 22.33q0 10.67 6 18.67 6 8 16 11l190 55Zm429-15-115-26q-6 12-15 22.5T591-344l196 195q9 9 22 9t22-9q8.25-8.4 9.63-18.2Q842-177 837-186l-96-173ZM120-130v-60h200v60H120Zm400-310Zm61-102Zm-178 82Zm188 116Z"/></svg>Offshore industries</li>
+          <li><svg class="ms" viewBox="0 -960 960 960" aria-hidden="true"><path d="M80-146v-60q28-3 48-16t40-27.5q20-14.5 45-25.5t62-11q37 0 63 12.5t47.5 27.5q21.5 15 43.5 27.5t51 12.5q29 0 51-12.5t43.5-27.5q21.5-15 47.5-27.5t63-12.5q37 0 61.5 11t45 25.5Q812-235 832-222t48 16v60q-35-2-58.5-14.5t-44-27Q757-202 736-214t-51-12q-30 0-52.5 12.5t-44 27.5q-21.5 15-47 27.5T480-146q-36 0-61.5-12.5t-47-27.5q-21.5-15-44-27.5T275-226q-30 0-51.5 12T182-187.5q-20 14.5-43.5 27T80-146Zm0-176v-60q28-3 48-16t40-27.5q20-14.5 45-25.5t62-11q37 0 63 12.5t47.5 27.5q21.5 15 43.5 27.5t51 12.5q29 0 51-12.5t43.5-27.5q21.5-15 47.5-27.5t63-12.5q37 0 61.5 11t45 25.5Q812-411 832-398t48 16v60q-35-4-58.5-17t-44-27Q757-380 736-391t-51-11q-30 0-52 12.5T589-362q-22 15-47.5 27.5T480-322q-36 0-61.5-12.5t-47-27.5q-21.5-15-44-27.5T275-402q-30 0-51.5 12T182-363.5q-20 14.5-43.5 27T80-322Zm0-176v-60q28-2 48-14.5t40-27q20-14.5 45-26.5t62-12q37 0 63 12.5t47.5 27.5q21.5 15 43.5 27.5t51 12.5q29 0 51-12.5t43.5-27.5q21.5-15 47.5-27.5t63-12.5q37 0 61.5 12t45 26.5q20.5 14.5 40.5 27t48 14.5v60q-35-2-58.5-14.5t-44-27Q757-554 736-566t-51-12q-30 0-52.5 12.5t-44 27.5q-21.5 15-47 27.5T480-498q-36 0-61.5-12.5t-47-27.5q-21.5-15-44-27.5T275-578q-30 0-51.5 12T182-539.5q-20 14.5-43.5 27T80-498Zm0-176v-60q28-3 48-16t40-27.5q20-14.5 45-25.5t62-11q37 0 63 12.5t47.5 27.5q21.5 15 43.5 27.5t51 12.5q29 0 51-12.5t43.5-27.5q21.5-15 47.5-27.5t63-12.5q37 0 61.5 11t45 25.5Q812-763 832-750t48 16v60q-35-2-58.5-14.5t-44-27Q757-730 736-742t-51-12q-30 0-52.5 12.5t-44 27.5q-21.5 15-47 27.5T480-674q-36 0-61.5-12.5t-47-27.5q-21.5-15-44-27.5T275-754q-30 0-51.5 12T182-715.5q-20 14.5-43.5 27T80-674Z"/></svg>Coastal services</li>
+          <li><svg class="ms" viewBox="0 -960 960 960" aria-hidden="true"><path d="M212-241v-339h60v339h-60Zm242 0v-339h60v339h-60ZM80-121v-60h800v60H80Zm608-120v-339h60v339h-60ZM80-640v-53l400-228 400 228v53H80Zm134-60h532-532Zm0 0h532L480-852 214-700Z"/></svg>Policy makers</li>
+          <li><svg class="ms" viewBox="0 -960 960 960" aria-hidden="true"><path d="M213-175q-43.59-45-68.3-104Q120-338 120-400q0-73 25.5-133.5T222-645q35-35 87-59t122.5-37.5Q502-755 591-758.5t198 3.5q8 108 5.5 197.5t-16 160.75q-13.5 71.25-38 124.56Q716-218.87 680-183q-51 51-110 77T444-80q-69 0-126.5-23.5T213-175Zm103 0q25 17 58 26t69.92 9Q497-140 547-162t91-64q27-27 46-70.5t31-103Q727-459 731-534t0-165q-94-2-168.5 2.5T431-680q-57 12-98 30.5T266-604q-42 43-64 91t-22 98q0 48 20.5 100.5T251-230q53-98 127-176t157-123q-87 75-141 162.5T316-175Zm0 0Zm0 0Z"/></svg>Environmental NGOs</li>
+          <li><svg class="ms" viewBox="0 -960 960 960" aria-hidden="true"><path d="M479-120 189-279v-240L40-600l439-240 441 240v317h-60v-282l-91 46v240L479-120Zm0-308 315-172-315-169-313 169 313 172Zm0 240 230-127v-168L479-360 249-485v170l230 127Zm1-240Zm-1 74Zm0 0Z"/></svg>Academia</li>
+          <li><svg class="ms" viewBox="0 -960 960 960" aria-hidden="true"><path d="M0-240v-53q0-38.57 41.5-62.78Q83-380 150.38-380q12.16 0 23.39.5t22.23 2.15q-8 17.35-12 35.17-4 17.81-4 37.18v65H0Zm240 0v-65q0-32 17.5-58.5T307-410q32-20 76.5-30t96.5-10q53 0 97.5 10t76.5 30q32 20 49 46.5t17 58.5v65H240Zm540 0v-65q0-19.86-3.5-37.43T765-377.27q11-1.73 22.17-2.23 11.17-.5 22.83-.5 67.5 0 108.75 23.77T960-293v53H780Zm-480-60h360v-6q0-37-50.5-60.5T480-390q-79 0-129.5 23.5T300-305v5ZM149.57-410q-28.57 0-49.07-20.56Q80-451.13 80-480q0-29 20.56-49.5Q121.13-550 150-550q29 0 49.5 20.5t20.5 49.93q0 28.57-20.5 49.07T149.57-410Zm660 0q-28.57 0-49.07-20.56Q740-451.13 740-480q0-29 20.56-49.5Q781.13-550 810-550q29 0 49.5 20.5t20.5 49.93q0 28.57-20.5 49.07T809.57-410ZM480-480q-50 0-85-35t-35-85q0-51 35-85.5t85-34.5q51 0 85.5 34.5T600-600q0 50-34.5 85T480-480Zm.35-60Q506-540 523-557.35t17-43Q540-626 522.85-643t-42.5-17q-25.35 0-42.85 17.15t-17.5 42.5q0 25.35 17.35 42.85t43 17.5ZM480-300Zm0-300Z"/></svg>The general public</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="mfcs">
+    <div class="section-head">
+      <p class="eyebrow">Where it applies</p>
+      <h2>The seven Monitoring and Forecasting Centres</h2>
+      <p class="note">Each MFC produces the ocean analyses and forecasts for one region and is represented by at least one COMEDI partner. Most run the NEMO ocean model; the Arctic MFC uses HYCOM. Their DA software differs from centre to centre.</p>
+    </div>
+    <figure class="map">
+      <img src="COMEDI.MFC.map.jpg" width="1400" height="804" loading="lazy" alt="Map of the seven CMEMS MFC regions with their COMEDI partners, models and DA systems before COMEDI.">
+      <figcaption>The MFC regions with their partners, models and DA systems before COMEDI. Blue: physics; green: biogeochemistry; grey: sea ice.</figcaption>
+    </figure>
+    <div class="table-scroll">
+      <table class="mfc-table">
+        <thead><tr><th scope="col">MFC</th><th scope="col">Region</th><th scope="col">COMEDI partners</th><th scope="col">DA system today</th></tr></thead>
+        <tbody>
+          <tr><td><span class="code">ARC</span></td><td>Arctic Ocean</td><td>NERSC, METNO</td><td>TOPAZ (EnKF)</td></tr>
+          <tr><td><span class="code">BAL</span></td><td>Baltic Sea</td><td>AWI</td><td>PDAF (simplified EnKF)</td></tr>
+          <tr><td><span class="code">BLK</span></td><td>Black Sea</td><td>CMCC, ULi&egrave;ge</td><td>OceanVar (3DVar); OAK (simplified EnKF)</td></tr>
+          <tr><td><span class="code">GLO</span></td><td>Global Ocean</td><td>ECMWF, CNR, MOi</td><td>NEMOVAR and CIGAR (ensemble of 3DVars); MROA (simplified EnKF)</td></tr>
+          <tr><td><span class="code">IBI</span></td><td>Iberia&ndash;Biscay&ndash;Ireland</td><td>MOi</td><td>MROA (simplified EnKF)</td></tr>
+          <tr><td><span class="code">MED</span></td><td>Mediterranean Sea</td><td>CMCC, OGS</td><td>OceanVar (3DVar); 3DVarBio (3DVar)</td></tr>
+          <tr><td><span class="code">NWS</span></td><td>North-West European Shelf</td><td>CERFACS, UKMET</td><td>NEMOVAR (3DVar with two-scale B)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="workplan">
+    <div class="section-head">
+      <p class="eyebrow">How the work is organised</p>
+      <h2>Work plan</h2>
+      <p class="note">Eight work packages over 48 months. Bars are coloured by the objective they serve.</p>
+    </div>
+    <div class="gantt" role="table" aria-label="Work packages with lead partner and duration in project months">
+      <div class="g-row g-head" role="row"><div class="g-label" role="columnheader">Work package</div><div class="g-track" role="columnheader"><span>Year 1</span><span>Year 2</span><span>Year 3</span><span>Year 4</span></div></div>
+      <div class="g-row" role="row"><div class="g-label" role="cell"><b>WP1</b>Management and coordination<small>Lead: NERSC</small></div><div class="g-track" role="cell"><span class="g-bar navy" style="--s:1;--e:48;--c:#175f83">M1&ndash;M48</span></div></div>
+      <div class="g-row" role="row"><div class="g-label" role="cell"><b>WP2</b>Forecast uncertainty representation<small>Lead: CNR</small></div><div class="g-track" role="cell"><span class="g-bar" style="--s:1;--e:24;--c:var(--o1)">M1&ndash;M24</span></div></div>
+      <div class="g-row" role="row"><div class="g-label" role="cell"><b>WP3</b>Core assimilation method<small>Lead: ULi&egrave;ge</small></div><div class="g-track" role="cell"><span class="g-bar" style="--s:1;--e:24;--c:var(--o1)">M1&ndash;M24</span></div></div>
+      <div class="g-row" role="row"><div class="g-label" role="cell"><b>WP4</b>Observation operator and uncertainty<small>Lead: CERFACS</small></div><div class="g-track" role="cell"><span class="g-bar" style="--s:1;--e:24;--c:var(--o2)">M1&ndash;M24</span></div></div>
+      <div class="g-row" role="row"><div class="g-label" role="cell"><b>WP5</b>Observation impact evaluation<small>Lead: UKMET</small></div><div class="g-track" role="cell"><span class="g-bar" style="--s:18;--e:44;--c:var(--o2)">M18&ndash;M44</span></div></div>
+      <div class="g-row" role="row"><div class="g-label" role="cell"><b>WP6</b>Interoperable software development<small>Lead: MOi</small></div><div class="g-track" role="cell"><span class="g-bar" style="--s:13;--e:36;--c:var(--o3)">M13&ndash;M36</span></div></div>
+      <div class="g-row" role="row"><div class="g-label" role="cell"><b>WP7</b>Demonstration in MFCs<small>Lead: OGS</small></div><div class="g-track" role="cell"><span class="g-bar" style="--s:25;--e:45;--c:var(--o4)">M25&ndash;M45</span></div></div>
+      <div class="g-row" role="row"><div class="g-label" role="cell"><b>WP8</b>Dissemination, exploitation and communication<small>Lead: NERSC</small></div><div class="g-track" role="cell"><span class="g-bar navy" style="--s:1;--e:48;--c:#175f83">M1&ndash;M48</span></div></div>
+    </div>
+  </section>
+
+  <section id="partners">
+    <div class="section-head">
+      <p class="eyebrow">Who</p>
+      <h2>Consortium</h2>
+      <p class="note">DA developers from the MFCs work alongside research institutes and universities, so that new methods are taken up in operations.</p>
+    </div>
+    <ul class="partners">
+      <li><span class="pn">1</span><span><strong>NERSC</strong> <span class="badge">Coordinator</span><small>Nansen Environmental and Remote Sensing Center, Norway</small></span></li>
+      <li><span class="pn">2</span><span><strong>MOi</strong><small>Mercator Ocean International, France</small></span></li>
+      <li><span class="pn">3</span><span><strong>ULi&egrave;ge</strong><small>Universit&eacute; de Li&egrave;ge, Belgium</small></span></li>
+      <li><span class="pn">4</span><span><strong>OGS</strong><small>Istituto Nazionale di Oceanografia e di Geofisica Sperimentale, Italy</small></span></li>
+      <li><span class="pn">5</span><span><strong>UKMET</strong><small>Met Office, United Kingdom</small></span></li>
+      <li><span class="pn">6</span><span><strong>ECMWF</strong><small>European Centre for Medium-Range Weather Forecasts</small></span></li>
+      <li><span class="pn">7</span><span><strong>AWI</strong><small>Alfred Wegener Institute, Helmholtz Centre for Polar and Marine Research, Germany</small></span></li>
+      <li><span class="pn">8</span><span><strong>CMCC</strong><small>Centro Euro-Mediterraneo sui Cambiamenti Climatici, Italy</small></span></li>
+      <li><span class="pn">9</span><span><strong>CERFACS</strong><small>Centre Europ&eacute;en de Recherche et de Formation Avanc&eacute;e en Calcul Scientifique, France</small></span></li>
+      <li><span class="pn">10</span><span><strong>CNR</strong><small>Consiglio Nazionale delle Ricerche, Italy</small></span></li>
+      <li><span class="pn">11</span><span><strong>METNO</strong><small>Norwegian Meteorological Institute, Norway</small></span></li>
+    </ul>
+    <div class="jdts">
+      <div><h3>AI JDT</h3><p>AI techniques for data assimilation. ULi&egrave;ge, NERSC, CMCC.</p></div>
+      <div><h3>Protocol JDT</h3><p>Diagnostic protocols for observation impact. MOi, ECMWF, UKMET, METNO, OGS.</p></div>
+      <div><h3>Software JDT</h3><p>Interoperable DA software. AWI, NERSC, MOi, CMCC.</p></div>
+    </div>
+  </section>
+
+  <section id="news">
+    <div class="section-head">
+      <p class="eyebrow">Milestones</p>
+      <h2>News and events</h2>
+    </div>
+    <ol class="timeline">
+      <li class="upcoming">
+        <time datetime="2026-09">Sep 2026</time>
+        <h3>Project starts</h3>
+        <p>COMEDI begins its 48-month programme with a kick-off meeting.</p>
+      </li>
+      <li>
+        <time datetime="2026-06-18">18 Jun 2026</time>
+        <h3>Introduced at the 21st International EnKF Workshop</h3>
+        <p>Presented COMEDI in the talk &ldquo;New features in NEDAS v1.2.0 and applications in geophysical data assimilation&rdquo; in Rosendal, Norway. <a href="../../../blog.html#20260618">Read more</a></p>
+      </li>
+      <li>
+        <time datetime="2026-04-28">28 Apr 2026</time>
+        <h3>Research directions at the STOCHASTICA workshop</h3>
+        <p>Outlined the project's research questions on scalable non-Gaussian and AI-based DA for the COST Action CA24104 network. <a href="../../../blog.html#20260428">Read more</a></p>
+      </li>
+    </ol>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap cols">
+    <div>
+      <p><strong>Contact</strong></p>
+      <p>Yue (Michael) Ying, Project Coordinator<br>NERSC, Bergen, Norway</p>
+      <p><a href="../../../index.html">Personal homepage</a></p>
+    </div>
+    <div>
+      <p class="eu-flag">
+        <svg width="36" height="24" viewBox="0 0 36 24" aria-hidden="true"><rect width="36" height="24" fill="#003399"/><g fill="#ffcc00"><circle cx="18" cy="5" r="1.1"/><circle cx="21.5" cy="5.94" r="1.1"/><circle cx="24.06" cy="8.5" r="1.1"/><circle cx="25" cy="12" r="1.1"/><circle cx="24.06" cy="15.5" r="1.1"/><circle cx="21.5" cy="18.06" r="1.1"/><circle cx="18" cy="19" r="1.1"/><circle cx="14.5" cy="18.06" r="1.1"/><circle cx="11.94" cy="15.5" r="1.1"/><circle cx="11" cy="12" r="1.1"/><circle cx="11.94" cy="8.5" r="1.1"/><circle cx="14.5" cy="5.94" r="1.1"/></g></svg>
+        Funded by the European Union
+      </p>
+      <p>COMEDI has received funding from the European Union's Horizon Europe research and innovation programme under grant agreement No. 101296319. Views and opinions expressed are those of the author(s) only and do not necessarily reflect those of the European Union. Neither the European Union nor the granting authority can be held responsible for them.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var wheel = document.querySelector('#obj-stage .wheel');
+  var panel = document.getElementById('obj-panel');
+  var views = panel.querySelectorAll('[data-view]');
+  var segs = wheel.querySelectorAll('.seg');
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var current = 0;
+
+  function show(n, origin, animate) {
+    if (n === current && n !== 0) n = 0;   // clicking the open objective closes it
+    current = n;
+    wheel.classList.toggle('has-active', n > 0);
+    segs.forEach(function (s) {
+      var on = +s.dataset.obj === n;
+      s.classList.toggle('active', on);
+      s.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    views.forEach(function (v) { v.hidden = v.dataset.view !== String(n); });
+    panel.style.setProperty('--oc', n ? 'var(--o' + n + ')' : 'transparent');
+    panel.classList.toggle('tinted', n > 0);
+
+    if (animate && n > 0 && !reduce) {
+      // colour floods out of the chosen segment and settles into the panel
+      var src = origin || wheel.querySelector('.seg[data-obj="' + n + '"] .seg-fill');
+      var pr = panel.getBoundingClientRect(), sr = src.getBoundingClientRect();
+      var x = sr.left + sr.width / 2 - pr.left, y = sr.top + sr.height / 2 - pr.top;
+      var r = Math.max(Math.hypot(x, y), Math.hypot(pr.width - x, y),
+                       Math.hypot(x, pr.height - y), Math.hypot(pr.width - x, pr.height - y));
+      panel.style.setProperty('--x', x + 'px');
+      panel.style.setProperty('--y', y + 'px');
+      panel.style.setProperty('--r', r + 'px');
+      panel.classList.remove('flooding');
+      void panel.offsetWidth;
+      panel.classList.add('flooding');
+    }
+    if (animate && (pr = panel.getBoundingClientRect()) && (pr.top < 0 || pr.top > window.innerHeight * 0.6)) {
+      panel.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    }
+    try {
+      history.replaceState(null, '', n ? '#objective-' + n : location.pathname + location.search);
+    } catch (e) {}
+  }
+
+  segs.forEach(function (s) {
+    s.addEventListener('click', function () { show(+s.dataset.obj, s.querySelector('.seg-fill'), true); });
+    s.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); show(+s.dataset.obj, s.querySelector('.seg-fill'), true); }
+    });
+  });
+  panel.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-open]');
+    if (!b) return;
+    var n = +b.dataset.open;
+    if (n === current) return;
+    show(n, n ? wheel.querySelector('.seg[data-obj="' + n + '"] .seg-fill') : null, true);
+  });
+
+  var m = /^#objective-([1-4])$/.exec(location.hash);
+  if (m) show(+m[1], null, false);
+})();
+</script>
+</body>
+</html>

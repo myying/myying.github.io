@@ -1073,6 +1073,7 @@ main .tab-panel { padding-block: 0; }
         else if (code[0] === 'L') state = rowReady(ri) ? 'avail' : 'e'; // shared once the tool is built
         else state = 'e';
         var demos = list.filter(function (t) { return t.demo; });
+        if (state === 'st-planned' && !demos.length) state = 'e';   // planned work is outlined only where a demonstration is planned
         if (demos.length) {
           if (demos.every(function (t) { return t.demoDone; })) mark = '<b class="ck" aria-label="demonstration complete"></b>';
         }

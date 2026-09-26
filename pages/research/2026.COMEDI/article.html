@@ -1070,7 +1070,7 @@ main .tab-panel { padding-block: 0; }
     var lastGroup = '';
     data.rows.forEach(function (r, ri) {
       if (r.group !== lastGroup) {
-        h += '<tr><th class="path" colspan="' + (data.cols.length + 2) + '">Path ' + r.path + ' &middot; ' + r.group + '</th></tr>';
+        h += '<tr><th class="path" colspan="' + (data.cols.length + 2) + '">' + r.group + '</th></tr>';
         lastGroup = r.group;
       }
       h += '<tr><th class="row" scope="row">' + r.name + '</th>';
@@ -1103,24 +1103,32 @@ main .tab-panel { padding-block: 0; }
   var loaded = false;
   function summary() {
     if (!loaded) { document.getElementById('p-summary').innerHTML = '<div class="p-sum"><div class="lbl">All tasks</div><div class="val"><small>Loading tasks&hellip;</small></div></div>'; return; }
-    var groups = [['All tasks', function () { return true; }],
-                  ['Path 1 · core methods', function (r) { return r.path === 1; }],
-                  ['Path 2 · modular tools', function (r) { return r.path === 2; }],
-                  ['Path 3 · model-specific', function (r) { return r.path === 3; }]];
-    document.getElementById('p-summary').innerHTML = groups.map(function (g) {
+    function card(label, n, extra) {
+      var total = n.planned + n.progress + n.done, d = total || 1;
+      return '<div class="p-sum"><div class="lbl">' + label + '</div><div class="val">' + n.done + ' <small>of ' + total +
+             ' done &middot; ' + n.progress + ' in progress</small></div><div class="demo-line">' + extra + '</div>' +
+             '<div class="p-bar"><span class="b-done" style="width:' + (100 * n.done / d) + '%"></span>' +
+             '<span class="b-progress" style="width:' + (100 * n.progress / d) + '%"></span></div></div>';
+    }
+    // task kinds; interface tasks are counted once, per interface, in the last card
+    var groups = [['Core assimilation methods', function (r) { return r.path === 1; }],
+                  ['Modular tools and observation operators', function (r) { return r.path === 2; }],
+                  ['Model-specific', function (r) { return r.path === 3; }]];
+    var html = groups.map(function (g) {
       var n = { planned: 0, progress: 0, done: 0 }, demos = 0, demosDone = 0;
       tasks.forEach(function (t) {
-        if (!g[1](data.rows[t.row])) return;
+        if (t.kind === 'interface' || !g[1](data.rows[t.row])) return;
         n[eff(t)]++;
         if (t.demo) { demos++; if (t.demoDone) demosDone++; }
       });
-      var total = n.planned + n.progress + n.done;
-      var d = total || 1;
-      return '<div class="p-sum"><div class="lbl">' + g[0] + '</div><div class="val">' + n.done + ' <small>of ' + total +
-             ' done &middot; ' + n.progress + ' in progress</small></div><div class="demo-line">' + demosDone + ' of ' + demos + ' demonstrations complete</div>' +
-             '<div class="p-bar"><span class="b-done" style="width:' + (100 * n.done / d) + '%"></span>' +
-             '<span class="b-progress" style="width:' + (100 * n.progress / d) + '%"></span></div></div>';
+      return card(g[0], n, demosDone + ' of ' + demos + ' demonstrations complete');
     }).join('');
+    var names = {};
+    tasks.forEach(function (t) { if (t.iface) names[t.iface] = (names[t.iface] || 0) + 1; });
+    var ni = { planned: 0, progress: 0, done: 0 }, served = 0;
+    Object.keys(names).forEach(function (k) { ni[ifStatus(k)]++; served += names[k]; });
+    html += card('Interfaces', ni, 'serving ' + served + ' tasks');
+    document.getElementById('p-summary').innerHTML = html;
   }
 
   var KINDTXT = { implementation: 'initial implementation', interface: 'shared through a new interface',

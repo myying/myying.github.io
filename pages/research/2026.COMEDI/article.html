@@ -317,11 +317,6 @@ main section { padding-block: 44px 0; }
   .chain { grid-template-columns: minmax(0, 1fr); gap: 16px; }
   .stage:not(:last-child)::after { top: auto; bottom: -13px; right: auto; left: 28px; transform: rotate(135deg); }
 }
-
-/* ---------- MFCs ---------- */
-.mfc-table { width: 100%; min-width: 620px; border-collapse: collapse; font-size: 0.95rem; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
-.mfc-table th, .mfc-table td { text-align: left; vertical-align: top; padding: 9px 12px; border-top: 1px solid var(--line); line-height: 1.4; }
-.mfc-table thead th { border-top: 0; font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 500; background: var(--bg); }
 .code {
   font-family: var(--mono); font-size: 0.8rem;
   color: var(--deep-ink); background: var(--deep);
@@ -362,6 +357,7 @@ main section { padding-block: 44px 0; }
   background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px;
 }
 .partners .pn { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.partners.ab li { grid-template-columns: minmax(0, 1fr); }
 .partners strong { font-family: var(--display); font-weight: 600; }
 .partners small { display: block; color: var(--muted); line-height: 1.35; }
 .jdts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 22px; }
@@ -413,7 +409,7 @@ main .tab-panel { padding-block: 0; }
 .tab-panel .panel-title { font-size: 1.35rem; }
 .tab-panel .section-head { margin-bottom: 18px; }
 
-/* ---------- progress (Table 1.2) ---------- */
+/* ---------- progress ---------- */
 .p-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin-bottom: 16px; }
 .p-sum { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; }
 .p-sum .p-bar { margin-top: auto; }
@@ -477,10 +473,10 @@ main .tab-panel { padding-block: 0; }
   <div class="wrap">
     <a class="back" href="../../../research.html">&larr; Yue Ying &middot; Research projects</a>
     <p class="eyebrow">Horizon Europe &middot; Grant agreement 101296319</p>
-    <h1><svg class="logo" viewBox="190 100 1375 390" role="img" aria-label="COMEDI"><g class="t"><path d="M387.48037889039244 345.93504736129904C367.9174560216509 366.13937753721245 351.5615696887686 373.8362652232747 328.7916102841678 373.8362652232747C284.8552097428958 373.8362652232747 249.25710419485793 337.27604871447903 249.25710419485793 293.0189445196211C249.25710419485793 273.77672530446546 256.6332882273342 253.25169147496615 268.82002706359947 239.14073071718536C283.25169147496615 222.14343707713124 303.7767253044655 213.16373477672528 327.82949932341 213.16373477672528C355.41001353179973 213.16373477672528 374.0108254397835 222.14343707713124 390.04600811907983 242.9891745602165H439.11366711772666C429.8132611637348 222.46414073071716 421.4749661705007 211.23951285520974 405.43978349120437 198.09066305818672C383.6319350473613 180.45196211096075 355.73071718538563 170.83085250338294 326.86738836265226 170.83085250338294C259.8403247631935 170.83085250338294 205.0 225.67117726657645 205.0 292.6982408660352C205.0 361.3288227334235 260.48173207036535 416.16914749661703 329.7537212449256 416.16914749661703C378.5006765899865 416.16914749661703 420.51285520974295 389.2300405953992 439.11366711772666 345.93504736129904Z"/><path d="M812.0 412.0H855.9364005412721V234.33017591339646L917.8322056833559 412.0H953.7510148849798L1015.6468200270637 234.33017591339646V412.0H1059.5832205683357V174.99999999999997H999.2909336941814L936.1123139377537 354.5940460081191L872.2922868741543 174.99999999999997H812.0Z"/><path d="M1118.0 412.0H1245.319350473613V369.9878213802436H1161.936400541272V314.82679296346413H1241.7916102841677V272.8146143437077H1161.936400541272V217.0121786197564H1245.319350473613V174.99999999999997H1118.0Z"/><path d="M1285.0 412.0H1340.1610284167793C1376.0798376184032 412.0 1397.5669824086604 408.4722598105548 1416.8092016238159 398.851150202977C1453.3694181326116 380.8917456021651 1474.8565629228688 341.765899864682 1474.8565629228688 293.98105548037887C1474.8565629228688 248.76184032476317 1456.255751014885 211.88092016238159 1423.2232746955344 191.99729364005412C1404.6224627875506 180.77266576454667 1376.4005412719891 174.99999999999997 1339.1989174560215 174.99999999999997H1285.0ZM1328.936400541272 369.9878213802436V217.0121786197564H1337.595399188092C1365.8173207036534 217.0121786197564 1380.569688768606 219.57780784844383 1394.359945872801 226.63328822733422C1416.8092016238159 238.1786197564276 1430.5994587280106 263.5142083897158 1430.5994587280106 293.98105548037887C1430.5994587280106 322.5236806495264 1417.4506089309878 347.8592692828146 1396.2841677943165 359.404600811908C1383.1353179972937 366.46008119079835 1364.8552097428958 369.9878213802436 1338.5575101488498 369.9878213802436Z"/><path d="M1507.0 412.0H1550.936400541272V174.99999999999997H1507.0Z"/></g><circle cx="696.1" cy="145.9" r="34.9" fill="#175f83"/><circle cx="784.7" cy="257.1" r="34.9" fill="#175f83"/><circle cx="753.1" cy="395.6" r="34.9" fill="#175f83"/><circle cx="625.0" cy="457.3" r="34.9" fill="#175f83"/><circle cx="496.9" cy="395.6" r="34.9" fill="#175f83"/><circle cx="465.3" cy="257.1" r="34.9" fill="#175f83"/><circle cx="553.9" cy="145.9" r="34.9" fill="#175f83"/><circle cx="625" cy="293.5" r="140" fill="#175f83"/><circle cx="625" cy="293.5" r="118.6" fill="#fff"/><path d="M 548.6 217.1 A 108.1 108.1 0 0 1 701.4 217.1 L 664.1 254.4 A 55.3 55.3 0 0 0 585.9 254.4 Z" fill="#9adcf8" stroke="#fff" stroke-width="11.9" stroke-linejoin="miter"/><path d="M 701.4 217.1 A 108.1 108.1 0 0 1 701.4 369.9 L 664.1 332.6 A 55.3 55.3 0 0 0 664.1 254.4 Z" fill="#e79fdc" stroke="#fff" stroke-width="11.9" stroke-linejoin="miter"/><path d="M 701.4 369.9 A 108.1 108.1 0 0 1 548.6 369.9 L 585.9 332.6 A 55.3 55.3 0 0 0 664.1 332.6 Z" fill="#90d977" stroke="#fff" stroke-width="11.9" stroke-linejoin="miter"/><path d="M 548.6 369.9 A 108.1 108.1 0 0 1 548.6 217.1 L 585.9 254.4 A 55.3 55.3 0 0 0 585.9 332.6 Z" fill="#f1aa85" stroke="#fff" stroke-width="11.9" stroke-linejoin="miter"/><circle cx="625" cy="293.5" r="37.4" fill="#175f83"/></svg></h1>
+    <h1><svg class="logo" viewBox="190 100 1375 390" role="img" aria-label="COMEDI"><g class="t" transform="translate(0,678) scale(0.1,-0.1)"><path d="M3179 5020 c-420 -42 -797 -291 -976 -643 -153 -303 -164 -731 -28 -1065 114 -281 369 -525 652 -626 166 -58 279 -77 480 -77 373 0 644 109 928 374 l70 64 -150 157 c-149 156 -149 156 -189 118 -125 -119 -256 -206 -372 -246 -229 -80 -507 -55 -711 65 -32 19 -97 72 -144 119 -72 71 -93 100 -132 180 -61 125 -78 190 -84 336 -12 257 63 445 246 616 90 85 198 146 316 180 112 31 313 31 430 0 151 -42 316 -137 446 -259 46 -43 46 -43 195 98 82 78 150 145 152 149 6 16 -157 167 -244 227 -135 92 -245 144 -399 188 -145 42 -340 60 -486 45z M8321 3842 c-107 -620 -197 -1139 -199 -1154 -4 -28 -4 -28 210 -28 l214 0 124 720 c69 395 128 716 131 712 4 -4 113 -328 244 -719 l237 -713 193 0 193 0 39 113 c22 61 131 385 244 719 112 334 206 605 209 602 3 -3 59 -326 126 -717 l120 -712 212 -3 c166 -2 212 0 211 10 0 7 -87 526 -193 1153 l-192 1140 -214 0 -213 0 -266 -792 c-146 -436 -269 -793 -272 -793 -3 0 -124 358 -269 795 l-264 795 -216 0 -215 0 -194 -1128z M11182 3818 l3 -1153 628 -3 627 -2 0 215 0 215 -407 2 -408 3 -3 303 -2 302 410 0 410 0 0 210 0 210 -410 0 -410 0 0 210 0 210 410 0 410 0 0 215 0 215 -630 0 -630 0 2 -1152z M12852 3819 l3 -1154 285 -3 c320 -3 632 10 764 33 390 68 687 403 761 857 19 120 19 356 0 478 -40 249 -142 461 -303 632 -155 164 -316 240 -602 284 -77 12 -211 17 -508 21 l-402 5 2 -1153z m683 721 c330 -23 510 -127 625 -358 89 -180 104 -479 35 -685 -49 -145 -162 -285 -269 -336 -103 -48 -266 -71 -508 -71 l-128 0 0 723 c0 398 3 727 7 730 9 9 81 8 238 -3z M15060 3815 l0 -1155 220 0 220 0 0 1155 0 1155 -220 0 -220 0 0 -1155z"/></g><circle cx="696.1" cy="145.9" r="34.9" fill="#175f83"/><circle cx="784.7" cy="257.1" r="34.9" fill="#175f83"/><circle cx="753.1" cy="395.6" r="34.9" fill="#175f83"/><circle cx="625.0" cy="457.3" r="34.9" fill="#175f83"/><circle cx="496.9" cy="395.6" r="34.9" fill="#175f83"/><circle cx="465.3" cy="257.1" r="34.9" fill="#175f83"/><circle cx="553.9" cy="145.9" r="34.9" fill="#175f83"/><circle cx="625" cy="293.5" r="140" fill="#175f83"/><circle cx="625" cy="293.5" r="118.6" fill="#fff"/><path d="M 548.6 217.1 A 108.1 108.1 0 0 1 701.4 217.1 L 664.1 254.4 A 55.3 55.3 0 0 0 585.9 254.4 Z" fill="#9adcf8" stroke="#fff" stroke-width="11.9" stroke-linejoin="miter"/><path d="M 701.4 217.1 A 108.1 108.1 0 0 1 701.4 369.9 L 664.1 332.6 A 55.3 55.3 0 0 0 664.1 254.4 Z" fill="#e79fdc" stroke="#fff" stroke-width="11.9" stroke-linejoin="miter"/><path d="M 701.4 369.9 A 108.1 108.1 0 0 1 548.6 369.9 L 585.9 332.6 A 55.3 55.3 0 0 0 664.1 332.6 Z" fill="#90d977" stroke="#fff" stroke-width="11.9" stroke-linejoin="miter"/><path d="M 548.6 369.9 A 108.1 108.1 0 0 1 548.6 217.1 L 585.9 254.4 A 55.3 55.3 0 0 0 585.9 332.6 Z" fill="#f1aa85" stroke="#fff" stroke-width="11.9" stroke-linejoin="miter"/><circle cx="625" cy="293.5" r="37.4" fill="#175f83"/></svg></h1>
     <p class="expansion"><b>CO</b>pernicus <b>M</b>arine services with <b>E</b>nhanced <b>D</b>ata assimilation and improved <b>I</b>nteroperability</p>
     <p class="lede">COMEDI will modernise and harmonise data assimilation (DA) practices across all Monitoring and Forecasting Centres (MFCs) of the Copernicus Marine Service, enabling them to leverage new technologies and use new types of ocean observations to achieve better accuracy and reliability.</p>
-    <nav class="quick" aria-label="On this page"><a href="#objectives">Objectives</a><a href="#service">Copernicus Marine</a><a href="#mfcs">Forecasting centres</a><a href="#partners">Consortium</a><a href="#workplan">Work plan</a><a href="#progress">Progress</a><a href="#news">News</a></nav>
+    <nav class="quick" aria-label="On this page"><a href="#objectives">Objectives</a><a href="#service">Copernicus Marine</a><a href="#partners">Consortium</a><a href="#advisory">Advisory board</a><a href="#workplan">Work plan</a><a href="#progress">Progress</a><a href="#news">News</a></nav>
     <dl class="facts">
       <div><dt>Call</dt><dd>HORIZON-CL4-2025-02-SPACE-44</dd></div>
       <div><dt>Duration</dt><dd>48 months, from Sep 2026</dd></div>
@@ -703,8 +699,8 @@ main .tab-panel { padding-block: 0; }
     <div class="tabs-scroll">
       <div class="tabs" role="tablist" aria-label="Project details">
         <button type="button" role="tab" id="tab-service" aria-controls="service" aria-selected="true">Copernicus Marine</button>
-        <button type="button" role="tab" id="tab-mfcs" aria-controls="mfcs" aria-selected="false" tabindex="-1">Forecasting centres</button>
         <button type="button" role="tab" id="tab-partners" aria-controls="partners" aria-selected="false" tabindex="-1">Consortium</button>
+        <button type="button" role="tab" id="tab-advisory" aria-controls="advisory" aria-selected="false" tabindex="-1">Advisory board</button>
         <button type="button" role="tab" id="tab-workplan" aria-controls="workplan" aria-selected="false" tabindex="-1">Work plan</button>
         <button type="button" role="tab" id="tab-progress" aria-controls="progress" aria-selected="false" tabindex="-1">Progress</button>
         <button type="button" role="tab" id="tab-news" aria-controls="news" aria-selected="false" tabindex="-1">News</button>
@@ -749,31 +745,10 @@ main .tab-panel { padding-block: 0; }
         </div>
       </div>
     </section>
-    <section id="mfcs" class="tab-panel" role="tabpanel" aria-labelledby="tab-mfcs" tabindex="0" hidden>
-      <div class="section-head">
-        <p class="eyebrow">Where it applies</p>
-        <h3 class="panel-title">The seven Monitoring and Forecasting Centres</h3>
-        <p class="note">Each MFC produces the ocean analyses and forecasts for one region and is represented by at least one COMEDI partner. Most run the NEMO ocean model; the Arctic MFC uses HYCOM. Their DA software differs from centre to centre.</p>
-      </div>
-      <div class="table-scroll">
-        <table class="mfc-table">
-          <thead><tr><th scope="col">MFC</th><th scope="col">Region</th><th scope="col">COMEDI partners</th><th scope="col">DA system today</th></tr></thead>
-          <tbody>
-            <tr><td><span class="code">ARC</span></td><td>Arctic Ocean</td><td>NERSC, METNO</td><td>TOPAZ (EnKF)</td></tr>
-            <tr><td><span class="code">BAL</span></td><td>Baltic Sea</td><td>AWI</td><td>PDAF (simplified EnKF)</td></tr>
-            <tr><td><span class="code">BLK</span></td><td>Black Sea</td><td>CMCC, ULi&egrave;ge</td><td>OceanVar (3DVar); OAK (simplified EnKF)</td></tr>
-            <tr><td><span class="code">GLO</span></td><td>Global Ocean</td><td>ECMWF, CNR, MOi</td><td>NEMOVAR and CIGAR (ensemble of 3DVars); MROA (simplified EnKF)</td></tr>
-            <tr><td><span class="code">IBI</span></td><td>Iberia&ndash;Biscay&ndash;Ireland</td><td>MOi</td><td>MROA (simplified EnKF)</td></tr>
-            <tr><td><span class="code">MED</span></td><td>Mediterranean Sea</td><td>CMCC, OGS</td><td>OceanVar (3DVar); 3DVarBio (3DVar)</td></tr>
-            <tr><td><span class="code">NWS</span></td><td>North-West European Shelf</td><td>CERFACS, UKMET</td><td>NEMOVAR (3DVar with two-scale B)</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
     <section id="partners" class="tab-panel" role="tabpanel" aria-labelledby="tab-partners" tabindex="0" hidden>
       <div class="section-head">
-        <p class="eyebrow">Who</p>
-        <h3 class="panel-title">Consortium</h3>
+        <p class="eyebrow">Consortium</p>
+        <h3 class="panel-title">COMEDI partners</h3>
         <p class="note">DA developers from the MFCs work alongside research institutes and universities, so that new methods are taken up in operations.</p>
       </div>
       <ul class="partners">
@@ -795,6 +770,24 @@ main .tab-panel { padding-block: 0; }
         <div><h3>Software JDT</h3><p>Interoperable DA software. AWI, NERSC, MOi, CMCC.</p></div>
       </div>
     </section>
+    <section id="advisory" class="tab-panel" role="tabpanel" aria-labelledby="tab-advisory" tabindex="0" hidden>
+      <div class="section-head">
+        <p class="eyebrow">Advisory board</p>
+        <h3 class="panel-title">Who advises us</h3>
+        <p class="note">Nine external experts &mdash; from forecasting centres, data providers and the research community &mdash; review the project's direction and keep it connected to the users of Copernicus Marine.</p>
+      </div>
+      <ul class="partners ab">
+        <li><span><strong>Joanna Staneva</strong><small>Helmholtz-Zentrum Hereon, Germany &middot; Downscaling, wave&ndash;ocean interactions</small></span></li>
+        <li><span><strong>Vasily Korabel</strong><small>DMI, Denmark &middot; PDAF, NEMOVAR, Baltic MFC</small></span></li>
+        <li><span><strong>Jozef Skakala</strong><small>PML, United Kingdom &middot; Biogeochemical DA, NWS MFC</small></span></li>
+        <li><span><strong>L&ouml;rinc Meszaros</strong><small>Deltares, Netherlands &middot; Biogeochemical downscaling, CMUG, EuroGOOS</small></span></li>
+        <li><span><strong>Yann Guichoux</strong><small>eOdyn, France &middot; User of surface currents</small></span></li>
+        <li><span><strong>Marie-Isabelle Pujol</strong><small>CLS, France &middot; Sea level TAC provider</small></span></li>
+        <li><span><strong>Marie-H&eacute;l&egrave;ne Rio</strong><small>ESA &middot; Satellite data provider</small></span></li>
+        <li><span><strong>Helen Morrison</strong><small>BSH, Germany &middot; NWS MFC</small></span></li>
+        <li><span><strong>Alberto Carrassi</strong><small>University of Bologna, Italy &middot; Non-Gaussian DA theory</small></span></li>
+      </ul>
+    </section>
     <section id="workplan" class="tab-panel" role="tabpanel" aria-labelledby="tab-workplan" tabindex="0" hidden>
       <div class="section-head">
         <p class="eyebrow">How the work is organised</p>
@@ -815,7 +808,7 @@ main .tab-panel { padding-block: 0; }
     </section>
     <section id="progress" class="tab-panel" role="tabpanel" aria-labelledby="tab-progress" tabindex="0" hidden>
         <div class="section-head">
-          <p class="eyebrow">Table 1.2 of the proposal</p>
+          <p class="eyebrow">COMEDI Innovations</p>
           <h3 class="panel-title">Progress on sharing each innovation</h3>
           <p class="note">Each row is a COMEDI innovation; each column an MFC or a DA software package. The colour shows how the innovation reaches it, and the marks show the status of each task. A task links an MFC with the DA software it uses, so both cells change together.</p>
         </div>
@@ -958,7 +951,7 @@ main .tab-panel { padding-block: 0; }
       open(panels[(i + d + tabs.length) % tabs.length].id, true);
     });
   });
-  // quick links and deep links (#service, #mfcs, ...) open the matching tab
+  // quick links and deep links (#service, #partners, ...) open the matching tab
   function fromHash() {
     var id = location.hash.slice(1);
     if (panels.some(function (p) { return p.id === id; })) {

@@ -458,6 +458,7 @@ main .tab-panel { padding-block: 0; }
 .p-table td button { color: var(--ink); }
 .p-table td button:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
 .p-table td.sel button { outline: 2px solid var(--ink); outline-offset: 1px; }
+.p-table td.src button { outline: 2px dashed var(--ink); outline-offset: 1px; }
 .p-table td button { position: relative; }
 .p-detail { margin-top: 10px; font-size: 0.95rem; min-height: 1.6em; }
 .p-updated { font-size: 0.85rem; color: var(--muted); margin-top: 4px; }
@@ -829,7 +830,7 @@ main .tab-panel { padding-block: 0; }
           <span class="gap"><b class="ck"></b>Demonstration complete</span>
         </div>
         <div class="p-scroll"><table class="p-table" id="p-table"></table></div>
-        <p class="p-detail" id="p-detail" aria-live="polite">Select a cell to see what it stands for.</p>
+        <p class="p-detail" id="p-detail" aria-live="polite">Select a cell to see its task. For a task that uses an interface, a dashed outline marks the software the method comes from.</p>
         <p class="p-updated" id="p-updated"></p>
         <script type="application/json" id="table12">{"cols":["ARC","BAL","BLK","GLO","IBI","MED","NWS","CIGAR","NEMOVAR","OceanVar","E-Med-BGC","MROA","NEDAS","OAK","PDAF"],"split":7,"rows":[{"path":1,"group":"Core assimilation method","name":"Non-Gaussian filtering","cells":["DX","DX","-","Y","Y","-","-","-","-","-","-","Y","DX","-","DX"]},{"path":1,"group":"Core assimilation method","name":"AI assimilation core","cells":["DX","Y","DX","-","-","DX","-","-","-","DX","-","-","DX","DX","Y"]},{"path":1,"group":"Core assimilation method","name":"Automated tuning","cells":["Y","L","-","Y","Y","DX","-","-","-","-","YX","Y","Y","-","DX"]},{"path":1,"group":"Core assimilation method","name":"Higher-order sampling","cells":["Y","L","-","Y","Y","DX","-","-","-","-","YX","Y","Y","-","DX"]},{"path":2,"group":"Modular tools","name":"AI super resolution","cells":["L","L","L","L","L","DX","-","-","-","-","DX","L","L","L","L"]},{"path":2,"group":"Modular tools","name":"AI ensemble generation","cells":["DX","L","DX","DX","DX","DX","L","L","L","DX","L","DX","DX","L","L"]},{"path":2,"group":"Modular tools","name":"Upgraded stochastic physics","cells":["Y","L","L","DX","L","L","LX","DX","LX","L","L","L","Y","L","L"]},{"path":2,"group":"Modular tools","name":"AI bias correction","cells":["-","L","L","DX","L","L","L","DX","L","L","L","L","-","L","L"]},{"path":2,"group":"Modular tools","name":"Mechanistic perturbation","cells":["L","L","DX","LX","L","LX","-","-","-","-","LX","LX","L","DX","L"]},{"path":2,"group":"Modular tools","name":"Correlated R","cells":["YX","YX","LX","Y","Y","L","DX","-","DX","LX","-","Y","YX","-","YX"]},{"path":2,"group":"New observation operators","name":"Sentinel-3 NG WiSA","cells":["-","-","Y","B","B","Y","BX","-","BX","Y","-","B","-","-","-"]},{"path":2,"group":"New observation operators","name":"CIMR Tb","cells":["DX","L","L","L","L","L","-","-","-","-","L","L","DX","L","L"]},{"path":2,"group":"New observation operators","name":"Sentinel-3 reflectance","cells":["-","-","BX","BX","B","BX","-","-","-","-","BX","BX","-","BX","-"]},{"path":3,"group":"Model-specific","name":"Dynamic ensemble","cells":["BX","BX","BX","BX","BX","YX","BX","BX","BX","-","YX","BX","BX","BX","BX"]},{"path":3,"group":"Model-specific","name":"Multiscale B","cells":["B","DX","-","DX","DX","Y","DX","-","DX","-","Y","DX","B","-","DX"]},{"path":3,"group":"Model-specific","name":"Hybrid B","cells":["B","B","DX","LX","-","DX","DX","LX","DX","DX","-","-","B","-","B"]},{"path":3,"group":"Model-specific","name":"FSOI and its emulation","cells":["DX","L","L","DX","L","L","L","-","DX","-","L","L","DX","L","L"]}]}</script>
       </section>
@@ -990,7 +991,7 @@ main .tab-panel { padding-block: 0; }
   var colIndex = {}; data.cols.forEach(function (c, i) { colIndex[c] = i; });
   var tasks = [], byCell = {};
 
-  // progress.csv: innovation,mfc,software,kind,demo,status,demo_done,note (software may list several, separated by ;)
+  // progress.csv: innovation,mfc,software,kind,interface,source,demo,status,demo_done,note (software may list several, separated by ;)
   function parseCSV(text) {
     var rows = [], row = [], f = '', q = false;
     for (var i = 0; i < text.length; i++) {
@@ -1023,7 +1024,7 @@ main .tab-panel { padding-block: 0; }
       if (status === 'in progress' || status === 'ongoing') status = 'progress';
       if (!STATUS[status]) status = 'planned';
       var task = { innovation: t.innovation, row: ri, mfc: t.mfc, software: (t.software || '').split(';').map(function (s) { return s.trim(); }).filter(Boolean),
-                   kind: (t.kind || '').toLowerCase(), status: status, demo: /^y/i.test(t.demo), demoDone: /^y/i.test(t.demo_done), note: t.note || '' };
+                   kind: (t.kind || '').toLowerCase(), iface: t.interface || '', source: t.source || '', status: status, demo: /^y/i.test(t.demo), demoDone: /^y/i.test(t.demo_done), note: t.note || '' };
       tasks.push(task);
       [task.mfc].concat(task.software).forEach(function (c) {
         if (colIndex[c] === undefined) return;
@@ -1116,7 +1117,8 @@ main .tab-panel { padding-block: 0; }
   function describe(task) {
     var s = '<strong>' + task.innovation + '</strong> &middot; ' + task.mfc +
             (task.software.length ? ' with ' + task.software.join(', ') : '') +
-            ' (' + (KINDTXT[task.kind] || task.kind) + '): <strong>' + STATUS[task.status] + '</strong>';
+            ' (' + (KINDTXT[task.kind] || task.kind) + (task.iface ? ', via ' + task.iface : '') +
+            (task.source ? ', method from ' + task.source : '') + '): <strong>' + STATUS[task.status] + '</strong>';
     if (task.demo) s += task.demoDone ? ', demonstration complete' : ', demonstration to come';
     if (task.note) s += '. ' + task.note.replace(/</g, '&lt;');
     return s + '.';
@@ -1127,8 +1129,13 @@ main .tab-panel { padding-block: 0; }
     var b = e.target.closest('button[data-r]');
     if (!b) return;
     var ri = +b.dataset.r, ci = +b.dataset.c, r = data.rows[ri], code = r.cells[ci];
-    table.querySelectorAll('td.sel').forEach(function (td) { td.classList.remove('sel'); });
+    table.querySelectorAll('td.sel, td.src').forEach(function (td) { td.classList.remove('sel', 'src'); });
     var list = byCell[ri + '|' + ci] || [];
+    list.forEach(function (t) {
+      if (!t.source || colIndex[t.source] === undefined) return;
+      var sb = table.querySelector('button[data-r="' + t.row + '"][data-c="' + colIndex[t.source] + '"]');
+      if (sb) sb.parentNode.classList.add('src');
+    });
     var keys = [ri + '|' + ci];
     list.forEach(function (t) { keys = keys.concat(taskCells(t)); });
     keys.forEach(function (k) {

@@ -428,7 +428,20 @@ main .tab-panel { padding-block: 0; }
 .p-legend span { display: inline-flex; align-items: center; gap: 6px; }
 .p-legend .gap { margin-left: 8px; }
 .sw { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
-.c-D { background: #4f9a45; } .c-L { background: #c3e3b2; } .c-Y { background: #f1df72; } .c-B { background: #a6d6ef; }
+.c-D { --cc: #4f9a45; } .c-L { --cc: #9fd186; } .c-Y { --cc: #e8cf3f; } .c-B { --cc: #7cc3e8; }
+.sw { background: var(--cc); }
+.sw.st-planned { background: var(--surface); box-shadow: inset 0 0 0 2px var(--ink); }
+.sw.st-progress { background: repeating-linear-gradient(45deg, var(--ink) 0 2px, transparent 2px 5px); box-shadow: inset 0 0 0 2px var(--ink); }
+.sw.st-done { background: var(--ink); }
+.sw.untracked { background: color-mix(in srgb, var(--ink) 18%, transparent); }
+.p-table td.untracked { background: color-mix(in srgb, var(--cc) 32%, transparent); }
+.p-table td.st-planned { background: var(--surface); box-shadow: inset 0 0 0 2px var(--cc); }
+.p-table td.st-progress { background: repeating-linear-gradient(45deg, var(--cc) 0 3px, transparent 3px 7px); box-shadow: inset 0 0 0 2px var(--cc); }
+.p-table td.st-done { background: var(--cc); }
+.cb { width: 11px; height: 11px; border: 1.5px solid currentColor; border-radius: 2px; display: inline-grid; place-items: center; box-sizing: border-box; background: var(--surface); }
+.cb.done { background: currentColor; }
+.cb.done::after { content: ""; width: 3px; height: 6px; border: solid var(--surface); border-width: 0 1.6px 1.6px 0; transform: translate(0, -1px) rotate(45deg); }
+.p-legend .cb { color: var(--ink); }
 .p-scroll { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
 .p-table { border-collapse: separate; border-spacing: 2px; font-size: 0.85rem; margin: 6px; }
 .p-table th { font-weight: 600; text-align: left; white-space: nowrap; padding: 2px 8px 2px 4px; }
@@ -445,24 +458,10 @@ main .tab-panel { padding-block: 0; }
   width: 100%; height: 26px; border: 0; background: none; padding: 0; cursor: pointer;
   display: grid; place-items: center; border-radius: 4px; color: #10181d;
 }
-.p-table td.c-D button { color: #fff; }
+.p-table td button { color: var(--ink); }
 .p-table td button:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
 .p-table td.sel button { outline: 2px solid var(--ink); outline-offset: 1px; }
-.m { width: 13px; height: 13px; border-radius: 50%; display: inline-grid; place-items: center; box-sizing: border-box; font-family: var(--mono); font-size: 0.7rem; font-weight: 700; line-height: 1; }
-.m-planned { border: 1.5px solid currentColor; opacity: 0.55; }
-.m-progress { border: 1.5px solid currentColor; background: linear-gradient(90deg, currentColor 50%, transparent 50%); }
-.m-done { background: currentColor; position: relative; }
-.m-done::after { content: ""; width: 3px; height: 6px; border: solid var(--surface); border-width: 0 1.5px 1.5px 0; transform: translate(0, -1px) rotate(45deg); }
-.p-legend .m { color: var(--ink); }
-.p-legend .m-done::after { border-color: var(--surface); }
-.p-table td button .m-done::after { border-color: #fff; }
-.p-table td.c-D button .m-done::after { border-color: #4f9a45; }
-.m-demo { width: auto; height: auto; border-radius: 0; font-size: 0.72rem; }
 .p-table td button { position: relative; }
-.xm { position: absolute; top: 0; right: 3px; font-family: var(--mono); font-size: 9px; font-weight: 700; line-height: 1.2; opacity: 0.45; }
-.xm.done { opacity: 1; }
-.xm-l { font-family: var(--mono); font-size: 0.8rem; font-weight: 700; color: var(--ink); opacity: 0.45; }
-.xm-l.done { opacity: 1; }
 .p-detail { margin-top: 10px; font-size: 0.95rem; min-height: 1.6em; }
 .p-updated { font-size: 0.85rem; color: var(--muted); margin-top: 4px; }
 
@@ -825,11 +824,14 @@ main .tab-panel { padding-block: 0; }
           <span><i class="sw c-L"></i>Shared as a module</span>
           <span><i class="sw c-Y"></i>Shared through a new interface</span>
           <span><i class="sw c-B"></i>Implemented separately</span>
-          <span class="gap"><b class="m m-planned"></b>Planned</span>
-          <span><b class="m m-progress"></b>In progress</span>
-          <span><b class="m m-done"></b>Done</span>
-          <span><b class="xm-l">x</b>Demonstration planned</span>
-          <span><b class="xm-l done">X</b>Demonstration complete</span>
+        </div>
+        <div class="p-legend">
+          <span><i class="sw st-planned"></i>Planned</span>
+          <span><i class="sw st-progress"></i>In progress</span>
+          <span><i class="sw st-done"></i>Done</span>
+          <span><i class="sw untracked"></i>Available, not a COMEDI task</span>
+          <span class="gap"><b class="cb"></b>Demonstration planned</span>
+          <span><b class="cb done"></b>Demonstration complete</span>
         </div>
         <div class="p-scroll"><table class="p-table" id="p-table"></table></div>
         <p class="p-detail" id="p-detail" aria-live="polite">Select a cell to see what it stands for.</p>
@@ -1061,16 +1063,13 @@ main .tab-panel { padding-block: 0; }
         if (ci === data.split) h += '<td class="sep"></td>';
         if (code === '-') { h += '<td class="e"></td>'; return; }
         var list = byCell[ri + '|' + ci] || [];
-        var mark = '';
-        if (list.length) {
-          mark = '<b class="m m-' + cellStatus(list) + '"></b>';
-          var demos = list.filter(function (t) { return t.demo; });
-          if (demos.length) {
-            var done = demos.every(function (t) { return t.demoDone; });
-            mark += '<b class="xm' + (done ? ' done' : '') + '">' + (done ? 'X' : 'x') + '</b>';
-          }
+        var mark = '', state = list.length ? 'st-' + cellStatus(list) : 'untracked';
+        var demos = list.filter(function (t) { return t.demo; });
+        if (demos.length) {
+          var done = demos.every(function (t) { return t.demoDone; });
+          mark = '<b class="cb' + (done ? ' done' : '') + '"></b>';
         }
-        h += '<td class="c-' + code[0] + '"><button type="button" data-r="' + ri + '" data-c="' + ci + '" aria-label="' +
+        h += '<td class="c-' + code[0] + ' ' + state + '"><button type="button" data-r="' + ri + '" data-c="' + ci + '" aria-label="' +
              r.name + ', ' + data.cols[ci] + '">' + mark + '</button></td>';
       });
       h += '</tr>';

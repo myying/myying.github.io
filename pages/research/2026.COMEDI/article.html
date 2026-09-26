@@ -1119,8 +1119,12 @@ main .tab-panel { padding-block: 0; }
     var s = '<strong>' + task.innovation + '</strong> &middot; ' + task.mfc +
             (task.software.length ? ' with ' + task.software.join(', ') : '') +
             ' (' + (KINDTXT[task.kind] || task.kind) + (task.iface ? ', via ' + task.iface : '') +
-            (task.source ? ', method from ' + task.source : '') + '): <strong>' + STATUS[task.status] + '</strong>';
-    if (task.demo) s += task.demoDone ? ', demonstration complete' : ', demonstration to come';
+            (task.source ? ', method from ' + task.source : '') + '): ';
+    if (task.demo && task.status === 'planned' && !task.demoDone) s += '<strong>Planned demonstration</strong>';
+    else {
+      s += '<strong>' + STATUS[task.status] + '</strong>';
+      if (task.demo) s += task.demoDone ? ', demonstration complete' : ', demonstration to come';
+    }
     if (task.note) s += '. ' + task.note.replace(/</g, '&lt;');
     return s + '.';
   }

@@ -1121,6 +1121,7 @@ main .tab-panel { padding-block: 0; }
             ' (' + (KINDTXT[task.kind] || task.kind) + (task.iface ? ', via ' + task.iface : '') +
             (task.source ? ', method from ' + task.source : '') + '): ';
     if (task.demo && task.status === 'planned' && !task.demoDone) s += '<strong>Planned demonstration</strong>';
+    else if (!task.demo && task.status === 'planned') s = s.replace(/: $/, '');   // no demonstration: no status to report yet
     else {
       s += '<strong>' + STATUS[task.status] + '</strong>';
       if (task.demo) s += task.demoDone ? ', demonstration complete' : ', demonstration to come';

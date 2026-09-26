@@ -435,8 +435,8 @@ main .tab-panel { padding-block: 0; }
 .p-table td.avail { background: var(--cc); }
 .p-table td.st-progress { background: repeating-linear-gradient(45deg, var(--cc) 0 3px, transparent 3px 7px); box-shadow: inset 0 0 0 2px var(--cc); }
 .p-table td.st-done { background: var(--cc); }
-.ck { display: inline-block; width: 7px; height: 13px; border: solid currentColor; border-width: 0 2.5px 2.5px 0; transform: translate(0, -2px) rotate(45deg); }
-.p-legend .ck { color: var(--ink); height: 11px; width: 6px; margin: 0 3px; }
+.xk { font-family: var(--body); font-size: 17px; font-weight: 700; line-height: 1; color: var(--ink); }
+.p-legend .xk { font-size: 15px; }
 .p-scroll { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
 .p-table { border-collapse: separate; border-spacing: 2px; font-size: 0.85rem; margin: 6px; }
 .p-table th { font-weight: 600; text-align: left; white-space: nowrap; padding: 2px 8px 2px 4px; }
@@ -825,7 +825,7 @@ main .tab-panel { padding-block: 0; }
         <div class="p-legend">
           <span><i class="sw st-progress"></i>In progress</span>
           <span><i class="sw st-done"></i>Done</span>
-          <span class="gap"><b class="ck"></b>Demonstration complete</span>
+          <span class="gap"><b class="xk">X</b>Demonstration complete</span>
         </div>
         <div class="p-scroll"><table class="p-table" id="p-table"></table></div>
         <p class="p-detail" id="p-detail" aria-live="polite">Select a cell to see its task. For a task that uses an interface, a dashed outline marks the software the method comes from.</p>
@@ -1089,7 +1089,7 @@ main .tab-panel { padding-block: 0; }
         var demos = list.filter(function (t) { return t.demo; });
         if (state === 'st-planned') state = 'e';                     // nothing is drawn until work starts
         if (demos.length) {
-          if (demos.every(function (t) { return t.demoDone; })) mark = '<b class="ck" aria-label="demonstration complete"></b>';
+          if (demos.every(function (t) { return t.demoDone; })) mark = '<b class="xk" aria-label="demonstration complete">X</b>';
         }
         h += '<td class="c-' + code[0] + ' ' + state + '"><button type="button" data-r="' + ri + '" data-c="' + ci + '" aria-label="' +
              r.name + ', ' + data.cols[ci] + '">' + mark + '</button></td>';

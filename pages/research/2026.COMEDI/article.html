@@ -433,8 +433,7 @@ main .tab-panel { padding-block: 0; }
 .sw.st-planned { background: var(--surface); box-shadow: inset 0 0 0 2px var(--ink); }
 .sw.st-progress { background: repeating-linear-gradient(45deg, var(--ink) 0 2px, transparent 2px 5px); box-shadow: inset 0 0 0 2px var(--ink); }
 .sw.st-done { background: var(--ink); }
-.sw.untracked { background: color-mix(in srgb, var(--ink) 18%, transparent); }
-.p-table td.untracked { background: color-mix(in srgb, var(--cc) 32%, transparent); }
+.p-table td.avail { background: var(--cc); }
 .p-table td.st-planned { background: var(--surface); box-shadow: inset 0 0 0 2px var(--cc); }
 .p-table td.st-progress { background: repeating-linear-gradient(45deg, var(--cc) 0 3px, transparent 3px 7px); box-shadow: inset 0 0 0 2px var(--cc); }
 .p-table td.st-done { background: var(--cc); }
@@ -819,15 +818,14 @@ main .tab-panel { padding-block: 0; }
         <div class="p-summary" id="p-summary"></div>
         <div class="p-legend">
           <span><i class="sw c-D"></i>Initial implementation</span>
-          <span><i class="sw c-L"></i>Shared as a module</span>
+          <span><i class="sw c-L"></i>Shared as a module, shown once the initial implementation is done</span>
           <span><i class="sw c-Y"></i>Shared through a new interface</span>
-          <span><i class="sw c-B"></i>Implemented separately</span>
+          <span><i class="sw c-B"></i>Already available</span>
         </div>
         <div class="p-legend">
           <span><i class="sw st-planned"></i>Planned</span>
           <span><i class="sw st-progress"></i>In progress</span>
           <span><i class="sw st-done"></i>Done</span>
-          <span><i class="sw untracked"></i>Available, not a COMEDI task</span>
           <span class="gap"><b class="ck"></b>Demonstration complete</span>
         </div>
         <div class="p-scroll"><table class="p-table" id="p-table"></table></div>
@@ -984,7 +982,7 @@ main .tab-panel { padding-block: 0; }
   var el = document.getElementById('table12');
   if (!el) return;
   var data = JSON.parse(el.textContent);
-  var KIND = { D: 'Initial implementation', L: 'Shared as a module', Y: 'Shared through a new interface', B: 'Implemented separately' };
+  var KIND = { D: 'Initial implementation', L: 'Shared as a module', Y: 'Shared through a new interface', B: 'Already available' };
   var STATUS = { planned: 'Planned', progress: 'In progress', done: 'Done' };
   var table = document.getElementById('p-table');
   var detail = document.getElementById('p-detail');
@@ -1025,7 +1023,7 @@ main .tab-panel { padding-block: 0; }
       if (status === 'in progress' || status === 'ongoing') status = 'progress';
       if (!STATUS[status]) status = 'planned';
       var task = { innovation: t.innovation, row: ri, mfc: t.mfc, software: (t.software || '').split(';').map(function (s) { return s.trim(); }).filter(Boolean),
-                   status: status, demo: /^y/i.test(t.demo), demoDone: /^y/i.test(t.demo_done), note: t.note || '' };
+                   kind: (t.kind || '').toLowerCase(), status: status, demo: /^y/i.test(t.demo), demoDone: /^y/i.test(t.demo_done), note: t.note || '' };
       tasks.push(task);
       [task.mfc].concat(task.software).forEach(function (c) {
         if (colIndex[c] === undefined) return;
@@ -1033,6 +1031,11 @@ main .tab-panel { padding-block: 0; }
         (byCell[k] = byCell[k] || []).push(task);
       });
     });
+  }
+
+  // a row's tool becomes available to others once one of its initial implementations is done
+  function rowReady(ri) {
+    return tasks.some(function (t) { return t.row === ri && t.kind === 'implementation' && t.status === 'done'; });
   }
 
   function cellStatus(list) {
@@ -1060,7 +1063,11 @@ main .tab-panel { padding-block: 0; }
         if (ci === data.split) h += '<td class="sep"></td>';
         if (code === '-') { h += '<td class="e"></td>'; return; }
         var list = byCell[ri + '|' + ci] || [];
-        var mark = '', state = list.length ? 'st-' + cellStatus(list) : 'untracked';
+        var mark = '', state;
+        if (code[0] === 'B') state = 'avail';                         // capability that already exists
+        else if (list.length) state = 'st-' + cellStatus(list);
+        else if (code[0] === 'L') state = rowReady(ri) ? 'avail' : 'e'; // shared once the tool is built
+        else state = 'e';
         var demos = list.filter(function (t) { return t.demo; });
         if (demos.length) {
           if (demos.every(function (t) { return t.demoDone; })) mark = '<b class="ck" aria-label="demonstration complete"></b>';
@@ -1097,22 +1104,43 @@ main .tab-panel { padding-block: 0; }
     }).join('');
   }
 
+  var KINDTXT = { implementation: 'initial implementation', interface: 'shared through a new interface',
+                  shared: 'shared as a module', available: 'already available' };
+  function taskCells(task) {
+    return [task.mfc].concat(task.software).filter(function (c) { return colIndex[c] !== undefined; })
+      .map(function (c) { return task.row + '|' + colIndex[c]; });
+  }
+  function describe(task) {
+    var s = '<strong>' + task.innovation + '</strong> &middot; ' + task.mfc +
+            (task.software.length ? ' with ' + task.software.join(', ') : '') +
+            ' (' + (KINDTXT[task.kind] || task.kind) + '): <strong>' + STATUS[task.status] + '</strong>';
+    if (task.demo) s += task.demoDone ? ', demonstration complete' : ', demonstration to come';
+    if (task.note) s += '. ' + task.note.replace(/</g, '&lt;');
+    return s + '.';
+  }
+
+  // Selecting a cell highlights every cell of its task(s): the MFC and the DA software it uses.
   table.addEventListener('click', function (e) {
     var b = e.target.closest('button[data-r]');
     if (!b) return;
     var ri = +b.dataset.r, ci = +b.dataset.c, r = data.rows[ri], code = r.cells[ci];
     table.querySelectorAll('td.sel').forEach(function (td) { td.classList.remove('sel'); });
-    b.parentNode.classList.add('sel');
     var list = byCell[ri + '|' + ci] || [];
-    var txt = '<strong>' + r.name + '</strong> in <strong>' + data.cols[ci] + '</strong>: ' + KIND[code[0]].toLowerCase() + '. ';
-    if (!list.length) txt += 'Not tracked as a COMEDI task.';
-    else txt += list.map(function (t) {
-      var s = 'Task ' + t.mfc + (t.software.length ? ' with ' + t.software.join(', ') : '') + ': <strong>' + STATUS[t.status] + '</strong>';
-      if (t.demo) s += t.demoDone ? ', demonstration complete' : ', demonstration planned';
-      if (t.note) s += ' (' + t.note.replace(/</g, '&lt;') + ')';
-      return s;
-    }).join('; ') + '.';
-    detail.innerHTML = txt;
+    var keys = [ri + '|' + ci];
+    list.forEach(function (t) { keys = keys.concat(taskCells(t)); });
+    keys.forEach(function (k) {
+      var p = k.split('|');
+      var btn = table.querySelector('button[data-r="' + p[0] + '"][data-c="' + p[1] + '"]');
+      if (btn) btn.parentNode.classList.add('sel');
+    });
+    if (list.length) {
+      detail.innerHTML = list.map(describe).join('<br>');
+    } else {
+      var what = code[0] === 'B' ? 'already available before COMEDI'
+               : code[0] === 'L' ? (rowReady(ri) ? 'available through sharing' : 'will be available through sharing once the initial implementation is done')
+               : KIND[code[0]].toLowerCase();
+      detail.innerHTML = '<strong>' + r.name + '</strong> in <strong>' + data.cols[ci] + '</strong>: ' + what + '. Not a COMEDI task.';
+    }
   });
 
   render();

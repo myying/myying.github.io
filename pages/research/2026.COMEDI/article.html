@@ -264,7 +264,7 @@ main section { padding-block: 44px 0; }
 .ill .i-use { stroke: var(--muted); stroke-width: 0.9; opacity: 0.6; }
 .ill .i-box { fill: var(--surface); stroke: var(--deep); stroke-width: 1.2; }
 .ill .i-sw { fill: var(--ink); font-family: var(--mono); font-size: 6.9px; text-anchor: middle; }
-.ill .i-iface { fill: none; stroke: color-mix(in srgb, var(--oc) 40%, var(--ink)); stroke-width: 2.2; stroke-linecap: round; }
+.ill .i-iface { fill: none; stroke: #e8cf3f; stroke-width: 2.8; stroke-linecap: round; }
 .ill .i-plug { fill: none; stroke: var(--deep); stroke-width: 1.1; stroke-dasharray: 3 3; }
 .ill .i-chip { fill: var(--oc); stroke: color-mix(in srgb, var(--oc) 40%, var(--ink)); stroke-width: 1; }
 .ill .i-chiptxt { fill: var(--o-ink); font-family: var(--mono); font-size: 8.4px; font-weight: 500; text-anchor: middle; }
@@ -419,6 +419,7 @@ main .tab-panel { padding-block: 0; }
 .p-sum .lbl { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
 .p-sum .val { font-family: var(--display); font-weight: 700; font-size: 1.35rem; font-variant-numeric: tabular-nums; }
 .p-sum .val small { font-family: var(--body); font-weight: 400; font-size: 0.85rem; color: var(--muted); }
+.p-sum .demo-line { font-size: 0.85rem; color: var(--muted); }
 .p-bar { height: 6px; border-radius: 999px; background: var(--line); overflow: hidden; display: flex; margin-top: 6px; }
 .p-bar .b-done { background: #2e7d32; }
 .p-bar .b-progress { background: #e0a800; }
@@ -427,7 +428,15 @@ main .tab-panel { padding-block: 0; }
 .p-legend span { display: inline-flex; align-items: center; gap: 6px; }
 .p-legend .gap { margin-left: 8px; }
 .sw { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
-.c-D { background: #4f9a45; } .c-L { background: #c3e3b2; } .c-Y { background: #f1df72; } .c-B { background: #a6d6ef; }
+.c-D { --cc: #4f9a45; } .c-L { --cc: #9fd186; } .c-Y { --cc: #e8cf3f; } .c-B { --cc: #7cc3e8; }
+.sw { background: var(--cc); }
+.sw.st-progress { background: repeating-linear-gradient(45deg, var(--ink) 0 2px, transparent 2px 5px); box-shadow: inset 0 0 0 2px var(--ink); }
+.sw.st-done { background: var(--ink); }
+.p-table td.avail { background: var(--cc); }
+.p-table td.st-progress { background: repeating-linear-gradient(45deg, var(--cc) 0 3px, transparent 3px 7px); box-shadow: inset 0 0 0 2px var(--cc); }
+.p-table td.st-done { background: var(--cc); }
+.ck { display: inline-block; width: 7px; height: 13px; border: solid currentColor; border-width: 0 2.5px 2.5px 0; transform: translate(0, -2px) rotate(45deg); }
+.p-legend .ck { color: var(--ink); height: 11px; width: 6px; margin: 0 3px; }
 .p-scroll { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
 .p-table { border-collapse: separate; border-spacing: 2px; font-size: 0.85rem; margin: 6px; }
 .p-table th { font-weight: 600; text-align: left; white-space: nowrap; padding: 2px 8px 2px 4px; }
@@ -439,24 +448,17 @@ main .tab-panel { padding-block: 0; }
 .p-table td { width: 30px; min-width: 30px; height: 26px; padding: 0; border-radius: 4px; text-align: center; }
 .p-table td.split { border-left: 0; }
 .p-table td.sep, .p-table th.sep { width: 6px; min-width: 6px; background: none; }
-.p-table td.e { background: color-mix(in srgb, var(--line) 45%, transparent); }
+.p-table td.e { background: none; box-shadow: inset 0 0 0 1px var(--line); }
+.p-table td button:hover { background: color-mix(in srgb, var(--ink) 8%, transparent); }
 .p-table td button {
   width: 100%; height: 26px; border: 0; background: none; padding: 0; cursor: pointer;
   display: grid; place-items: center; border-radius: 4px; color: #10181d;
 }
-.p-table td.c-D button { color: #fff; }
+.p-table td button { color: var(--ink); }
 .p-table td button:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
 .p-table td.sel button { outline: 2px solid var(--ink); outline-offset: 1px; }
-.m { width: 13px; height: 13px; border-radius: 50%; display: inline-grid; place-items: center; box-sizing: border-box; font-family: var(--mono); font-size: 0.7rem; font-weight: 700; line-height: 1; }
-.m-planned { border: 1.5px solid currentColor; opacity: 0.55; }
-.m-progress { border: 1.5px solid currentColor; background: linear-gradient(90deg, currentColor 50%, transparent 50%); }
-.m-done { background: currentColor; position: relative; }
-.m-done::after { content: ""; width: 3px; height: 6px; border: solid var(--surface); border-width: 0 1.5px 1.5px 0; transform: translate(0, -1px) rotate(45deg); }
-.p-legend .m { color: var(--ink); }
-.p-legend .m-done::after { border-color: var(--surface); }
-.p-table td button .m-done::after { border-color: #fff; }
-.p-table td.c-D button .m-done::after { border-color: #4f9a45; }
-.m-demo { width: auto; height: auto; border-radius: 0; font-size: 0.72rem; }
+.p-table td.src button { outline: 2px dashed var(--ink); outline-offset: 1px; }
+.p-table td button { position: relative; }
 .p-detail { margin-top: 10px; font-size: 0.95rem; min-height: 1.6em; }
 .p-updated { font-size: 0.85rem; color: var(--muted); margin-top: 4px; }
 
@@ -811,21 +813,22 @@ main .tab-panel { padding-block: 0; }
         <div class="section-head">
           <p class="eyebrow">Table 1.2 of the proposal</p>
           <h3 class="panel-title">Progress on sharing each innovation</h3>
-          <p class="note">Each row is a COMEDI innovation; each column an MFC or a DA software package. The colour shows how the innovation reaches it, and the mark shows the status of the work there.</p>
+          <p class="note">Each row is a COMEDI innovation; each column an MFC or a DA software package. The colour shows how the innovation reaches it, and the marks show the status of each task. A task links an MFC with the DA software it uses, so both cells change together.</p>
         </div>
         <div class="p-summary" id="p-summary"></div>
         <div class="p-legend">
           <span><i class="sw c-D"></i>Initial implementation</span>
-          <span><i class="sw c-L"></i>Shared as a module</span>
+          <span><i class="sw c-L"></i>Shared as a module, shown once the initial implementation is done</span>
           <span><i class="sw c-Y"></i>Shared through a new interface</span>
-          <span><i class="sw c-B"></i>Implemented separately</span>
-          <span class="gap"><b class="m m-planned"></b>Planned</span>
-          <span><b class="m m-progress"></b>In progress</span>
-          <span><b class="m m-done"></b>Done</span>
-          <span><b class="m m-demo">X</b>Demonstration in an MFC</span>
+          <span><i class="sw c-B"></i>Already available</span>
+        </div>
+        <div class="p-legend">
+          <span><i class="sw st-progress"></i>In progress</span>
+          <span><i class="sw st-done"></i>Done</span>
+          <span class="gap"><b class="ck"></b>Demonstration complete</span>
         </div>
         <div class="p-scroll"><table class="p-table" id="p-table"></table></div>
-        <p class="p-detail" id="p-detail" aria-live="polite">Select a cell to see what it stands for.</p>
+        <p class="p-detail" id="p-detail" aria-live="polite">Select a cell to see its task. For a task that uses an interface, a dashed outline marks the software the method comes from.</p>
         <p class="p-updated" id="p-updated"></p>
         <script type="application/json" id="table12">{"cols":["ARC","BAL","BLK","GLO","IBI","MED","NWS","CIGAR","NEMOVAR","OceanVar","E-Med-BGC","MROA","NEDAS","OAK","PDAF"],"split":7,"rows":[{"path":1,"group":"Core assimilation method","name":"Non-Gaussian filtering","cells":["DX","DX","-","Y","Y","-","-","-","-","-","-","Y","DX","-","DX"]},{"path":1,"group":"Core assimilation method","name":"AI assimilation core","cells":["DX","Y","DX","-","-","DX","-","-","-","DX","-","-","DX","DX","Y"]},{"path":1,"group":"Core assimilation method","name":"Automated tuning","cells":["Y","L","-","Y","Y","DX","-","-","-","-","YX","Y","Y","-","DX"]},{"path":1,"group":"Core assimilation method","name":"Higher-order sampling","cells":["Y","L","-","Y","Y","DX","-","-","-","-","YX","Y","Y","-","DX"]},{"path":2,"group":"Modular tools","name":"AI super resolution","cells":["L","L","L","L","L","DX","-","-","-","-","DX","L","L","L","L"]},{"path":2,"group":"Modular tools","name":"AI ensemble generation","cells":["DX","L","DX","DX","DX","DX","L","L","L","DX","L","DX","DX","L","L"]},{"path":2,"group":"Modular tools","name":"Upgraded stochastic physics","cells":["Y","L","L","DX","L","L","LX","DX","LX","L","L","L","Y","L","L"]},{"path":2,"group":"Modular tools","name":"AI bias correction","cells":["-","L","L","DX","L","L","L","DX","L","L","L","L","-","L","L"]},{"path":2,"group":"Modular tools","name":"Mechanistic perturbation","cells":["L","L","DX","LX","L","LX","-","-","-","-","LX","LX","L","DX","L"]},{"path":2,"group":"Modular tools","name":"Correlated R","cells":["YX","YX","LX","Y","Y","L","DX","-","DX","LX","-","Y","YX","-","YX"]},{"path":2,"group":"New observation operators","name":"Sentinel-3 NG WiSA","cells":["-","-","Y","B","B","Y","BX","-","BX","Y","-","B","-","-","-"]},{"path":2,"group":"New observation operators","name":"CIMR Tb","cells":["DX","L","L","L","L","L","-","-","-","-","L","L","DX","L","L"]},{"path":2,"group":"New observation operators","name":"Sentinel-3 reflectance","cells":["-","-","BX","BX","B","BX","-","-","-","-","BX","BX","-","BX","-"]},{"path":3,"group":"Model-specific","name":"Dynamic ensemble","cells":["BX","BX","BX","BX","BX","YX","BX","BX","BX","-","YX","BX","BX","BX","BX"]},{"path":3,"group":"Model-specific","name":"Multiscale B","cells":["B","DX","-","DX","DX","Y","DX","-","DX","-","Y","DX","B","-","DX"]},{"path":3,"group":"Model-specific","name":"Hybrid B","cells":["B","B","DX","LX","-","DX","DX","LX","DX","DX","-","-","B","-","B"]},{"path":3,"group":"Model-specific","name":"FSOI and its emulation","cells":["DX","L","L","DX","L","L","L","-","DX","-","L","L","DX","L","L"]}]}</script>
       </section>
@@ -978,16 +981,83 @@ main .tab-panel { padding-block: 0; }
   var el = document.getElementById('table12');
   if (!el) return;
   var data = JSON.parse(el.textContent);
-  var KIND = { D: 'Initial implementation', L: 'Shared as a module', Y: 'Shared through a new interface', B: 'Implemented separately' };
+  var KIND = { D: 'Initial implementation', L: 'Shared as a module', Y: 'Shared through a new interface', B: 'Already available' };
   var STATUS = { planned: 'Planned', progress: 'In progress', done: 'Done' };
-  var status = {};
   var table = document.getElementById('p-table');
   var detail = document.getElementById('p-detail');
+  var rowIndex = {}; data.rows.forEach(function (r, i) { rowIndex[r.name] = i; });
+  var colIndex = {}; data.cols.forEach(function (c, i) { colIndex[c] = i; });
+  var tasks = [], byCell = {};
+  var ifaceStatus = {}, ifaceNote = {};   // from interfaces.csv, the central switch per interface
 
-  // A cell is tracked work when COMEDI demonstrates it (X) or builds a new interface for it (yellow).
-  function tracked(code) { return code.indexOf('X') > 0 || code[0] === 'Y'; }
-  function key(r, c) { return r.name + '|' + data.cols[c]; }
-  function st(r, c) { return status[key(r, c)] || 'planned'; }
+  // progress.csv: innovation,mfc,software,kind,interface,source,demo,status,demo_done,note (software may list several, separated by ;)
+  // status 'via interface' means the task follows its interface's status in interfaces.csv (interface,status,note)
+  function parseCSV(text) {
+    var rows = [], row = [], f = '', q = false;
+    for (var i = 0; i < text.length; i++) {
+      var ch = text[i];
+      if (q) {
+        if (ch === '"' && text[i + 1] === '"') { f += '"'; i++; }
+        else if (ch === '"') q = false;
+        else f += ch;
+      } else if (ch === '"') q = true;
+      else if (ch === ',') { row.push(f); f = ''; }
+      else if (ch === '\n' || ch === '\r') {
+        if (ch === '\r' && text[i + 1] === '\n') i++;
+        row.push(f); f = ''; if (row.join('') !== '') rows.push(row); row = [];
+      } else f += ch;
+    }
+    row.push(f); if (row.join('') !== '') rows.push(row);
+    var head = rows.shift().map(function (h) { return h.trim().toLowerCase(); });
+    return rows.map(function (r) {
+      var o = {}; head.forEach(function (h, i) { o[h] = (r[i] || '').trim(); }); return o;
+    });
+  }
+
+  function load(list) {
+    tasks = []; byCell = {};
+    list.forEach(function (t) {
+      var ri = rowIndex[t.innovation];
+      if (ri === undefined) return;
+      var status = (t.status || 'planned').toLowerCase();
+      if (status === 'finished' || status === 'complete' || status === 'completed') status = 'done';
+      if (status === 'in progress' || status === 'ongoing') status = 'progress';
+      if (/^via/.test(status)) status = 'via';                     // follows interfaces.csv
+      if (!STATUS[status] && status !== 'via') status = 'planned';
+      var task = { innovation: t.innovation, row: ri, mfc: t.mfc, software: (t.software || '').split(';').map(function (s) { return s.trim(); }).filter(Boolean),
+                   kind: (t.kind || '').toLowerCase(), iface: t.interface || '', source: t.source || '', status: status, demo: /^y/i.test(t.demo), demoDone: /^y/i.test(t.demo_done), note: t.note || '' };
+      tasks.push(task);
+      [task.mfc].concat(task.software).forEach(function (c) {
+        if (colIndex[c] === undefined) return;
+        var k = ri + '|' + colIndex[c];
+        (byCell[k] = byCell[k] || []).push(task);
+      });
+    });
+  }
+
+  function normStatus(s) {
+    s = (s || 'planned').toLowerCase();
+    if (s === 'finished' || s === 'complete' || s === 'completed') return 'done';
+    if (s === 'in progress' || s === 'ongoing') return 'progress';
+    return STATUS[s] ? s : 'planned';
+  }
+  function ifStatus(name) { return ifaceStatus[name] || 'planned'; }
+  // a task's own status, or its interface's status when it is marked 'via interface'
+  function eff(task) { return task.status === 'via' ? ifStatus(task.iface) : task.status; }
+  // yellow cells always show the state of the interface they rely on
+  function cellTaskStatus(task, code) { return code[0] === 'Y' && task.iface ? ifStatus(task.iface) : eff(task); }
+
+  // a row's tool becomes available to others once one of its initial implementations is done
+  function rowReady(ri) {
+    return tasks.some(function (t) { return t.row === ri && t.kind === 'implementation' && eff(t) === 'done'; });
+  }
+
+  function cellStatus(list, code) {
+    var s = list.map(function (t) { return cellTaskStatus(t, code); });
+    if (s.every(function (x) { return x === 'done'; })) return 'done';
+    if (s.some(function (x) { return x !== 'planned'; })) return 'progress';
+    return 'planned';
+  }
 
   function render() {
     var h = '<thead><tr class="grp"><th></th><th colspan="' + data.split + '">MFCs</th><th class="sep"></th>' +
@@ -1006,10 +1076,22 @@ main .tab-panel { padding-block: 0; }
       h += '<tr><th class="row" scope="row">' + r.name + '</th>';
       r.cells.forEach(function (code, ci) {
         if (ci === data.split) h += '<td class="sep"></td>';
-        if (code === '-') { h += '<td class="e"></td>'; return; }
-        var mark = tracked(code) ? '<b class="m m-' + st(r, ci) + '"></b>' : '';
-        if (code.indexOf('X') > 0 && !mark) mark = '<b class="m m-demo">X</b>';
-        h += '<td class="c-' + code[0] + '"><button type="button" data-r="' + ri + '" data-c="' + ci + '" aria-label="' +
+        if (code === '-') {
+          h += '<td class="e"><button type="button" data-r="' + ri + '" data-c="' + ci + '" aria-label="' + r.name + ', ' + data.cols[ci] + ': not a planned activity"></button></td>';
+          return;
+        }
+        var list = byCell[ri + '|' + ci] || [];
+        var mark = '', state;
+        if (code[0] === 'B') state = 'avail';                         // capability that already exists
+        else if (list.length) state = 'st-' + cellStatus(list, code);
+        else if (code[0] === 'L') state = rowReady(ri) ? 'avail' : 'e'; // shared once the tool is built
+        else state = 'e';
+        var demos = list.filter(function (t) { return t.demo; });
+        if (state === 'st-planned') state = 'e';                     // nothing is drawn until work starts
+        if (demos.length) {
+          if (demos.every(function (t) { return t.demoDone; })) mark = '<b class="ck" aria-label="demonstration complete"></b>';
+        }
+        h += '<td class="c-' + code[0] + ' ' + state + '"><button type="button" data-r="' + ri + '" data-c="' + ci + '" aria-label="' +
              r.name + ', ' + data.cols[ci] + '">' + mark + '</button></td>';
       });
       h += '</tr>';
@@ -1018,49 +1100,116 @@ main .tab-panel { padding-block: 0; }
     summary();
   }
 
+  var loaded = false;
   function summary() {
-    var groups = [['All tracked work', function () { return true; }],
+    if (!loaded) { document.getElementById('p-summary').innerHTML = '<div class="p-sum"><div class="lbl">All tasks</div><div class="val"><small>Loading tasks&hellip;</small></div></div>'; return; }
+    var groups = [['All tasks', function () { return true; }],
                   ['Path 1 · core methods', function (r) { return r.path === 1; }],
                   ['Path 2 · modular tools', function (r) { return r.path === 2; }],
                   ['Path 3 · model-specific', function (r) { return r.path === 3; }]];
     document.getElementById('p-summary').innerHTML = groups.map(function (g) {
-      var n = { planned: 0, progress: 0, done: 0 };
-      data.rows.forEach(function (r) {
-        if (!g[1](r)) return;
-        r.cells.forEach(function (code, ci) { if (tracked(code)) n[st(r, ci)]++; });
+      var n = { planned: 0, progress: 0, done: 0 }, demos = 0, demosDone = 0;
+      tasks.forEach(function (t) {
+        if (!g[1](data.rows[t.row])) return;
+        n[eff(t)]++;
+        if (t.demo) { demos++; if (t.demoDone) demosDone++; }
       });
-      var total = n.planned + n.progress + n.done || 1;
-      return '<div class="p-sum"><div class="lbl">' + g[0] + '</div><div class="val">' + n.done + ' <small>of ' +
-             (n.planned + n.progress + n.done) + ' done &middot; ' + n.progress + ' in progress</small></div>' +
-             '<div class="p-bar"><span class="b-done" style="width:' + (100 * n.done / total) + '%"></span>' +
-             '<span class="b-progress" style="width:' + (100 * n.progress / total) + '%"></span></div></div>';
+      var total = n.planned + n.progress + n.done;
+      var d = total || 1;
+      return '<div class="p-sum"><div class="lbl">' + g[0] + '</div><div class="val">' + n.done + ' <small>of ' + total +
+             ' done &middot; ' + n.progress + ' in progress</small></div><div class="demo-line">' + demosDone + ' of ' + demos + ' demonstrations complete</div>' +
+             '<div class="p-bar"><span class="b-done" style="width:' + (100 * n.done / d) + '%"></span>' +
+             '<span class="b-progress" style="width:' + (100 * n.progress / d) + '%"></span></div></div>';
     }).join('');
   }
 
+  var KINDTXT = { implementation: 'initial implementation', interface: 'shared through a new interface',
+                  shared: 'shared as a module', available: 'already available' };
+  function taskCells(task) {
+    return [task.mfc].concat(task.software).filter(function (c) { return colIndex[c] !== undefined; })
+      .map(function (c) { return task.row + '|' + colIndex[c]; });
+  }
+  function describe(task) {
+    var st = eff(task);
+    var s = '<strong>' + task.innovation + '</strong> &middot; ' + task.mfc +
+            (task.software.length ? ' with ' + task.software.join(', ') : '') +
+            ' (' + (KINDTXT[task.kind] || task.kind) + (task.iface ? ', via ' + task.iface : '') +
+            (task.source ? ', method from ' + task.source : '') + '): ';
+    if (task.demo && st === 'planned' && !task.demoDone) s += '<strong>Planned demonstration</strong>';
+    else if (!task.demo && st === 'planned') s = s.replace(/: $/, '');   // no demonstration: no status to report yet
+    else {
+      s += '<strong>' + STATUS[st] + '</strong>';
+      if (task.demo) s += task.demoDone ? ', demonstration complete' : ', demonstration to come';
+    }
+    if (task.iface && task.status !== 'via' && ifStatus(task.iface) !== 'planned') s += '; interface ' + STATUS[ifStatus(task.iface)].toLowerCase();
+    if (task.note) s += '. ' + task.note.replace(/</g, '&lt;');
+    return s + '.';
+  }
+
+  // Selecting a cell highlights every cell of its task(s): the MFC and the DA software it uses.
   table.addEventListener('click', function (e) {
     var b = e.target.closest('button[data-r]');
     if (!b) return;
-    var r = data.rows[+b.dataset.r], ci = +b.dataset.c, code = r.cells[ci];
-    table.querySelectorAll('td.sel').forEach(function (td) { td.classList.remove('sel'); });
-    b.parentNode.classList.add('sel');
-    var txt = '<strong>' + r.name + '</strong> in <strong>' + data.cols[ci] + '</strong>: ' + KIND[code[0]].toLowerCase();
-    if (code.indexOf('X') > 0) txt += ', with a demonstration in an MFC';
-    txt += tracked(code) ? '. Status: <strong>' + STATUS[st(r, ci)] + '</strong>.' : '. Not tracked as a COMEDI task.';
-    detail.innerHTML = txt;
+    var ri = +b.dataset.r, ci = +b.dataset.c, r = data.rows[ri], code = r.cells[ci];
+    table.querySelectorAll('td.sel, td.src').forEach(function (td) { td.classList.remove('sel', 'src'); });
+    var list = byCell[ri + '|' + ci] || [];
+    list.forEach(function (t) {
+      if (!t.source || colIndex[t.source] === undefined) return;
+      var sb = table.querySelector('button[data-r="' + t.row + '"][data-c="' + colIndex[t.source] + '"]');
+      if (sb) sb.parentNode.classList.add('src');
+    });
+    var keys = [ri + '|' + ci];
+    list.forEach(function (t) { keys = keys.concat(taskCells(t)); });
+    var iface = code[0] === 'Y' && list.length ? list[0].iface : '';
+    if (iface) {
+      tasks.forEach(function (t) {
+        if (t.iface !== iface) return;
+        taskCells(t).forEach(function (k) {
+          var p = k.split('|');
+          if (data.rows[+p[0]].cells[+p[1]][0] === 'Y') keys.push(k);
+        });
+      });
+    }
+    keys.forEach(function (k) {
+      var p = k.split('|');
+      var btn = table.querySelector('button[data-r="' + p[0] + '"][data-c="' + p[1] + '"]');
+      if (btn) btn.parentNode.classList.add('sel');
+    });
+    if (list.length) {
+      var head = '';
+      if (iface) {
+        var n = tasks.filter(function (t) { return t.iface === iface; }).length;
+        head = '<strong>' + iface + '</strong>: <strong>' + STATUS[ifStatus(iface)] + '</strong>, used by ' + n + (n === 1 ? ' task' : ' tasks') +
+               (ifaceNote[iface] ? ' (' + ifaceNote[iface].replace(/</g, '&lt;') + ')' : '') + '.<br>';
+      }
+      detail.innerHTML = head + list.map(describe).join('<br>');
+    } else {
+      if (code === '-') { detail.innerHTML = '<strong>' + r.name + '</strong> in <strong>' + data.cols[ci] + '</strong>: not a planned activity.'; return; }
+      var what = code[0] === 'B' ? 'already available before COMEDI'
+               : code[0] === 'L' ? (rowReady(ri) ? 'available through sharing' : 'will be available through sharing once the initial implementation is done')
+               : KIND[code[0]].toLowerCase();
+      detail.innerHTML = '<strong>' + r.name + '</strong> in <strong>' + data.cols[ci] + '</strong>: ' + what + '. Not a COMEDI task.';
+    }
   });
 
   render();
-  // Live status: edit status.json next to this page and push; entries look like
-  // "Non-Gaussian filtering|ARC": "progress" (planned, progress or done).
-  fetch('status.json', { cache: 'no-store' }).then(function (res) {
+  fetch('interfaces.csv', { cache: 'no-store' }).then(function (res) {
+    return res.ok ? res.text() : '';
+  }).catch(function () { return ''; }).then(function (txt) {
+    if (txt) parseCSV(txt).forEach(function (r) { ifaceStatus[r.interface] = normStatus(r.status); ifaceNote[r.interface] = r.note || ''; });
+    return fetch('progress.csv', { cache: 'no-store' });
+  }).then(function (res) {
     if (!res.ok) throw new Error(res.status);
-    return res.json();
-  }).then(function (s) {
-    status = s.status || {};
+    var lm = res.headers.get('Last-Modified');
+    return res.text().then(function (txt) { return { txt: txt, lm: lm }; });
+  }).then(function (o) {
+    load(parseCSV(o.txt));
+    loaded = true;
     render();
-    if (s.updated) document.getElementById('p-updated').textContent = 'Status last updated ' + s.updated + '.';
+    document.getElementById('p-updated').textContent = tasks.length + ' tasks from progress.csv' +
+      (o.lm ? ', last updated ' + new Date(o.lm).toISOString().slice(0, 10) : '') + '.';
   }).catch(function () {
-    document.getElementById('p-updated').textContent = 'Live status could not be loaded; all work is shown as planned.';
+    document.getElementById('p-updated').textContent = 'The task list (progress.csv) could not be loaded.';
   });
 })();
 </script>

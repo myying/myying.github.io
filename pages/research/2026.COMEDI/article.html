@@ -430,11 +430,9 @@ main .tab-panel { padding-block: 0; }
 .sw { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
 .c-D { --cc: #4f9a45; } .c-L { --cc: #9fd186; } .c-Y { --cc: #e8cf3f; } .c-B { --cc: #7cc3e8; }
 .sw { background: var(--cc); }
-.sw.st-planned { background: var(--surface); box-shadow: inset 0 0 0 2px var(--ink); }
 .sw.st-progress { background: repeating-linear-gradient(45deg, var(--ink) 0 2px, transparent 2px 5px); box-shadow: inset 0 0 0 2px var(--ink); }
 .sw.st-done { background: var(--ink); }
 .p-table td.avail { background: var(--cc); }
-.p-table td.st-planned { background: var(--surface); box-shadow: inset 0 0 0 2px var(--cc); }
 .p-table td.st-progress { background: repeating-linear-gradient(45deg, var(--cc) 0 3px, transparent 3px 7px); box-shadow: inset 0 0 0 2px var(--cc); }
 .p-table td.st-done { background: var(--cc); }
 .ck { display: inline-block; width: 7px; height: 13px; border: solid currentColor; border-width: 0 2.5px 2.5px 0; transform: translate(0, -2px) rotate(45deg); }
@@ -450,7 +448,8 @@ main .tab-panel { padding-block: 0; }
 .p-table td { width: 30px; min-width: 30px; height: 26px; padding: 0; border-radius: 4px; text-align: center; }
 .p-table td.split { border-left: 0; }
 .p-table td.sep, .p-table th.sep { width: 6px; min-width: 6px; background: none; }
-.p-table td.e { background: none; box-shadow: inset 0 0 0 1px var(--line); }
+.p-table td.e { background: none; }
+.p-table td button:hover { background: color-mix(in srgb, var(--ink) 8%, transparent); }
 .p-table td button {
   width: 100%; height: 26px; border: 0; background: none; padding: 0; cursor: pointer;
   display: grid; place-items: center; border-radius: 4px; color: #10181d;
@@ -824,7 +823,6 @@ main .tab-panel { padding-block: 0; }
           <span><i class="sw c-B"></i>Already available</span>
         </div>
         <div class="p-legend">
-          <span><i class="sw st-planned"></i>Planned</span>
           <span><i class="sw st-progress"></i>In progress</span>
           <span><i class="sw st-done"></i>Done</span>
           <span class="gap"><b class="ck"></b>Demonstration complete</span>
@@ -990,8 +988,10 @@ main .tab-panel { padding-block: 0; }
   var rowIndex = {}; data.rows.forEach(function (r, i) { rowIndex[r.name] = i; });
   var colIndex = {}; data.cols.forEach(function (c, i) { colIndex[c] = i; });
   var tasks = [], byCell = {};
+  var ifaceStatus = {}, ifaceNote = {};   // from interfaces.csv, the central switch per interface
 
   // progress.csv: innovation,mfc,software,kind,interface,source,demo,status,demo_done,note (software may list several, separated by ;)
+  // status 'via interface' means the task follows its interface's status in interfaces.csv (interface,status,note)
   function parseCSV(text) {
     var rows = [], row = [], f = '', q = false;
     for (var i = 0; i < text.length; i++) {
@@ -1022,7 +1022,8 @@ main .tab-panel { padding-block: 0; }
       var status = (t.status || 'planned').toLowerCase();
       if (status === 'finished' || status === 'complete' || status === 'completed') status = 'done';
       if (status === 'in progress' || status === 'ongoing') status = 'progress';
-      if (!STATUS[status]) status = 'planned';
+      if (/^via/.test(status)) status = 'via';                     // follows interfaces.csv
+      if (!STATUS[status] && status !== 'via') status = 'planned';
       var task = { innovation: t.innovation, row: ri, mfc: t.mfc, software: (t.software || '').split(';').map(function (s) { return s.trim(); }).filter(Boolean),
                    kind: (t.kind || '').toLowerCase(), iface: t.interface || '', source: t.source || '', status: status, demo: /^y/i.test(t.demo), demoDone: /^y/i.test(t.demo_done), note: t.note || '' };
       tasks.push(task);
@@ -1034,14 +1035,27 @@ main .tab-panel { padding-block: 0; }
     });
   }
 
+  function normStatus(s) {
+    s = (s || 'planned').toLowerCase();
+    if (s === 'finished' || s === 'complete' || s === 'completed') return 'done';
+    if (s === 'in progress' || s === 'ongoing') return 'progress';
+    return STATUS[s] ? s : 'planned';
+  }
+  function ifStatus(name) { return ifaceStatus[name] || 'planned'; }
+  // a task's own status, or its interface's status when it is marked 'via interface'
+  function eff(task) { return task.status === 'via' ? ifStatus(task.iface) : task.status; }
+  // yellow cells always show the state of the interface they rely on
+  function cellTaskStatus(task, code) { return code[0] === 'Y' && task.iface ? ifStatus(task.iface) : eff(task); }
+
   // a row's tool becomes available to others once one of its initial implementations is done
   function rowReady(ri) {
-    return tasks.some(function (t) { return t.row === ri && t.kind === 'implementation' && t.status === 'done'; });
+    return tasks.some(function (t) { return t.row === ri && t.kind === 'implementation' && eff(t) === 'done'; });
   }
 
-  function cellStatus(list) {
-    if (list.every(function (t) { return t.status === 'done'; })) return 'done';
-    if (list.some(function (t) { return t.status !== 'planned'; })) return 'progress';
+  function cellStatus(list, code) {
+    var s = list.map(function (t) { return cellTaskStatus(t, code); });
+    if (s.every(function (x) { return x === 'done'; })) return 'done';
+    if (s.some(function (x) { return x !== 'planned'; })) return 'progress';
     return 'planned';
   }
 
@@ -1069,11 +1083,11 @@ main .tab-panel { padding-block: 0; }
         var list = byCell[ri + '|' + ci] || [];
         var mark = '', state;
         if (code[0] === 'B') state = 'avail';                         // capability that already exists
-        else if (list.length) state = 'st-' + cellStatus(list);
+        else if (list.length) state = 'st-' + cellStatus(list, code);
         else if (code[0] === 'L') state = rowReady(ri) ? 'avail' : 'e'; // shared once the tool is built
         else state = 'e';
         var demos = list.filter(function (t) { return t.demo; });
-        if (state === 'st-planned' && !demos.length) state = 'e';   // planned work is outlined only where a demonstration is planned
+        if (state === 'st-planned') state = 'e';                     // nothing is drawn until work starts
         if (demos.length) {
           if (demos.every(function (t) { return t.demoDone; })) mark = '<b class="ck" aria-label="demonstration complete"></b>';
         }
@@ -1097,7 +1111,7 @@ main .tab-panel { padding-block: 0; }
       var n = { planned: 0, progress: 0, done: 0 }, demos = 0, demosDone = 0;
       tasks.forEach(function (t) {
         if (!g[1](data.rows[t.row])) return;
-        n[t.status]++;
+        n[eff(t)]++;
         if (t.demo) { demos++; if (t.demoDone) demosDone++; }
       });
       var total = n.planned + n.progress + n.done;
@@ -1116,16 +1130,18 @@ main .tab-panel { padding-block: 0; }
       .map(function (c) { return task.row + '|' + colIndex[c]; });
   }
   function describe(task) {
+    var st = eff(task);
     var s = '<strong>' + task.innovation + '</strong> &middot; ' + task.mfc +
             (task.software.length ? ' with ' + task.software.join(', ') : '') +
             ' (' + (KINDTXT[task.kind] || task.kind) + (task.iface ? ', via ' + task.iface : '') +
             (task.source ? ', method from ' + task.source : '') + '): ';
-    if (task.demo && task.status === 'planned' && !task.demoDone) s += '<strong>Planned demonstration</strong>';
-    else if (!task.demo && task.status === 'planned') s = s.replace(/: $/, '');   // no demonstration: no status to report yet
+    if (task.demo && st === 'planned' && !task.demoDone) s += '<strong>Planned demonstration</strong>';
+    else if (!task.demo && st === 'planned') s = s.replace(/: $/, '');   // no demonstration: no status to report yet
     else {
-      s += '<strong>' + STATUS[task.status] + '</strong>';
+      s += '<strong>' + STATUS[st] + '</strong>';
       if (task.demo) s += task.demoDone ? ', demonstration complete' : ', demonstration to come';
     }
+    if (task.iface && task.status !== 'via' && ifStatus(task.iface) !== 'planned') s += '; interface ' + STATUS[ifStatus(task.iface)].toLowerCase();
     if (task.note) s += '. ' + task.note.replace(/</g, '&lt;');
     return s + '.';
   }
@@ -1144,13 +1160,29 @@ main .tab-panel { padding-block: 0; }
     });
     var keys = [ri + '|' + ci];
     list.forEach(function (t) { keys = keys.concat(taskCells(t)); });
+    var iface = code[0] === 'Y' && list.length ? list[0].iface : '';
+    if (iface) {
+      tasks.forEach(function (t) {
+        if (t.iface !== iface) return;
+        taskCells(t).forEach(function (k) {
+          var p = k.split('|');
+          if (data.rows[+p[0]].cells[+p[1]][0] === 'Y') keys.push(k);
+        });
+      });
+    }
     keys.forEach(function (k) {
       var p = k.split('|');
       var btn = table.querySelector('button[data-r="' + p[0] + '"][data-c="' + p[1] + '"]');
       if (btn) btn.parentNode.classList.add('sel');
     });
     if (list.length) {
-      detail.innerHTML = list.map(describe).join('<br>');
+      var head = '';
+      if (iface) {
+        var n = tasks.filter(function (t) { return t.iface === iface; }).length;
+        head = '<strong>' + iface + '</strong>: <strong>' + STATUS[ifStatus(iface)] + '</strong>, used by ' + n + (n === 1 ? ' task' : ' tasks') +
+               (ifaceNote[iface] ? ' (' + ifaceNote[iface].replace(/</g, '&lt;') + ')' : '') + '.<br>';
+      }
+      detail.innerHTML = head + list.map(describe).join('<br>');
     } else {
       if (code === '-') { detail.innerHTML = '<strong>' + r.name + '</strong> in <strong>' + data.cols[ci] + '</strong>: not a planned activity.'; return; }
       var what = code[0] === 'B' ? 'already available before COMEDI'
@@ -1161,7 +1193,12 @@ main .tab-panel { padding-block: 0; }
   });
 
   render();
-  fetch('progress.csv', { cache: 'no-store' }).then(function (res) {
+  fetch('interfaces.csv', { cache: 'no-store' }).then(function (res) {
+    return res.ok ? res.text() : '';
+  }).catch(function () { return ''; }).then(function (txt) {
+    if (txt) parseCSV(txt).forEach(function (r) { ifaceStatus[r.interface] = normStatus(r.status); ifaceNote[r.interface] = r.note || ''; });
+    return fetch('progress.csv', { cache: 'no-store' });
+  }).then(function (res) {
     if (!res.ok) throw new Error(res.status);
     var lm = res.headers.get('Last-Modified');
     return res.text().then(function (txt) { return { txt: txt, lm: lm }; });

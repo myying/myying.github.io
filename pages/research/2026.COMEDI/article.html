@@ -450,7 +450,7 @@ main .tab-panel { padding-block: 0; }
 .p-table td { width: 30px; min-width: 30px; height: 26px; padding: 0; border-radius: 4px; text-align: center; }
 .p-table td.split { border-left: 0; }
 .p-table td.sep, .p-table th.sep { width: 6px; min-width: 6px; background: none; }
-.p-table td.e { background: color-mix(in srgb, var(--line) 45%, transparent); }
+.p-table td.e { background: none; box-shadow: inset 0 0 0 1px var(--line); }
 .p-table td button {
   width: 100%; height: 26px; border: 0; background: none; padding: 0; cursor: pointer;
   display: grid; place-items: center; border-radius: 4px; color: #10181d;
@@ -1061,7 +1061,10 @@ main .tab-panel { padding-block: 0; }
       h += '<tr><th class="row" scope="row">' + r.name + '</th>';
       r.cells.forEach(function (code, ci) {
         if (ci === data.split) h += '<td class="sep"></td>';
-        if (code === '-') { h += '<td class="e"></td>'; return; }
+        if (code === '-') {
+          h += '<td class="e"><button type="button" data-r="' + ri + '" data-c="' + ci + '" aria-label="' + r.name + ', ' + data.cols[ci] + ': not a planned activity"></button></td>';
+          return;
+        }
         var list = byCell[ri + '|' + ci] || [];
         var mark = '', state;
         if (code[0] === 'B') state = 'avail';                         // capability that already exists
@@ -1136,6 +1139,7 @@ main .tab-panel { padding-block: 0; }
     if (list.length) {
       detail.innerHTML = list.map(describe).join('<br>');
     } else {
+      if (code === '-') { detail.innerHTML = '<strong>' + r.name + '</strong> in <strong>' + data.cols[ci] + '</strong>: not a planned activity.'; return; }
       var what = code[0] === 'B' ? 'already available before COMEDI'
                : code[0] === 'L' ? (rowReady(ri) ? 'available through sharing' : 'will be available through sharing once the initial implementation is done')
                : KIND[code[0]].toLowerCase();

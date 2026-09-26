@@ -1078,7 +1078,9 @@ main .tab-panel { padding-block: 0; }
     summary();
   }
 
+  var loaded = false;
   function summary() {
+    if (!loaded) { document.getElementById('p-summary').innerHTML = '<div class="p-sum"><div class="lbl">All tasks</div><div class="val"><small>Loading tasks&hellip;</small></div></div>'; return; }
     var groups = [['All tasks', function () { return true; }],
                   ['Path 1 · core methods', function (r) { return r.path === 1; }],
                   ['Path 2 · modular tools', function (r) { return r.path === 2; }],
@@ -1124,6 +1126,7 @@ main .tab-panel { padding-block: 0; }
     return res.text().then(function (txt) { return { txt: txt, lm: lm }; });
   }).then(function (o) {
     load(parseCSV(o.txt));
+    loaded = true;
     render();
     document.getElementById('p-updated').textContent = tasks.length + ' tasks from progress.csv' +
       (o.lm ? ', last updated ' + new Date(o.lm).toISOString().slice(0, 10) : '') + '.';

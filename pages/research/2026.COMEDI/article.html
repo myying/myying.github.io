@@ -356,11 +356,16 @@ main section { padding-block: 44px 0; }
 /* ---------- consortium ---------- */
 .partners { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
 .partners li {
-  display: grid; grid-template-columns: 2rem minmax(0, 1fr); gap: 10px; align-items: baseline;
-  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px;
+  display: flex; flex-direction: column; gap: 10px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px;
 }
+.partners .plogo { display: grid; place-items: center; height: 68px; box-sizing: border-box;
+  background: #fff; border-radius: 8px; padding: 10px 14px; overflow: hidden; }
+.partners .plogo img { max-height: 44px; max-width: 100%; width: auto; object-fit: contain; }
+.partners a { color: inherit; text-decoration: none; display: block; }
+.partners a:hover strong, .partners a:focus-visible strong { text-decoration: underline; }
 .partners .pn { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
-.partners.ab li { grid-template-columns: minmax(0, 1fr); }
+.partners.ab li { display: grid; grid-template-columns: minmax(0, 1fr); }
 .partners strong { font-family: var(--display); font-weight: 600; }
 .partners small { display: block; color: var(--muted); line-height: 1.35; }
 .jdts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 22px; }
@@ -767,17 +772,50 @@ main .tab-panel { padding-block: 0; }
         <p class="note">DA developers from the MFCs work alongside research institutes and universities, so that new methods are taken up in operations.</p>
       </div>
       <ul class="partners">
-        <li><span class="pn">1</span><span><strong>NERSC</strong> <span class="badge">Coordinator</span><small>Nansen Environmental and Remote Sensing Center, Norway</small></span></li>
-        <li><span class="pn">2</span><span><strong>MOi</strong><small>Mercator Ocean International, France</small></span></li>
-        <li><span class="pn">3</span><span><strong>ULi&egrave;ge</strong><small>Universit&eacute; de Li&egrave;ge, Belgium</small></span></li>
-        <li><span class="pn">4</span><span><strong>OGS</strong><small>Istituto Nazionale di Oceanografia e di Geofisica Sperimentale, Italy</small></span></li>
-        <li><span class="pn">5</span><span><strong>UKMET</strong><small>Met Office, United Kingdom</small></span></li>
-        <li><span class="pn">6</span><span><strong>ECMWF</strong><small>European Centre for Medium-Range Weather Forecasts</small></span></li>
-        <li><span class="pn">7</span><span><strong>AWI</strong><small>Alfred Wegener Institute, Helmholtz Centre for Polar and Marine Research, Germany</small></span></li>
-        <li><span class="pn">8</span><span><strong>CMCC</strong><small>Centro Euro-Mediterraneo sui Cambiamenti Climatici, Italy</small></span></li>
-        <li><span class="pn">9</span><span><strong>CERFACS</strong><small>Centre Europ&eacute;en de Recherche et de Formation Avanc&eacute;e en Calcul Scientifique, France</small></span></li>
-        <li><span class="pn">10</span><span><strong>CNR</strong><small>Consiglio Nazionale delle Ricerche, Italy</small></span></li>
-        <li><span class="pn">11</span><span><strong>METNO</strong><small>Norwegian Meteorological Institute, Norway</small></span></li>
+        <li>
+          <span class="plogo"><img src="logos/nersc.png" alt="NERSC logo" loading="lazy"></span>
+          <a href="https://nersc.no/" rel="noopener"><strong>NERSC</strong> <span class="badge">Coordinator</span><small>Nansen Environmental and Remote Sensing Center, Norway</small></a>
+        </li>
+        <li>
+          <span class="plogo"><img src="logos/moi.svg" alt="MOi logo" loading="lazy"></span>
+          <a href="https://www.mercator-ocean.eu/" rel="noopener"><strong>MOi</strong><small>Mercator Ocean International, France</small></a>
+        </li>
+        <li>
+          <span class="plogo"><img src="logos/uliege.svg" alt="ULi&egrave;ge logo" loading="lazy"></span>
+          <a href="https://www.uliege.be/" rel="noopener"><strong>ULi&egrave;ge</strong><small>Universit&eacute; de Li&egrave;ge, Belgium</small></a>
+        </li>
+        <li>
+          <span class="plogo"><img src="logos/ogs.png" alt="OGS logo" loading="lazy"></span>
+          <a href="https://www.ogs.it/" rel="noopener"><strong>OGS</strong><small>Istituto Nazionale di Oceanografia e di Geofisica Sperimentale, Italy</small></a>
+        </li>
+        <li>
+          <span class="plogo"><img src="logos/ukmet.png" alt="UKMET logo" loading="lazy"></span>
+          <a href="https://www.metoffice.gov.uk/" rel="noopener"><strong>UKMET</strong><small>Met Office, United Kingdom</small></a>
+        </li>
+        <li>
+          <span class="plogo"><img src="logos/ecmwf.svg" alt="ECMWF logo" loading="lazy"></span>
+          <a href="https://www.ecmwf.int/" rel="noopener"><strong>ECMWF</strong><small>European Centre for Medium-Range Weather Forecasts</small></a>
+        </li>
+        <li>
+          <span class="plogo"><img src="logos/awi.svg" alt="AWI logo" loading="lazy"></span>
+          <a href="https://www.awi.de/" rel="noopener"><strong>AWI</strong><small>Alfred Wegener Institute, Helmholtz Centre for Polar and Marine Research, Germany</small></a>
+        </li>
+        <li>
+          <span class="plogo"><img src="logos/cmcc.svg" alt="CMCC logo" loading="lazy"></span>
+          <a href="https://www.cmcc.it/" rel="noopener"><strong>CMCC</strong><small>Centro Euro-Mediterraneo sui Cambiamenti Climatici, Italy</small></a>
+        </li>
+        <li>
+          <span class="plogo"><img src="logos/cerfacs.png" alt="CERFACS logo" loading="lazy"></span>
+          <a href="https://cerfacs.fr/" rel="noopener"><strong>CERFACS</strong><small>Centre Europ&eacute;en de Recherche et de Formation Avanc&eacute;e en Calcul Scientifique, France</small></a>
+        </li>
+        <li>
+          <span class="plogo"><img src="logos/cnr.png" alt="CNR logo" loading="lazy"></span>
+          <a href="https://www.cnr.it/" rel="noopener"><strong>CNR</strong><small>Consiglio Nazionale delle Ricerche, Italy</small></a>
+        </li>
+        <li>
+          <span class="plogo"><img src="logos/metno.svg" alt="METNO logo" loading="lazy"></span>
+          <a href="https://www.met.no/" rel="noopener"><strong>METNO</strong><small>Norwegian Meteorological Institute, Norway</small></a>
+        </li>
       </ul>
       <div class="jdts">
         <div><h3>AI JDT</h3><p>AI techniques for data assimilation. ULi&egrave;ge, NERSC, CMCC.</p></div>

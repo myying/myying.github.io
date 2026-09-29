@@ -356,17 +356,14 @@ main section { padding-block: 44px 0; }
 /* ---------- consortium ---------- */
 .partners { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
 .partners li {
-  display: flex; flex-direction: column; gap: 10px;
-  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px;
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; align-items: baseline;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px;
 }
-.partners .plogo { display: grid; place-items: center; height: 120px; box-sizing: border-box;
-  background: #fff; border-radius: 8px; padding: 14px 18px; overflow: hidden; }
-.partners .plogo img { max-height: 92px; max-width: 100%; width: auto; object-fit: contain; }
-.partners a { color: inherit; text-decoration: none; display: block; font-size: 0.95rem; line-height: 1.4; }
-.partners a:hover, .partners a:focus-visible { text-decoration: underline; }
-.partners .badge { margin-top: 8px; align-self: flex-start; }
-.partners .pn { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
-.partners.ab li { display: grid; grid-template-columns: minmax(0, 1fr); }
+.plogos { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+.plogos a { display: grid; place-items: center; height: 118px; box-sizing: border-box;
+  background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 16px 20px; overflow: hidden; }
+.plogos img { max-height: 86px; max-width: 100%; width: auto; object-fit: contain; }
 .partners strong { font-family: var(--display); font-weight: 600; }
 .partners small { display: block; color: var(--muted); line-height: 1.35; }
 .jdts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 22px; }
@@ -772,51 +769,18 @@ main .tab-panel { padding-block: 0; }
         <h3 class="panel-title">COMEDI partners</h3>
         <p class="note">DA developers from the MFCs work alongside research institutes and universities, so that new methods are taken up in operations.</p>
       </div>
-      <ul class="partners">
-        <li>
-          <span class="plogo"><img src="logos/nersc.png" alt="NERSC logo" loading="lazy"></span>
-          <a href="https://nersc.no/" rel="noopener">Nansen Environmental and Remote Sensing Center, Norway</a> <span class="badge">Coordinator</span>
-        </li>
-        <li>
-          <span class="plogo"><img src="logos/moi.svg" alt="MOi logo" loading="lazy"></span>
-          <a href="https://www.mercator-ocean.eu/" rel="noopener">Mercator Ocean International, France</a>
-        </li>
-        <li>
-          <span class="plogo"><img src="logos/uliege.svg" alt="ULi&egrave;ge logo" loading="lazy"></span>
-          <a href="https://www.uliege.be/" rel="noopener">Universit&eacute; de Li&egrave;ge, Belgium</a>
-        </li>
-        <li>
-          <span class="plogo"><img src="logos/ogs.png" alt="OGS logo" loading="lazy"></span>
-          <a href="https://www.ogs.it/" rel="noopener">Istituto Nazionale di Oceanografia e di Geofisica Sperimentale, Italy</a>
-        </li>
-        <li>
-          <span class="plogo"><img src="logos/ukmet.png" alt="UKMET logo" loading="lazy"></span>
-          <a href="https://www.metoffice.gov.uk/" rel="noopener">Met Office, United Kingdom</a>
-        </li>
-        <li>
-          <span class="plogo"><img src="logos/ecmwf.svg" alt="ECMWF logo" loading="lazy"></span>
-          <a href="https://www.ecmwf.int/" rel="noopener">European Centre for Medium-Range Weather Forecasts</a>
-        </li>
-        <li>
-          <span class="plogo"><img src="logos/awi.svg" alt="AWI logo" loading="lazy"></span>
-          <a href="https://www.awi.de/" rel="noopener">Alfred Wegener Institute, Helmholtz Centre for Polar and Marine Research, Germany</a>
-        </li>
-        <li>
-          <span class="plogo"><img src="logos/cmcc.svg" alt="CMCC logo" loading="lazy"></span>
-          <a href="https://www.cmcc.it/" rel="noopener">Centro Euro-Mediterraneo sui Cambiamenti Climatici, Italy</a>
-        </li>
-        <li>
-          <span class="plogo"><img src="logos/cerfacs.png" alt="CERFACS logo" loading="lazy"></span>
-          <a href="https://cerfacs.fr/" rel="noopener">Centre Europ&eacute;en de Recherche et de Formation Avanc&eacute;e en Calcul Scientifique, France</a>
-        </li>
-        <li>
-          <span class="plogo"><img src="logos/cnr.png" alt="CNR logo" loading="lazy"></span>
-          <a href="https://www.cnr.it/" rel="noopener">Consiglio Nazionale delle Ricerche, Italy</a>
-        </li>
-        <li>
-          <span class="plogo"><img src="logos/metno.svg" alt="METNO logo" loading="lazy"></span>
-          <a href="https://www.met.no/" rel="noopener">Norwegian Meteorological Institute, Norway</a>
-        </li>
+      <ul class="plogos">
+        <li><a href="https://nersc.no/" rel="noopener" title="NERSC"><img src="logos/nersc.png" alt="NERSC" loading="lazy"></a></li>
+        <li><a href="https://www.mercator-ocean.eu/" rel="noopener" title="Mercator Ocean International"><img src="logos/moi.svg" alt="Mercator Ocean International" loading="lazy"></a></li>
+        <li><a href="https://www.uliege.be/" rel="noopener" title="Universit&eacute; de Li&egrave;ge"><img src="logos/uliege.svg" alt="Universit&eacute; de Li&egrave;ge" loading="lazy"></a></li>
+        <li><a href="https://www.ogs.it/" rel="noopener" title="OGS"><img src="logos/ogs.png" alt="OGS" loading="lazy"></a></li>
+        <li><a href="https://www.metoffice.gov.uk/" rel="noopener" title="Met Office"><img src="logos/ukmet.png" alt="Met Office" loading="lazy"></a></li>
+        <li><a href="https://www.ecmwf.int/" rel="noopener" title="ECMWF"><img src="logos/ecmwf.svg" alt="ECMWF" loading="lazy"></a></li>
+        <li><a href="https://www.awi.de/" rel="noopener" title="Alfred Wegener Institute"><img src="logos/awi.svg" alt="Alfred Wegener Institute" loading="lazy"></a></li>
+        <li><a href="https://www.cmcc.it/" rel="noopener" title="CMCC"><img src="logos/cmcc.svg" alt="CMCC" loading="lazy"></a></li>
+        <li><a href="https://cerfacs.fr/" rel="noopener" title="CERFACS"><img src="logos/cerfacs.png" alt="CERFACS" loading="lazy"></a></li>
+        <li><a href="https://www.cnr.it/" rel="noopener" title="Consiglio Nazionale delle Ricerche"><img src="logos/cnr.png" alt="Consiglio Nazionale delle Ricerche" loading="lazy"></a></li>
+        <li><a href="https://www.met.no/" rel="noopener" title="Norwegian Meteorological Institute"><img src="logos/metno.svg" alt="Norwegian Meteorological Institute" loading="lazy"></a></li>
       </ul>
       <div class="jdts">
         <div><h3>AI JDT</h3><p>AI techniques for data assimilation. ULi&egrave;ge, NERSC, CMCC.</p></div>

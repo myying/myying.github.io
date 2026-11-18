@@ -105,9 +105,14 @@ for item in `find pages/publications/* -maxdepth 0 |sort -r`; do
         fi
     fi
     if [[ `cat $item/status` == 'in review' ]]; then
-        echo '<i>'`cat $item/journal`'</i>, in review.' >> publications.html
+        echo '<i>'`cat $item/journal`'</i>, in review. ' >> publications.html
+        if [ -f $item/doi ]; then
+            echo '<font style="font-size:14px;"><i class="fa fa-external-link"></i> <a href="https://doi.org/'`cat $item/doi`'">Web link</a></font> &nbsp;' >> publications.html
+        fi
         if [ -f $item/preprint.pdf ]; then
             echo '<font style="font-size:14px;"><i class="fa fa-download"></i> <a href="'$item'/preprint.pdf">preprint</a></font>' >> publications.html
+        elif [ -f $item/preprint_link ]; then
+            echo '<font style="font-size:14px;"><i class="fa fa-download"></i> <a href="'`cat $item/preprint_link`'">preprint</a></font>' >> publications.html
         fi
     fi
     if [[ `cat $item/status` == 'in prep' ]]; then

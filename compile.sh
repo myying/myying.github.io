@@ -79,8 +79,32 @@ html_end >> index.html
 rm -f publications.html
 html_start >> publications.html
 echo '    <div class="page" id="publications">' >> publications.html
-for item in `find pages/publications/* -maxdepth 0 |sort -r`; do
+##group unpublished entries first, then published ones by year (falls back
+##to the folder name year when the year file is empty)
+function publication_items() {
+    for item in `find pages/publications/* -maxdepth 0 |sort -r`; do
+        item_year=`cat $item/year`
+        if [[ -z "$item_year" ]]; then
+            item_year=`basename $item |cut -d. -f1`
+        fi
+        case `cat $item/status` in
+            'in prep')   rank=1; group='In preparation' ;;
+            'in review') rank=2; group='In review' ;;
+            'accepted'|'in press'|'in print')
+                         rank=3; group='Accepted' ;;
+            *)           rank=4; group=$item_year ;;
+        esac
+        echo "$rank:$item_year:$group:$item"
+    done |sort -t: -k1,1n -k2,2r -k4,4r
+}
+last_group=''
+publication_items |while IFS=: read -r rank item_year group item; do
+    if [[ "$group" != "$last_group" ]]; then
+        echo '<h2 id="'`echo $group |tr ' ' '-'`'">'"$group"'</h2>' >> publications.html
+        last_group=$group
+    fi
     echo '<p><i class="fa fa-file-text-o"></i> ' >> publications.html
+    status=`cat $item/status`
     year=`cat $item/year`
     if [[ -n "$year" ]]; then
         echo `cat $item/author`', '"$year"':<br/> ' >> publications.html
@@ -88,7 +112,7 @@ for item in `find pages/publications/* -maxdepth 0 |sort -r`; do
         echo `cat $item/author`':<br/> ' >> publications.html
     fi
     echo `cat $item/title`'.<br/>' >> publications.html
-    if [[ `cat $item/status` == 'published' ]]; then
+    if [[ "$status" == 'published' ]]; then
         echo '<i>'`cat $item/journal`'</i>, '`cat $item/issue`', '`cat $item/pages`'. ' >> publications.html
         echo '<font style="font-size:14px;"><i class="fa fa-external-link"></i> <a href="https://doi.org/'`cat $item/doi`'">Web link</a></font> &nbsp;' >> publications.html
         if [[ -f $item/open_access ]]; then
@@ -98,13 +122,13 @@ for item in `find pages/publications/* -maxdepth 0 |sort -r`; do
            echo '<font style="font-size:14px;"><i class="fa fa-download"></i> <a href="'$item'/print.pdf">PDF</a></font>' >> publications.html
         fi
     fi
-    if [[ `cat $item/status` == 'accepted' ]]; then
-        echo '<i>'`cat $item/journal`'</i>, accepted. ' >> publications.html
+    if [[ "$status" == 'accepted' || "$status" == 'in press' || "$status" == 'in print' ]]; then
+        echo '<i>'`cat $item/journal`'</i>, '"$status"'. ' >> publications.html
         if [ -f $item/doi ]; then
             echo '<font style="font-size:14px;"><i class="fa fa-external-link"></i> <a href="https://doi.org/'`cat $item/doi`'">Web link</a></font> &nbsp;' >> publications.html
         fi
     fi
-    if [[ `cat $item/status` == 'in review' ]]; then
+    if [[ "$status" == 'in review' ]]; then
         echo '<i>'`cat $item/journal`'</i>, in review. ' >> publications.html
         if [ -f $item/doi ]; then
             echo '<font style="font-size:14px;"><i class="fa fa-external-link"></i> <a href="https://doi.org/'`cat $item/doi`'">Web link</a></font> &nbsp;' >> publications.html
@@ -115,7 +139,7 @@ for item in `find pages/publications/* -maxdepth 0 |sort -r`; do
             echo '<font style="font-size:14px;"><i class="fa fa-download"></i> <a href="'`cat $item/preprint_link`'">preprint</a></font>' >> publications.html
         fi
     fi
-    if [[ `cat $item/status` == 'in prep' ]]; then
+    if [[ "$status" == 'in prep' ]]; then
         echo 'in prep.' >> publications.html
     fi
     echo '</p><br/>' >> publications.html
